@@ -1,0 +1,9 @@
+Ideas:
+
+
+Background of landing page:
+
+should it be plain or active or interactive?
+
+-mouse creates bubbles that float up when it moves through the background, very simple fish outlines swim around
+-make color swooshes/brushmarks as you pass over it, color and stroke changes every couple seconds 
