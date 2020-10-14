@@ -39,9 +39,9 @@
     		position:fixed;
     		opacity:0;
     		margin-top:5vh;
-    		padding-right:2em;
+    		/*padding-right:2em;*/
     		height:3em;
-    		width:100%;
+    		width:100vw;
 			background:#1B2731;
 			border-bottom: 2px solid #7CE0E5;
 			z-index:4;
@@ -178,8 +178,6 @@
 
     	#portfolio{
     		width:100%;
-    		padding-left:5vw;
-    		padding-right:5vw;
 
     	}
 
@@ -243,7 +241,7 @@
     	}
 
     	.portfolioItem {
-    		min-height: 20vw;
+    		height: 30rem;
     		width: 25vw;
     		text-align:center;
     		padding:1rem;
@@ -269,12 +267,14 @@
     	}
 
     	.portfolioItem a{
-    		color:turquoise;
+    		color:MEDIUMTURQUOISE;
     		cursor:pointer;
+    		text-decoration: none;
+    		font-weight:bold;
     	}
 
     	.portfolioItem a:hover{
-    		color:darkturquoise;
+    		color:CADETBLUE;
     		cursor:pointer;
     	}
 
@@ -317,7 +317,7 @@
 			width:40vw;
 			display:inline-block;
 			float:left;		
-			padding-left:5vw;
+			padding-left:7vw;
 			margin-right:5vw;
 		}
 
@@ -328,17 +328,16 @@
 
 		#aboutText {
 			font-size:1.5em;
-			padding-left:1.5em;
 		}
 
 		#aboutText a{
-    		color:turquoise;
+    		color:MEDIUMTURQUOISE;
     		text-decoration: none;
     		cursor:pointer;
     	}
 
     	#aboutText a:hover{
-    		color:darkturquoise;
+    		color:CADETBLUE;
     	}
 
 		/*icons*/
@@ -432,14 +431,12 @@
 <body id="top">
 		<div id="navBar">
 			<ul class="navBarLinks">
-				<li class="leftLink navBarLinkContainer"><a id="homeLink" class="active navLink" href="#top">Steven</a></li>
-				<li class="leftLink navBarLinkContainer"><a id="abotLink" class="navLink" href="#aboutMe">Bio</a></li>
-				<li class="leftLink navBarLinkContainer"><a id="portfolioLink" class="navLink" href="#portfolio">Portfolio</a></li>			
-				<li class="leftLink navBarLinkContainer"><a id="contactLink" class="navLink"  data-toggle="modal" href="#contact" data-target="#contact">Get in Touch</a></li>
-
-
+				<li class="leftLink navBarLinkContainer"><a id="homeLink" class="active navLink toBody" href="#top">Steven</a></li>
+				<li class="leftLink navBarLinkContainer"><a id="abotLink" class="navLink toBody" href="#aboutMe">Bio</a></li>
+				<li class="leftLink navBarLinkContainer"><a id="portfolioLink" class="navLink toBody" href="#portfolio">Portfolio</a></li>			
+				<li class="leftLink navBarLinkContainer"><a id="contactLink" class="navLink" href="mailto:steven@stevenamcdonald.com">Get in Touch</i></a></li>
 			</ul>
-			<a id="lastLink" class="rightLink navBarLinkContainer" href="mailto:sam489@cornell.edu"> <i class="zmdi zmdi-email zmdi-hc-2x"></i></a>
+			<a id="lastLink" class="rightLink navBarLinkContainer" href="mailto:steven@stevenamcdonald.com"> <i class="zmdi zmdi-email zmdi-hc-2x"></i></a>
 
 		    <a class="rightLink navBarLinkContainer" href="https://github.com/StevenMcDonald97"> <i class="zmdi zmdi-github zmdi-hc-2x" href="https://github.com/StevenMcDonald97"></i></a>
 
@@ -483,8 +480,8 @@
     		<div class="iconContainer">
 				<div class="iconWrapper"><i class="fas fa-tachometer-alt aboutIcon"></i></div>
 				<div class="iconText">
-					<h3> EFFICENT </h3>
-					<div> Eliminate any unnessecary costs</div>
+					<h3> EFFICIENT </h3>
+					<div> Eliminate any unnecessary costs</div>
 				</div>			
 			</div>
     		<div class="iconContainer">
@@ -508,8 +505,8 @@
 					<h2 class="title"> Portfolio Website Builder </h2>
 					<h4 class="subtitle"> React.js, Express.js, MongoDB, Node.js </h4>
 					<img class="portfolioImage" src="./images/portfolioBuilderImage.png"/>
-					<p class="description"> I developed a MERN stack app to allow artists and designers to create, edit, and deploy professional portfolio websites with ease. Once the app is hosted somewhere, for example using AWS, the user can add, edit, or delete images of work, portfolios, information pages, and other content. The app also lets the user customize their site layout and color scheme. I set up the hosting of the app for users under their chosen domain name and then let them manage the content.</p>
-					<a href="https://github.com/StevenMcDonald97/portfolioWebsite/tree/master"> You can see the code on github here </a>
+					<p class="description"> I developed a MERN stack app to allow artists and designers to create, edit, and deploy professional portfolio websites with ease under their own domain names. The user can change their site content and styling from an admin control panel.</p>
+					<a href="http://stevenmcdonaldart.com/"> You can see an example website here </a>
 				</div>
     		</div>
 			<div class="column">
@@ -517,7 +514,7 @@
 					<h2 class="title"> Khepra Incorporated Company Website  </h2>
 					<h4 class="subtitle"> jQuery, HTML, CSS3 </h4>
 					<img class="portfolioImage" src="./images/khepraLogo.png"/>
-					<p class="description"> I designed and implemented the company website for Khepra Incorporated, a biofuels startup based out of San Francisco California. <b> I am currently buildign a new version of the website, the version that is connected to below is a placeholder </b> </p>
+					<p class="description"> I designed and implemented the company website for Khepra Incorporated, a biofuels startup based out of San Francisco, California. <b> I am currently buildign a new version of the website, the version that is connected to below is a placeholder. </b> </p>
 					<a href="https://www.khepra.net"> See the website here</a>
 				</div>
     		</div>
@@ -526,7 +523,7 @@
 					<h2 class="title"> Disability Services Map  </h2>
 					<h4 class="subtitle"> jQuery, Laravel, Google Maps API </h4>
 					<img class="portfolioImage" src="./images/tsmap.png"/>
-					<p class="description"> I designed and built an interactive map for finding services for disabled students in the New York State area on transitionsource.org. This map has since become the most used feature on transitionsource.org </p>
+					<p class="description"> I designed and built an interactive map for finding services for disabled students in the New York State area on transitionsource.org. This map has since become the most used feature on the website. </p>
 					<a href="https://transitionsource.org/map"> You can see the map here </a>
 				</div>
     		</div>
@@ -538,7 +535,7 @@
 					<h2 class="title"> SQL Interpreter </h2>
 					<h4 class="subtitle"> JAVA </h4>
 					<img class="portfolioImage" src="./images/sql.png"/>
-					<p class="description"> As an extension of a project for a database course I wrote a postgresSQL interpreter in JAVA, capable of taking in queries in the form SELECT-FROM-WHERE in a text file and writing out the results. </p>
+					<p class="description"> As an extension of a project I did for a databases course, I wrote a postgresSQL interpreter in JAVA capable of taking in queries of the form SELECT-FROM-WHERE in a text file and writing the results to a seperate file. </p>
 					<a href="https://github.com/StevenMcDonald97/sqlInterpreter"> You can see the code on github here </a>
 				</div>
     		</div> 
@@ -546,7 +543,8 @@
 				<div class="portfolioItem">
 					<h2 class="title"> Art Museum Gender Disparity Visualization </h2>
 					<h4 class="subtitle"> D3, jQuery </h4>
-					<p class="description"> A D3 visualization of the disparity between male and female artist representation in the Tate and MOMA Museum collections (non-binary artists could not be included because the data does not exist)</p>
+					<img class="portfolioImage" src="./images/visualization.png"/>
+					<p class="description"> A D3 visualization of the disparity between male and female artist representation in the Tate and MOMA Museum collections (non-binary artists could not be included because the data does not exist).</p>
 					<a href="./projects/project2/index.html"> You can see the visualization here </a>
 				</div>
     		</div>  
@@ -554,8 +552,8 @@
 				<div class="portfolioItem">
 					<h2 class="title"> Mafia Game </h2>
 					<h4 class="subtitle"> oCaml </h4>
-					<p class="description"> A text-based single player version of the game mafia. The player is assigned a random role, and then based on their role will play against several AI players. The game is divided into several stages based on the real life game where players can commit different actions, culminating in </p>
-					<a href="https://github.coecis.cornell.edu/sam489/Mafia"> You can see the code on github here </a>
+					<p class="description"> A text-based single player version of the game mafia. The player is assigned a random role, and then based on their role will play against several AI players. The game is divided into several stages based on the real life game where players can commit different actions, culminating in a phase were the player and AIs vote to decide who to kill that round.</p>
+					<a href="https://github.com/StevenMcDonald97/MAFIA"> You can see the code on github here </a>
 				</div>
     		</div>  
     	</div>  
@@ -599,14 +597,14 @@
 		    }, 2000);
 		});
 
-		$(".navLink").click(function(e) {   
+		$(".navLink.toBody").click(function(e) {   
 			e.preventDefault();   
 			var dest = $(this).attr('href'); 
 			$('html,body').animate({ scrollTop: $(dest).offset().top }, 'slow'); 
 		});
 
 	    $(window).on('scroll', function() {
-			$(".navLink").each(function() {
+			$(".navLink.toBody").each(function() {
 				if ($($(this).attr('href')).offset().top < ($(window).scrollTop() + ($(window).height() / 2))) {
 					$('.navLink').removeClass('active');
 					$(this).addClass('active');
