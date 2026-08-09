@@ -1,781 +1,550 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Steven McDonald | Software Engineer </title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-  	<meta name="description" content="Front End, Back End web developer and software engineer">
-  	<meta name="keywords" content="HTML,CSS,JavaScript">
- 	<meta name="author" content="Steven McDonald">
-
-    <!-- Website Keywords-->
-    <meta name="keywords" content="Web developer, front end, back end, Computer Science, Cornell, Software engineering, Software Developer, Machine Learning">
-
-    <!-- Description of me-->
-    <meta name="description" content="Steven McDonald graduated cum laude from Cornell University with a BS in Computer Science, and has worked as a full stack developer for the Yang-Tan Institute for Disabiltiy Services and Khepra Incorporated.">
-
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
-
-	<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
-
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-	<script src="https://d3js.org/d3.v5.min.js"></script>
-	<script src="https://kit.fontawesome.com/e650c50b1a.js" crossorigin="anonymous"></script>
-
-    <style type="text/css">
-		html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, caption {
-		    margin: 0;
-		    padding: 0;
-		    border: 0;
-		    outline: 0;
-		    font-size: 100%;
-		    font-family: 'Lato', 'Arial', sans-serif;
-		    vertical-align: baseline;
-		    background: transparent;
-		}
-
-    	#navBar{
-    		position:fixed;
-    		opacity:0;
-    		margin-top:5vh;
-    		/*padding-right:2em;*/
-    		height:3em;
-    		width:100vw;
-			background:#1B2731;
-			border-bottom: 2px solid #7CE0E5;
-			z-index:4;
-    	}
-
-    	.navBarLinks{
-    		top:0;
-    		width:100%;
-  			list-style-type: none;
-			display:block;
-			line-height:3em;
-			margin-left:1em;
-			margin-right:1em;
-/*			overflow:show;
-*/    	}
-
-    	.navBarLinkContainer {
-			list-style-type: none;
-			color:white;
-			font-size:1.2em;
-
-			/*line-height:3em;*/
-    	}
-
-    	.navLink {
-    		color:white;
-    		text-decoration: none;
-    		padding-left:.75em;
-    		padding-right:.75em;
-       		padding-bottom:.7em;
-    	}
-
-    	.active {
-    		color:#FF4E42;
-    		width:100%;
-    		border-bottom: 2px solid #FF4E42;
-    	}
-
-    	.leftLink{
-    		float:left;
-    	}
-
-    	.navLink:hover{
-			color:#7CE0E5;    	
-		}
-
-    	.rightLink{
-    		float:right;
-    		font-size:1em;
-    		padding-left:.75em;
-    		padding-right:.75em;
-    		margin-top:.3em;
-    	}
-
-    	.rightLink:hover{
-    		color:#7CE0E5;
-    	}
-
-    	#lastLink{
-    		margin-right:1em;
-
-    	}
-
-    	#landingButton {
-    		border:2px solid white;
-    		background:none;
-    		color:white;
-    		padding:.3em;
-    		font-size:.8em;
-    		font-weight:lighter;
-    		margin-top:1em;
-    		cursor:pointer;
-    	}
-
-    	#landingButton:hover {
-    		color:#7CE0E5;
-    		border:2px solid #7CE0E5;
-    	}
-
-    	#landingPage{
-    		background:none;
-    		height:0px;
-    		padding:0 auto;
-    		padding-top:35vh;
-			pointer-events: none;
-			margin-bottom:65vh;
-    	}
-
-    	#landingSvg {
-    		width:100vw;
-    		height:100%;
-    		min-height:30em;
-   		    position: absolute;
-/*		    background:#34495E;
-*/		    
-			pointer-events: all;
-			left: 0;
-		    top: 0;
-		    z-index: 1;
-			border-bottom: 3px solid #7CE0E5;
-    	}
-
-    	#profilePicture{
-    		height:16vw;
-    		width:16vw;
-  			margin-left:42vw;
-    		opacity:0;
-    		display:inline-block;
-    		position:absolute;
-    		z-index:2;
-    		border-radius:50%;
-			box-shadow: 5px 5px 3px rgba(0,0,0,.3);
-			pointer-events: all;
-    	}
-
-    	#landingPageBlurb{
-    		position:absolute;
-    		display:inline-block;
-    		opacity:0;
-    		width:50vw;
-    		margin-top:2vw;
-    		margin-left:35vw;
-    		font-size:1.6em;
-    		text-align:left;
-    		z-index:2;
-			pointer-events: all;
-    	}
-
-    	#aboutMe{
-    		width:100vw;
-    		padding-top:4em;
-    		overflow:hidden; 
-    	}
-
-    	#portfolio{
-    		width:100%;
-
-    	}
-
-    	#contact{
-
-    	}
-
-    	footer{
-    		background:#34495E;
-    		height:6rem;
-    		width:100%;
-    		color:white;
-    		line-height:1.5rem;
-    		padding-top:2rem;
-    	}
-
-    	#goodByeMessage {
-    		text-align:center;
-    		display:block;
-    		margin:0 auto;
-    	}
-
-    	#goodByeMessage a {
-    		text-decoration:none;
-    		color:white;
-    		margin-left:.1rem;
-    		padding:0 .2rem;
-    		border:1px solid white;
-    	}
-    	.modal{
-
-    	}
-
-    	.mainHeader{
-    		color:white;
-    	}
-
-    	.emphasizedHeader{
-    		color:#f2280d;
-    	}
-
-    	.sectionHeader{
-    		text-align:center;
-    		font-size:2em;
-    		width:90vw;
-    		margin-bottom:1em;
-    	}
-
-    	.subHeader{
-
-    	}
-
-    	.bodyText{
-    		font-size:1em;
-    	}
-
-    	.break {
-    		width:100vw;
-    		line-height:100%;
-    		clear:both
-    	}
-
-    	.portfolioItem {
-    		height: 30rem;
-    		width: 25vw;
-    		text-align:center;
-    		padding:1rem;
-    		margin-left:3vw;
-    		margin-right:3vw;
-    		border:2px solid grey;
-    	}
-
-    	.portfolioItem .title{
-    		font-size:1.3rem;
-    		margin-bottom:.7rem;
-    	}
-
-    	.portfolioItem .subtitle{
-    		font-size:.8rem;
-    		margin-bottom:1rem;
-    	}
-    	.portfolioItem .description{
-    		font-size:1rem;
-    		line-height:1.2rem;
-    		letter-spacing: .25;
-    		margin-bottom:1rem;
-    	}
-
-    	.portfolioItem a{
-    		color:MEDIUMTURQUOISE;
-    		cursor:pointer;
-    		text-decoration: none;
-    		font-weight:bold;
-    	}
-
-    	.portfolioItem a:hover{
-    		color:CADETBLUE;
-    		cursor:pointer;
-    	}
-
-    	.portfolioImage {
-    		width:80%;
-    		height:40%;
-    		max-height:10rem;
-    		object-fit: contain;
-    		margin-bottom:1rem;
-    	}
-
-    	/*portfolio grid styling*/
-
-		.row {
-		  margin: 8px -16px;
-		}
-
-		/* Clear floats after rows */ 
-		.row:after {
-		  content: "";
-		  display: table;
-		  clear: both;
-		}
-
-		/* Add padding BETWEEN each column */
-		.row,
-		.row > .column {
-		  padding: 8px;
-		}
-
-
-		/* Create four equal columns that floats next to each other */
-		.column {
-		  float: left;
-		  width: 29%;
-		}
-
-		/*about section */
-		#aboutPageLeft{
-			width:40vw;
-			display:inline-block;
-			float:left;		
-			padding-left:7vw;
-			margin-right:5vw;
-		}
-
-		.aboutHeader{
-			font-size:2em;
-			margin-bottom:1em;
-		}
-
-		#aboutText {
-			font-size:1.5em;
-		}
-
-		#aboutText a{
-    		color:MEDIUMTURQUOISE;
-    		text-decoration: none;
-    		cursor:pointer;
-    	}
-
-    	#aboutText a:hover{
-    		color:CADETBLUE;
-    	}
-
-		/*icons*/
-		#aboutPageRight{
-			width:40vw;
-			display:inline-block;
-			float:right;
-			margin-right:5vw;
-		}
-
-		#iconContainer{
-			display:block;
-			float:right;
-		}
-
-		.iconWrapper {
-			width:6em;
-			height:6em;
-			border-radius:50%;
-			background:#7CE0E5;
-			text-align:center;
-			line-height:100%;
-			margin-bottom:1em;
-			display:inline-block;
-
-		}
-
-		.aboutIcon {
-			color:white;
-			font-size:3em;
-			margin-top:.4em;
-		}
-
-		.iconText{
-			width:28vw;
-			display:inline-block;
-			margin-left:1em;
-			margin-bottom:1em;
-		}
-
-		.downArrow {
-			width:100%;
-			text-align:center;
-			margin-top:.5em;
-			margin-bottom:.5em;
-			font-size:4em;
-			transform: scale(2,1); 
-			opacity:.1;
-			cursor:pointer;
-		}
-
-		.downArrow:hover{
-			opacity:.05;
-		}
-
-    	/*other*/
-
-    	.textLink{
-
-    	}
-
-    	.footerIcon{
-
-    	}
-
-
-		/* Responsive layout - makes a two column-layout instead of four columns */
-		@media screen and (max-width: 900px) {
-		  .column {
-		    width: 45%;
-		  }
-		  .portfolioItem {
-		  	width:40vw;
-		  }
-		}
-
-		/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-		@media screen and (max-width: 600px) {
-		  .column {
-		    width: 90%;
-		  }
-		  .portfolioItem {
-		  	width:80vw;
-		  }
-		}
-
-
-    </style>
+<meta charset="utf-8">
+<title>Steven McDonald — UI/UX Technical Lead</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Steven McDonald">
+<meta name="description" content="Steven McDonald is a UI/UX Technical Lead at Healthlevel. Cornell CS. He designs and ships the whole thing — research through production.">
+<meta name="keywords" content="UI/UX, technical lead, front end, design engineer, Cornell, Healthlevel, product design, software engineer">
+
+<meta property="og:title" content="Steven McDonald — UI/UX Technical Lead">
+<meta property="og:description" content="I design and ship the whole thing — research through production.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Instrument+Sans:ital,wght@0,400..600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ground:      #232A34;
+  --ground-deep: #1B212A;
+  --ground-lift: #2C343F;
+  --linen:       #EFEAE0;
+  --linen-mute:  #A2AEBB;
+  --hairline:    rgba(239,234,224,.14);
+
+  --ultramarine: #4463D6;
+  --cadmium:     #E2652A;
+  --viridian:    #2E9C86;
+  --naples:      #E8B24A;
+
+  --display: "Helvetica Neue", sans-serif;
+  --body:    "Instrument Sans", system-ui, sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, monospace;
+
+  --gutter: clamp(1.25rem, 5vw, 5.5rem);
+  --nav-h: 62px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--linen);
+  font-family:var(--body);
+  font-size:clamp(1rem,.95rem + .3vw,1.125rem);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* faint linen tooth over the whole ground */
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+}
+a{ color:inherit; }
+:focus-visible{
+  outline:2px solid var(--naples);
+  outline-offset:3px;
+  border-radius:2px;
+}
+
+/* ─── NAV ─────────────────────────────────── */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  height:var(--nav-h);
+  display:flex; align-items:center; gap:1.5rem;
+  padding:0 var(--gutter);
+  background:rgba(27,33,42,.72);
+  backdrop-filter:blur(14px) saturate(1.2);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border-bottom:1px solid var(--hairline);
+}
+.mark{
+  font-family:var(--display);
+  font-variation-settings:"wght" 700,"wdth" 88;
+  font-size:1rem; letter-spacing:-.015em;
+  text-decoration:none; margin-right:auto;
+  display:flex; align-items:center; gap:.55rem;
+}
+.mark .dot{
+  width:9px; height:9px; border-radius:50%;
+  background:var(--cadmium);
+  box-shadow:0 0 0 3px rgba(226,101,42,.22);
+}
+.nav-links{ display:flex; gap:.35rem; list-style:none; margin:0; padding:0; }
+.nav-links a{
+  font-family:var(--mono); font-size:.74rem; letter-spacing:.06em;
+  text-transform:uppercase; text-decoration:none;
+  color:var(--linen-mute);
+  padding:.5rem .7rem; border-radius:6px;
+  transition:color .18s ease, background .18s ease;
+}
+.nav-links a:hover, .nav-links a[aria-current="true"]{
+  color:var(--linen); background:rgba(239,234,224,.07);
+}
+.socials{ display:flex; gap:.15rem; margin-left:.75rem; }
+.socials a{
+  display:grid; place-items:center; width:36px; height:36px;
+  border-radius:8px; color:var(--linen-mute);
+  transition:color .18s ease, background .18s ease;
+}
+.socials a:hover{ color:var(--linen); background:rgba(239,234,224,.07); }
+.socials svg{ width:17px; height:17px; fill:currentColor; }
+@media (max-width:760px){
+  .nav-links li:nth-child(n+3){ display:none; }
+  .socials a:nth-child(1){ display:none; }
+}
+
+/* ─── HERO ────────────────────────────────── */
+.hero{
+  position:relative;
+  min-height:100svh;
+  padding:calc(var(--nav-h) + clamp(2rem,7vh,5rem)) var(--gutter) 0;
+  display:grid;
+  grid-template-rows:1fr auto;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+#paint{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  display:block;
+}
+.hero::after{ 
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(255,255,255,.055), transparent 62%),
+    linear-gradient(180deg, transparent 55%, rgba(20,25,32,.55) 100%);
+}
+
+.hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);
+  gap:clamp(2rem,5vw,5rem);
+  align-items:center;
+  width:100%; max-width:1320px; margin:0 auto;
+}
+@media (max-width:900px){
+  .hero-grid{ grid-template-columns:1fr; gap:2.5rem; }
+}
+
+.eyebrow{
+  font-family:var(--mono); font-size:.75rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--linen-mute);
+  display:flex; align-items:center; gap:.7rem; margin:0 0 1.4rem;
+}
+.eyebrow .rule{ width:34px; height:1px; background:var(--cadmium); flex:none; }
+
+h1{
+  font-family:var(--display);
+  font-variation-settings:"wght" 620,"wdth" 82,"opsz" 96;
+  font-size:clamp(2rem, 10.5vw, 6rem);
+  line-height:.86;
+  letter-spacing:-.035em;
+  margin:0;
+}
+h1 .line{ display:block; overflow:hidden; }
+h1 .line > span{ display:block; }
+h1 .second{ color:var(--linen); opacity:.55; }
+
+.lede{
+  max-width:34ch;
+  font-size:clamp(1.1rem,1rem + .55vw,1.5rem);
+  line-height:1.45;
+  color:var(--linen);
+  margin:1.9rem 0 0;
+}
+.lede em{ font-style:normal; color:var(--naples); }
+.lede .co{
+  color:var(--linen); text-decoration:none;
+  box-shadow:inset 0 -2px 0 var(--viridian);
+  transition:box-shadow .2s ease;
+}
+.lede .co:hover{ box-shadow:inset 0 -1.1em 0 rgba(46,156,134,.32); }
+
+.actions{ display:flex; flex-wrap:wrap; gap:.75rem; margin-top:2.2rem; }
+.btn{
+  font-family:var(--mono); font-size:.8rem; letter-spacing:.05em;
+  text-transform:uppercase; text-decoration:none;
+  padding:.92rem 1.35rem; border-radius:2px;
+  display:inline-flex; align-items:center; gap:.6rem;
+  border:1px solid transparent;
+  transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+.btn-fill{ background:var(--cadmium); color:#1A1008; font-weight:500; }
+.btn-fill:hover{ transform:translateY(-2px); background:#F0733A; }
+.btn-ghost{ border-color:var(--hairline); color:var(--linen); }
+.btn-ghost:hover{ transform:translateY(-2px); border-color:var(--linen); }
+.btn .arrow{ transition:transform .18s ease; }
+.btn:hover .arrow{ transform:translateX(4px); }
+
+/* portrait — a small toned panel, offset like a wet print */
+.portrait{ position:relative; justify-self:center; width:min(300px,64vw); }
+.portrait::before{
+  content:""; position:absolute; inset:0;
+  transform:translate(14px,14px);
+  background:var(--viridian); opacity:.55;
+  border-radius:6px;
+}
+.portrait img{
+  position:relative;
+  width:100%; aspect-ratio:4/5; object-fit:cover; object-position:50% 22%;
+  border-radius:6px;
+  filter:saturate(1.03) contrast(1.03);
+  box-shadow:0 24px 60px rgba(12,16,22,.5);
+}
+.portrait figcaption{
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.08em;
+  color:var(--linen-mute); margin-top:1.1rem; text-transform:uppercase;
+}
+@media (max-width:900px){ .portrait{ order:-1; width:min(230px,55vw); justify-self:start; } }
+
+/* the phase strip: a real sequence, so it earns its order */
+.phases{
+  width:100%; max-width:1320px; margin:0 auto;
+  padding:clamp(2rem,5vh,3.5rem) 0 clamp(1.6rem,4vh,2.4rem);
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:clamp(.5rem,2vw,2rem);
+  border-top:1px solid var(--hairline);
+}
+.phase{ display:flex; flex-direction:column; gap:.55rem; }
+.phase .swatch{ height:5px; border-radius:99px; width:100%; }
+.phase .name{
+  font-family:var(--mono); font-size:.76rem; letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.phase .what{ font-size:.85rem; color:var(--linen-mute); line-height:1.4; }
+@media (max-width:720px){
+  .phases{ grid-template-columns:repeat(2,1fr); gap:1.25rem; }
+  .phase .what{ display:none; }
+}
+
+.hint{
+  position:absolute; left:var(--gutter); bottom:1rem;
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--linen-mute);
+  opacity:.5; transition:opacity .6s ease; pointer-events:none;
+}
+.hint.gone{ opacity:0; }
+
+.section{
+  position:relative; z-index:1;
+  padding:clamp(4.5rem,11vh,8rem) var(--gutter);
+  max-width:1320px; margin:0 auto;
+}
+.section + .section{ border-top:1px solid var(--hairline); }
+.section-head{
+  display:flex; align-items:baseline; gap:1rem;
+  margin-bottom:2.5rem;
+}
+.section-head .num{
+  font-family:var(--mono); font-size:.75rem; color:var(--cadmium); letter-spacing:.1em;
+}
+.section-head h2{
+  font-family:var(--display);
+  font-variation-settings:"wght" 600,"wdth" 84;
+  font-size:clamp(1.9rem,1.2rem + 2.4vw,3.2rem);
+  letter-spacing:-.03em; line-height:1; margin:0;
+}
+.placeholder{
+  border:1px dashed var(--hairline); border-radius:4px;
+  padding:2.5rem; color:var(--linen-mute);
+  font-family:var(--mono); font-size:.8rem; line-height:1.8;
+}
+
+/* ─── FOOTER ──────────────────────────────── */
+footer{
+  position:relative; z-index:1;
+  background:var(--ground-deep);
+  border-top:1px solid var(--hairline);
+  padding:clamp(3rem,8vh,5rem) var(--gutter);
+}
+.footer-inner{
+  max-width:1320px; margin:0 auto;
+  display:flex; flex-wrap:wrap; gap:2rem; align-items:flex-end;
+  justify-content:space-between;
+}
+.footer-inner h3{
+  font-family:var(--display);
+  font-variation-settings:"wght" 600,"wdth" 84;
+  font-size:clamp(1.6rem,1.1rem + 2vw,2.6rem);
+  letter-spacing:-.03em; line-height:1.05; margin:0 0 .9rem;
+  max-width:16ch;
+}
+.footer-inner a.mailto{
+  font-family:var(--mono); font-size:.95rem; color:var(--naples);
+  text-decoration:none; border-bottom:1px solid rgba(232,178,74,.4);
+}
+.footer-inner a.mailto:hover{ border-bottom-color:var(--naples); }
+.colophon{
+  font-family:var(--mono); font-size:.7rem; color:var(--linen-mute);
+  line-height:1.9; letter-spacing:.04em;
+}
+
+/* ─── LOAD SEQUENCE ───────────────────────── */
+.reveal > *{
+  opacity:0; transform:translateY(14px);
+  animation:settle .85s cubic-bezier(.2,.7,.25,1) forwards;
+}
+.reveal > *:nth-child(1){ animation-delay:.15s; }
+.reveal > *:nth-child(2){ animation-delay:.28s; }
+.reveal > *:nth-child(3){ animation-delay:.44s; }
+.reveal > *:nth-child(4){ animation-delay:.56s; }
+.reveal > *:nth-child(5){ animation-delay:.66s; }
+@keyframes settle{ to{ opacity:1; transform:none; } }
+.portrait{ opacity:0; animation:settle .9s .35s cubic-bezier(.2,.7,.25,1) forwards; }
+.phases .phase{ opacity:0; animation:settle .8s cubic-bezier(.2,.7,.25,1) forwards; }
+.phases .phase:nth-child(1){ animation-delay:.7s; }
+.phases .phase:nth-child(2){ animation-delay:.79s; }
+.phases .phase:nth-child(3){ animation-delay:.88s; }
+.phases .phase:nth-child(4){ animation-delay:.97s; }
+
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  .reveal > *, .portrait, .phases .phase{ animation:none; opacity:1; transform:none; }
+  .btn:hover, .btn:hover .arrow{ transform:none; }
+}
+</style>
 </head>
 
 <body id="top">
-		<div id="navBar">
-			<ul class="navBarLinks">
-				<li class="leftLink navBarLinkContainer"><a id="homeLink" class="active navLink toBody" href="#top">Steven</a></li>
-				<li class="leftLink navBarLinkContainer"><a id="abotLink" class="navLink toBody" href="#aboutMe">Bio</a></li>
-				<li class="leftLink navBarLinkContainer"><a id="portfolioLink" class="navLink toBody" href="#portfolio">Portfolio</a></li>		
-				<li class="leftLink navBarLinkContainer"><a id="portfolioLink" class="navLink" href="http://stevenmcdonaldpleinair.com/">My Art</a></li>		
-				<li class="leftLink navBarLinkContainer"><a id="contactLink" class="navLink" href="mailto:steven@stevenamcdonald.com">Get in Touch</i></a></li>
-			</ul>
-			<a id="lastLink" class="rightLink navBarLinkContainer" href="mailto:steven@stevenamcdonald.com"> <i class="zmdi zmdi-email zmdi-hc-2x"></i></a>
 
-		    <a class="rightLink navBarLinkContainer" href="https://github.com/StevenMcDonald97"> <i class="zmdi zmdi-github zmdi-hc-2x" href="https://github.com/StevenMcDonald97"></i></a>
+<nav class="nav">
+  <a class="mark" href="#top"><span class="dot"></span>Steven McDonald</a>
+  <ul class="nav-links">
+    <li><a href="#aboutMe">Bio</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="http://stevenmcdonaldpleinair.com/">Paintings</a></li>
+    <li><a href="mailto:steven@stevenamcdonald.com">Contact</a></li>
+  </ul>
+  <div class="socials">
+    <a href="https://www.linkedin.com/in/steven-mcdonald-9216b0a0" aria-label="LinkedIn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.6c0-1.34-.03-3.07-1.9-3.07-1.9 0-2.2 1.46-2.2 2.97V21H9z"/></svg>
+    </a>
+    <a href="https://github.com/StevenMcDonald97" aria-label="GitHub">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.53-1.35-1.29-1.71-1.29-1.71-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.79 2.73 1.27 3.4.97.1-.76.4-1.28.73-1.57-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.55A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+    </a>
+    <a href="mailto:steven@stevenamcdonald.com" aria-label="Email">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20v14H2zm10 7.2L3.6 6.6h16.8z"/></svg>
+    </a>
+  </div>
+</nav>
 
-		    <a class="rightLink navBarLinkContainer" href="https://www.linkedin.com/in/steven-mcdonald-9216b0a0"><i class="zmdi zmdi-linkedin zmdi-hc-2x"></i> </a>
+<header class="hero">
+  <canvas id="paint" aria-hidden="true"></canvas>
 
-		</div>
-
-	<div id="landingPage">
-		<svg id="landingSvg"></svg>
-		<img 
-	    	id="profilePicture"
-	    	src="images/profile_pic.jpg"
-	    	alt="profile picture"
-	    	title="A software engineer seen in his natural html habitat"
-	    	height="175" width="175"
-    	>
-
-    	<div id="landingPageBlurb">
-	        <h3 class="mainHeader"> Hello, I'm <b class="emphasizedHeader"> Steven McDonald</b>. I'm a graduate of Cornell University looking for a full-time Software Engineering role</h3>
-	        <button id="landingButton"> Learn More About Me&#8594;</button>
-	    </div>
+  <div class="hero-grid">
+    <div class="reveal">
+      <p class="eyebrow"><span class="rule"></span>UI/UX Technical Lead · Healthlevel</p>
+      <h1>
+        <span class="line"><span>Steven</span></span>
+        <span class="line second"><span>McDonald</span></span>
+      </h1>
+      <p class="lede">I design and ship the whole thing at <a class="co" href="#aboutMe">Healthlevel</a> — <em>research through production</em>.</p>
+      <div class="actions">
+        <a class="btn btn-fill" href="#portfolio">See the work <span class="arrow">→</span></a>
+        <a class="btn btn-ghost" href="mailto:steven@stevenamcdonald.com">Get in touch</a>
+      </div>
     </div>
 
+    <figure class="portrait">
+      <img src="images/Steven_McDonald.jpeg" alt="Steven McDonald" width="600" height="600">
+      <figcaption>Cornell CS, cum laude · Ithaca → now</figcaption>
+    </figure>
+  </div>
 
-    <div id="aboutMe">
-    	<div id="aboutPageLeft">
-    		<h2 class="aboutHeader"> Who I Am </h2>
-			<p id="aboutText">I am a software engineer with a passion  for problem solving and design. I graduated cum-laude from Cornell Engineering in December 2019, and I have experience in full stack development, algorithm design, databases, and machine learning.	
-			You can see my full resume <a href="./documents/resume.pdf" class="textLink">here</a>
-			</p>
-		</div>
-    	<div id="aboutPageRight">
-    		<h2 class="aboutHeader"> Code Principles </h2>
-    		<div class="iconContainer">
-				<div class="iconWrapper"><i class="fas fa-bath aboutIcon"></i></div>
-				<div class="iconText">
-					<h3> CLEAN </h3>
-					<div> Easy to use and easy to understand</div>
-				</div>
-			</div>
-    		<div class="iconContainer">
-				<div class="iconWrapper"><i class="fas fa-tachometer-alt aboutIcon"></i></div>
-				<div class="iconText">
-					<h3> EFFICIENT </h3>
-					<div> Eliminate any unnecessary costs</div>
-				</div>			
-			</div>
-    		<div class="iconContainer">
-				<div class="iconWrapper"><i class="fas fa-laptop aboutIcon"></i></div>
-				<div class="iconText">
-					<h3> ROBUST </h3>
-					<div> Anticipate and solve problems before they happen </div>
-				</div>				
-			</div>
-    	</div>
-    	<div class="break">
-    		<i class="downArrow fas fa-angle-down"></i>
-    	</div>
+  <div class="phases">
+    <div class="phase"><span class="swatch" style="background:var(--ultramarine)"></span><span class="name">Research</span><span class="what">Interviews, workflows, and the constraints nobody wrote down.</span></div>
+    <div class="phase"><span class="swatch" style="background:var(--cadmium)"></span><span class="name">Design</span><span class="what">Flows, systems, and prototypes people can actually use.</span></div>
+    <div class="phase"><span class="swatch" style="background:var(--viridian)"></span><span class="name">Build</span><span class="what">Front end to back end, written to be maintained.</span></div>
+    <div class="phase"><span class="swatch" style="background:var(--naples)"></span><span class="name">Ship</span><span class="what">Into production, then measured and revised.</span></div>
+  </div>
+
+  <p class="hint" id="hint">Move your cursor</p>
+</header>
+
+<section class="section" id="aboutMe">
+  <div class="section-head"><span class="num">01</span><h2>Bio</h2></div>
+  <div class="placeholder">Your updated bio section goes here.<br>Use &lt;div class="section-head"&gt; for the heading and the tokens in :root for color and type.</div>
+</section>
+
+<section class="section" id="portfolio">
+  <div class="section-head"><span class="num">02</span><h2>Portfolio</h2></div>
+  <div class="placeholder">Your updated portfolio section goes here.</div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <h3>Have something worth building?</h3>
+      <a class="mailto" href="mailto:steven@stevenamcdonald.com">steven@stevenamcdonald.com</a>
     </div>
-
-    <div id="portfolio">
-    	<h2 class="sectionHeader"> My Selected Projects </h2>
-		<div class="row">
-			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Hearing and Color Blindness Test </h2>
-					<h4 class="subtitle"> Next.js, React.js </h4>
-					<img class="portfolioImage" src="./images/cb-hd-test.png"/>
-					<p class="description"> I implemented hearing and color blindness tests for an application being deployed in rural areas of India. I also transitioned the existing React code to Next.js and added Google Anayltics to track site usage. </p>
-					<a href="https://www.the2senses.com/"> the2senses.com </a>
-				</div>
-    		</div>
-			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> ClimateReps.com  </h2>
-					<h4 class="subtitle"> Node.js, MongoDB </h4>
-					<img class="portfolioImage" src="./images/climate.png"/>
-					<p class="description"> I doubled the efficiency of climatereps.com and added options for filtering results by locality. This is a website for tracking the progress of communities in the United States at meeting green energy goals, built using Node.js </b> </p>
-					<a href="http://climatereps.com/"> climatereps.com </a>
-				</div>
-    		</div>
-   			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Bird Audio CNN</h2>
-					<h4 class="subtitle"> Python, TensorFlow, SKLearn </h4>
-					<img class="portfolioImage" src="./images/birds.jpeg"/>
-					<p class="description"> I trained convulutional neural networks to classify heart rate audio from birds for Dr. Jamie Cornelius at Oregon State University. </p>
-				</div>
-    		</div>
-      	
-    	</div>
-   		<div class="row">
-			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Portfolio Website Builder </h2>
-					<h4 class="subtitle"> React.js, Express.js, MongoDB, Node.js </h4>
-					<img class="portfolioImage" src="./images/portfolioBuilderImage.png"/>
-					<p class="description"> I developed a MERN stack app to allow artists and designers to create, edit, and deploy professional portfolio websites with ease under their own domain names. Features include custom styling, portfolios pages, blogs, and video and sound pages among others.</p>
-					<p><a href="http://catherinecoombscollage.com/"> catherinecoombscollage.com </a></p>
-					<p><a href="http://elisecording.com/"> elisecording.com </a></p>
-				</div>
-    		</div>
-			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Khepra Incorporated Company Website  </h2>
-					<h4 class="subtitle"> jQuery, HTML, CSS3 </h4>
-					<img class="portfolioImage" src="./images/khepraLogo.png"/>
-					<p class="description"> I designed and built the company website for Khepra Incorporated, a biofuels startup based out of San Francisco, California, to showcase their vision of a fossil fuel free future. </p>
-					<a href="https://www.khepra.io"> See the website here</a>
-				</div>
-    		</div>
-   			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Disability Services Map  </h2>
-					<h4 class="subtitle"> jQuery, Laravel, Google Maps API </h4>
-					<img class="portfolioImage" src="./images/tsmap.png"/>
-					<p class="description"> I implemented a map to help teachers and parents find disability services for students in the New York State area on transitionsource.org. This map has since become the most used feature on the website. </p>
-					<a href="https://transitionsource.org/map"> You can see the map here </a>
-				</div>
-    		</div>
-      	
-    	</div>
-		<div class="row">
-            <div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Mini OS </h2>
-					<h4 class="subtitle"> C and x86 </h4>
-					<p class="description"> A small operating system based off a tutorial by x-BIT Development, allowing basic memory handling, process control, and file handling.</p>
-					<a href="https://github.com/StevenMcDonald97/mini-os"> You can see the code on github here </a>
-				</div>
-    		</div> 
-			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> SQL Interpreter </h2>
-					<h4 class="subtitle"> JAVA </h4>
-					<img class="portfolioImage" src="./images/sql.png"/>
-					<p class="description"> As an extension of a project I did for a databases course, I wrote a postgresSQL interpreter in JAVA capable of taking in queries of the form SELECT-FROM-WHERE in a text file and writing the results to a seperate file. </p>
-					<a href="https://github.com/StevenMcDonald97/sqlInterpreter"> You can see the code on github here </a>
-				</div>
-    		</div> 
-			<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Art Museum Gender Disparity Visualization </h2>
-					<h4 class="subtitle"> D3, jQuery </h4>
-					<img class="portfolioImage" src="./images/visualization.png"/>
-					<p class="description"> A D3 visualization of the disparity between male and female artist representation in the Tate and MOMA Museum collections (non-binary artists could not be included because the data does not exist).</p>
-					<a href="./projects/project2/index.html"> You can see the visualization here </a>
-				</div>
-    		</div>    
-    	</div>  
-		<div class="row">
-    		<div class="column">
-				<div class="portfolioItem">
-					<h2 class="title"> Mafia Game </h2>
-					<h4 class="subtitle"> oCaml </h4>
-					<p class="description"> A text-based single player version of the game mafia. The player is assigned a random role, and then based on their role will play against several AI players. The game is divided into several stages based on the real life game where players can commit different actions, culminating in a phase were the player and AIs vote to decide who to kill that round.</p>
-					<a href="https://github.com/StevenMcDonald97/MAFIA"> You can see the code on github here </a>
-				</div>
-    		</div>
-        </div>
-
-
-
+    <div class="colophon">
+      Steven McDonald · <span id="yr">2026</span><br>
+      Set in Bricolage Grotesque &amp; JetBrains Mono<br>
+      <a href="http://stevenmcdonaldpleinair.com/">Paintings →</a>
     </div>
+  </div>
+</footer>
 
-	<footer>
-		<div id="goodByeMessage">Thank you for taking the time to visit my site! <br> If you would like to collaborate or learn more please <a href="mailto:sam489@cornell.edu"> contact me</a></div>
-	</footer>
-
-</body>
 <script>
-	$(document).ready(function(){
-		$('#profilePicture').animate({
-	    	opacity:1
-	    }, 'slow', 'linear');
-		$('#profilePicture').delay(500).animate({
-	    	'margin-left': '20vw'
-	    }, 'slow', 'linear');
+document.getElementById('yr').textContent = new Date().getFullYear();
 
-		$('#navBar').delay(1700).animate({
-	    	'margin-top': '0em',
-	    	opacity:1
-	    }, 'slow', 'linear');
+/* ─────────────────────────────────────────────
+   Pigment spray: dragging across the ground
+   throws circles of paint outward from the
+   cursor. They travel until they leave the page.
+   ───────────────────────────────────────────── */
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = document.getElementById('paint');
+  const hero   = document.querySelector('.hero');
+  const hint   = document.getElementById('hint');
+  const ctx    = canvas.getContext('2d');
 
-		$('#landingPageBlurb').delay(1700).animate({
-	    	'margin-left': '40vw',
-	    	opacity:1
-	    }, 'slow', 'linear');
+  const PIGMENTS = [
+    [68,99,214],   // ultramarine
+    [226,101,42],  // cadmium orange
+    [46,156,134],  // viridian
+    [232,178,74],  // naples yellow
+    [178,58,72]    // alizarin
+  ];
 
-	    window.scrollTo(0,0);
+  let w = 0, h = 0, dpr = 1;
+  function size(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = hero.getBoundingClientRect();
+    w = r.width; h = r.height;
+    canvas.width  = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  size();
+  let rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(size, 150); });
 
-		$("#landingButton").click(function() {
-		   $('html, body').animate({
-		        scrollTop: $("#aboutMe").offset().top
-		    }, 2000);
-		});
+  const MAX = 840;
+  const drops = [];
+  let px = 0, py = 0, hasPrev = false, lastT = 0, pigment = 0;
 
-		$(".downArrow").click(function() {
-		   $('html, body').animate({
-		        scrollTop: $("#portfolio").offset().top
-		    }, 2000);
-		});
+  function spawn(x, y, vx, vy, strength){
+    pigment = (pigment + 1 + Math.floor(Math.random() * 2)) % PIGMENTS.length;
+    const ang = Math.random() * Math.PI * 2;
+    const spd = (1.1 + Math.random() * 3.4) * strength;
+    drops.push({
+      x: x + Math.cos(ang) * 6,
+      y: y + Math.sin(ang) * 6,
+      vx: Math.cos(ang) * spd + vx * 0.28,
+      vy: Math.sin(ang) * spd + vy * 0.28,
+      r: 3 + Math.random() * 11,
+      spin: (Math.random() - 0.5) * 0.06,
+      color: PIGMENTS[pigment],
+      born: performance.now()
+    });
+    if (drops.length > MAX) drops.splice(0, drops.length - MAX);
+  }
 
-		$(".navLink.toBody").click(function(e) {   
-			e.preventDefault();   
-			var dest = $(this).attr('href'); 
-			$('html,body').animate({ scrollTop: $(dest).offset().top }, 'slow'); 
-		});
+  const LIFE = 5200, FADE = 900;
+  function frame(){
+    ctx.clearRect(0, 0, w, h);
+    const now = performance.now();
+    for (let i = drops.length - 1; i >= 0; i--){
+      const d = drops[i];
+      d.x += d.vx;
+      d.y += d.vy;
+      d.vx *= 0.994;
+      d.vy *= 0.994;
+      d.r  += d.spin;
 
-	    $(window).on('scroll', function() {
-			$(".navLink.toBody").each(function() {
-				if ($($(this).attr('href')).offset().top < ($(window).scrollTop() + ($(window).height() / 2))) {
-					$('.navLink').removeClass('active');
-					$(this).addClass('active');
+      const m = d.r + 4;
+      if (d.x < -m || d.x > w + m || d.y < -m || d.y > h + m || d.r <= 1){
+        drops.splice(i, 1);
+        continue;
+      }
 
-				}
-			});
-		});
+      const age = now - d.born;
+      if (age > LIFE){ drops.splice(i, 1); continue; }
+      const a = age > LIFE - FADE ? (LIFE - age) / FADE : 1;
 
-	});
+      const c = d.color;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 0.82) + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  }
 
-	// d3 animate landing page background!
-	var margin = {top: 0, right: 0, bottom: 0, left: 0},
-   		width = $("#landingSvg").width(),
-    	height = $("#landingSvg").height();
+  function ambient(){
+    const x = w * (0.15 + Math.random() * 0.7);
+    const y = h * (0.2 + Math.random() * 0.6);
+    const n = 5 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < n; i++) spawn(x, y, 0, 0, 0.75);
+  }
 
-		// var npoints = 100;
-	var ptdata = [];
-	var session = [];
-	var path;
-	var drawing = false;
+  if (!reduced){
+    hero.addEventListener('pointermove', function(e){
+      const r = canvas.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      const t = performance.now();
+      let vx = 0, vy = 0, speed = 0;
+      if (hasPrev && t - lastT < 200){
+        vx = x - px; vy = y - py;
+        speed = Math.hypot(vx, vy);
+      }
+      px = x; py = y; lastT = t; hasPrev = true;
 
-	// use date as classname for paths
-	var date = new Date();
+      const n = 1 + Math.min(3, Math.floor(speed / 14));
+      for (let i = 0; i < n; i++) spawn(x, y, vx, vy, 1);
+      if (hint) hint.classList.add('gone');
+    }, { passive:true });
 
-	var line = d3.line()
-		.curve(d3.curveBundle)
-	    .x(function(d, i) { return d.x; })
-	    .y(function(d, i) { return d.y; });
+    hero.addEventListener('pointerleave', function(){ hasPrev = false; });
 
-	var svg = d3.select("#landingSvg");
+    requestAnimationFrame(frame);
+    setTimeout(ambient, 300);
+    setTimeout(ambient, 800);
+    setInterval(function(){
+      if (performance.now() - lastT > 2400) ambient();
+    }, 2600);
+  }
+})();
 
-    svg.append("rect")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("fill", "#34495E");
-
-	svg.on("mouseenter", toggleListen);
-	
-	setInterval(()=>{
-		drawing=true;
-		toggleListen();
-		setTimeout(function() {
-		  drawing = false;
-		  toggleListen();
-		  svg.on("mousemove", null);
-		}, 550);
-	}, 900);
-
-	function toggleListen() {
-		if (drawing){
-			listen();
-		} else {
-			svg.on("mousemove", null);
-		}
-	}
-
-	var strokeColor = d3.scaleOrdinal().domain([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,225,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49]).range(["#6e40aa","#6f40aa","#7140ab","#723fac","#7c3faf","#853eb1","#8f3db2","#983db3","#a23db3","#ac3cb2","#b63cb1","#bf3caf","#c83dac","#d13ea8","#da3fa4","#e2409f","#e94299","#f04493","#f6478d","#fc4a86","#ff5178","#ff5b68","#ff5c66","#ff5e63","#ff645b","#ff6a54","#ff7648","#ff843d","#ff8c38","#fd9334","#f89b32","#f2a32f","#ecaa2e","#e6b22e","#e0ba2f","#d9c131","#d3c934","#ccd038","#c6d73c","#c0dd42","#bae449","#b5ea51","#b0ef59","#aff05b","#5BF070","#07D57E","#00FEEB","#00A3FE","#2D9CF4","#2D53F4" ]);
-
-	function listen () {
-	  ptdata = []; // reset point data
-	  var time= new Date().getTime();
-	  var cName="c"+time;
-	  var colorIndex=((time % 49));
-
-	  path = svg.append("path") // start a new line
-	    .data([ptdata])
-	    .attr("class", "line")
-	    .attr("fill", "none")
-	    .attr("stroke", strokeColor(colorIndex))
-	    .attr("stroke-width", "1.5em")
-	    .attr("opacity", .4)
-	    .attr("stroke-linecap", "round")
-	    .attr("stroke-opacity",1)
-	    .attr("id", cName)
-	    .attr("d", line);
-
-	  setTimeout(()=>{
-		var xChange=0;
-	  	var yChange=0;
-	  	try {
-	  		var xChange=(ptdata[ptdata.length-1].x-ptdata[0].x)*2;
-	  		var yChange=(ptdata[ptdata.length-1].y-ptdata[0].y)*2;	
-	  	} catch {
-	  		console.log("failed to find path direction")
-	  	}
-
-	  	// console.log('translate('+xChange+','+yChange+')');
-
-	  	d3.select("path#"+cName)
-	  	    .transition()
-            .duration(3000)
-            .attr('transform','translate('+xChange+','+yChange+')')
-            .attr("stroke-opacity", 0)
-            .remove()
-      }, 100);
-
-		svg.on("mousemove", onmove);
-	  
-	}
-
-
-
-	function onmove (e) {
-	  var type = d3.event.type;
-	  var point;
-	  if (type === 'mousemove') {
-	    point = d3.mouse(this);
-	  } else {
-	    // only deal with a single touch input
-	    point = d3.touches(this)[0];
-	  }
-
-	  // push a new data point onto the back
-	  ptdata.push({ x: point[0], y: point[1] });
-	  tick();
-	}
-
-	function tick() {
-	  path.attr("d", function(d) { return line(d); }) // Redraw the path:
-	}
-	// calculateColor = () =>{
-
-	// }
-
-	// animate landing page drawing
-
-	
+/* nav: mark the section you're reading */
+(function(){
+  const links = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  const map = new Map();
+  links.forEach(function(l){
+    const el = document.querySelector(l.getAttribute('href'));
+    if (el) map.set(el, l);
+  });
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){
+        links.forEach(function(l){ l.removeAttribute('aria-current'); });
+        map.get(en.target).setAttribute('aria-current', 'true');
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  map.forEach(function(_l, el){ io.observe(el); });
+})();
 </script>
+</body>
 </html>
-
