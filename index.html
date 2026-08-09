@@ -269,6 +269,56 @@ h1 .second{ color:var(--linen); opacity:.55; }
   font-family:var(--mono); font-size:.8rem; line-height:1.8;
 }
 
+/* project cards — placeholders until real case studies drop in */
+.project-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;
+}
+@media (max-width:900px){
+  .project-grid{ grid-template-columns:1fr; }
+}
+.project-card{
+  border:1px dashed var(--hairline); border-radius:6px;
+  padding:1.75rem;
+  display:flex; flex-direction:column; gap:1.1rem;
+  min-height:15rem;
+  transition:border-color .2s ease, background .2s ease;
+}
+.project-card:hover{
+  border-color:rgba(239,234,224,.32);
+  background:rgba(239,234,224,.03);
+}
+.project-card .thumb{
+  height:8.5rem; border-radius:4px;
+  background:var(--ground-lift);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--linen-mute);
+}
+.project-card .index{
+  font-family:var(--mono); font-size:.7rem; color:var(--cadmium); letter-spacing:.08em;
+}
+.project-card h3{
+  font-family:var(--display);
+  font-variation-settings:"wght" 600,"wdth" 84;
+  font-size:1.2rem; letter-spacing:-.01em; margin:0;
+  color:var(--linen-mute);
+}
+.project-card p{
+  margin:0; font-size:.85rem; color:var(--linen-mute); line-height:1.6;
+  flex:1;
+}
+.project-card .tags{
+  display:flex; flex-wrap:wrap; gap:.4rem;
+}
+.project-card .tags span{
+  font-family:var(--mono); font-size:.65rem; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--linen-mute);
+  border:1px solid var(--hairline); border-radius:99px;
+  padding:.25rem .6rem;
+}
+
 /* ─── FOOTER ──────────────────────────────── */
 footer{
   position:relative; z-index:1;
@@ -387,7 +437,35 @@ footer{
 
 <section class="section" id="portfolio">
   <div class="section-head"><span class="num">02</span><h2>Portfolio</h2></div>
-  <div class="placeholder">Your updated portfolio section goes here.</div>
+  <div class="project-grid">
+    <div class="project-card">
+      <div class="thumb">Image / screenshot</div>
+      <div>
+        <span class="index">Project 01</span>
+        <h3>Project title</h3>
+      </div>
+      <p>One or two sentences on the problem, your role, and the outcome.</p>
+      <div class="tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+    </div>
+    <div class="project-card">
+      <div class="thumb">Image / screenshot</div>
+      <div>
+        <span class="index">Project 02</span>
+        <h3>Project title</h3>
+      </div>
+      <p>One or two sentences on the problem, your role, and the outcome.</p>
+      <div class="tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+    </div>
+    <div class="project-card">
+      <div class="thumb">Image / screenshot</div>
+      <div>
+        <span class="index">Project 03</span>
+        <h3>Project title</h3>
+      </div>
+      <p>One or two sentences on the problem, your role, and the outcome.</p>
+      <div class="tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
+    </div>
+  </div>
 </section>
 
 <footer>
@@ -439,9 +517,10 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   size();
   let rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(size, 150); });
 
-  const MAX = 840;
+  const MAX = 260;
   const drops = [];
-  let px = 0, py = 0, hasPrev = false, lastT = 0, pigment = 0;
+  let px = 0, py = 0, hasPrev = false, lastT = 0, lastSpawnT = 0, pigment = 0;
+  const SPAWN_GAP = 55; /* min ms between spawns while moving — keeps it subtle */
 
   function spawn(x, y, vx, vy, strength){
     pigment = (pigment + 1 + Math.floor(Math.random() * 2)) % PIGMENTS.length;
@@ -452,7 +531,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
       y: y + Math.sin(ang) * 6,
       vx: Math.cos(ang) * spd + vx * 0.28,
       vy: Math.sin(ang) * spd + vy * 0.28,
-      r: 3 + Math.random() * 11,
+      r: 3 + Math.random() * 8,
       spin: (Math.random() - 0.5) * 0.06,
       color: PIGMENTS[pigment],
       born: performance.now()
@@ -485,7 +564,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
       const c = d.color;
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 0.82) + ')';
+      ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 0.55) + ')';
       ctx.fill();
     }
     requestAnimationFrame(frame);
@@ -494,8 +573,8 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   function ambient(){
     const x = w * (0.15 + Math.random() * 0.7);
     const y = h * (0.2 + Math.random() * 0.6);
-    const n = 5 + Math.floor(Math.random() * 5);
-    for (let i = 0; i < n; i++) spawn(x, y, 0, 0, 0.75);
+    const n = 1 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < n; i++) spawn(x, y, 0, 0, 0.6);
   }
 
   if (!reduced){
@@ -510,19 +589,21 @@ document.getElementById('yr').textContent = new Date().getFullYear();
       }
       px = x; py = y; lastT = t; hasPrev = true;
 
-      const n = 1 + Math.min(3, Math.floor(speed / 14));
-      for (let i = 0; i < n; i++) spawn(x, y, vx, vy, 1);
+      if (t - lastSpawnT >= SPAWN_GAP){
+        lastSpawnT = t;
+        const n = 1 + Math.min(1, Math.floor(speed / 26));
+        for (let i = 0; i < n; i++) spawn(x, y, vx, vy, 0.7);
+      }
       if (hint) hint.classList.add('gone');
     }, { passive:true });
 
     hero.addEventListener('pointerleave', function(){ hasPrev = false; });
 
     requestAnimationFrame(frame);
-    setTimeout(ambient, 300);
-    setTimeout(ambient, 800);
+    setTimeout(ambient, 500);
     setInterval(function(){
-      if (performance.now() - lastT > 2400) ambient();
-    }, 2600);
+      if (performance.now() - lastT > 3200) ambient();
+    }, 4200);
   }
 })();
 
