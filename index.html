@@ -518,7 +518,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   const MAX = 260;
   const drops = [];
   let px = 0, py = 0, hasPrev = false, lastT = 0, lastSpawnT = 0, pigment = 0;
-  const SPAWN_GAP = 55; /* min ms between spawns while moving — keeps it subtle */
+  const SPAWN_GAP = 55; 
 
   function spawn(x, y, vx, vy, strength){
     pigment = (pigment + 1 + Math.floor(Math.random() * 2)) % PIGMENTS.length;
@@ -605,7 +605,6 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   }
 })();
 
-/* nav: mark the section you're reading */
 (function(){
   const links = Array.from(document.querySelectorAll('.nav-links a[href^="#"]'));
   if (!links.length || !('IntersectionObserver' in window)) return;
