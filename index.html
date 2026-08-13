@@ -154,7 +154,7 @@ a{ color:inherit; }
 h1{
   font-family:var(--display);
   font-variation-settings:"wght" 620,"wdth" 82,"opsz" 96;
-  font-size:clamp(2rem, 10.5vw, 6rem);
+  font-size:clamp(3rem, 10.5vw, 8rem);
   line-height:.86;
   letter-spacing:-.035em;
   margin:0;
@@ -318,6 +318,10 @@ h1 .second{ color:var(--linen); opacity:.55; }
   padding:.25rem .6rem;
 }
 
+.project-card img{
+  object-fit: cover;  
+}
+
 /* ─── FOOTER ──────────────────────────────── */
 footer{
   position:relative; z-index:1;
@@ -420,9 +424,9 @@ footer{
   </div>
 
   <div class="phases">
-    <div class="phase"><span class="swatch" style="background:var(--ultramarine)"></span><span class="name">Research</span><span class="what">Interviews, workflows, and the constraints nobody wrote down.</span></div>
+    <div class="phase"><span class="swatch" style="background:var(--ultramarine)"></span><span class="name">Research</span><span class="what">Interviews and workflows.</span></div>
     <div class="phase"><span class="swatch" style="background:var(--cadmium)"></span><span class="name">Design</span><span class="what">Flows, systems, and prototypes people can actually use.</span></div>
-    <div class="phase"><span class="swatch" style="background:var(--viridian)"></span><span class="name">Build</span><span class="what">Front end to back end, written to be maintained.</span></div>
+    <div class="phase"><span class="swatch" style="background:var(--viridian)"></span><span class="name">Build</span><span class="what">Front end, written to be maintained.</span></div>
     <div class="phase"><span class="swatch" style="background:var(--naples)"></span><span class="name">Ship</span><span class="what">Into production, then measured and revised.</span></div>
   </div>
 
@@ -437,33 +441,42 @@ footer{
 <section class="section" id="portfolio">
   <div class="section-head"><h2>Portfolio</h2></div>
   <div class="project-grid">
-    <div class="project-card">
+    <a class="project-card" href="www.anylessonai.com">
       <div class="thumb">Image / screenshot</div>
       <div>
         <span class="index">Project 01</span>
-        <h3>Project title</h3>
+        <h3>Any Course with AI</h3>
       </div>
-      <p>One or two sentences on the problem, your role, and the outcome.</p>
-      <div class="tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
-    </div>
-    <div class="project-card">
+      <img src="images/anyCourseWithAi.jpg" alt="Steven McDonald" width="100%" height="200">
+      <p>Pick a prebuilt course or let an LLM create a new one, and then let this engine teach it. Multiple formats
+         per concept, spaced revisits, and enough nudging  to keep you interested and learning. Zero dependencies, 
+         which was a constraint I set for fun and then had to live with.
+      </p>
+      <div class="tags"><span>Ed Tech</span><span>Generative AI</span><span>UX Design</span></div>
+    </a>
+    <a class="project-card">
       <div class="thumb">Image / screenshot</div>
       <div>
         <span class="index">Project 02</span>
-        <h3>Project title</h3>
+        <h3>TriLetters</h3>
       </div>
-      <p>One or two sentences on the problem, your role, and the outcome.</p>
-      <div class="tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
-    </div>
-    <div class="project-card">
+      <p>A Wordle inspired game where you get three letters in order and have to find as many words as you can that
+         contain them in that sequence. You get a score level based on how well you do relative to the total number
+         of valid words the game found.</p>
+      <div class="tags"><span>Typescript</span><span>Next.js</span><span>Tailwind</span></div>
+      </a>
+    <a class="project-card" href="www.the2senses.com">
       <div class="thumb">Image / screenshot</div>
       <div>
         <span class="index">Project 03</span>
-        <h3>Project title</h3>
+        <h3>The 2 Senses</h3>
       </div>
-      <p>One or two sentences on the problem, your role, and the outcome.</p>
-      <div class="tags"><span>Tag</span><span>Tag</span><span>Tag</span></div>
-    </div>
+      <img src="images/the2senses.png" alt="Steven McDonald" width="100%" height="200">
+      <p>Colorblindness and hearing tests are easy to find if you read English. This suite puts them in Hindi, Kannada,
+         Tamil, and Telugu too, aimed at rural communities in India who've largely been left out of online screening.
+          I volunteered as the front-end developer; built in Next.js on Vercel.</p>
+      <div class="tags"><span>Vercel</span><span>User Engagement</span><span>Tech for Good</span></div>
+    </a>
   </div>
 </section>
 
