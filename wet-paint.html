@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wet Paint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ground:      #232A34;
+  --ground-deep: #1A2029;
+  --linen:       #EFEAE0;
+  --linen-mute:  #A2AEBB;
+
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --gutter: clamp(1rem, 4vw, 2.75rem);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; height:100%; }
+
+body{
+  margin:0;
+  height:100%;
+  background:var(--ground);
+  color:var(--linen);
+  font-family:var(--mono);
+  line-height:1.5;
+  overflow:hidden;                       /* the board is the whole page; nothing should scroll */
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;              /* no pull-to-refresh mid-dodge on mobile */
+}
+
+/* ─── BOARD ─────────────────────────────────────────── */
+.board{
+  position:relative;
+  width:100%; height:100svh;
+  overflow:hidden;
+  isolation:isolate;
+  cursor:none;                           /* the linen dot IS the cursor */
+  touch-action:none;                     /* let pointermove drive the game instead of scrolling */
+}
+.board.idle{ cursor:default; }
+
+#paint{ position:absolute; inset:0; z-index:-1; width:100%; height:100%; display:block; }
+
+/* Static lighting: highlight top-left, vignette at the foot. */
+.board::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(255,255,255,.055), transparent 62%),
+    linear-gradient(180deg, transparent 55%, rgba(20,25,32,.55) 100%);
+}
+
+/* ─── HUD ───────────────────────────────────────────── */
+/* Two corners only. Everything is mono, so the numbers sit on a
+   fixed grid and never reflow as digits change. */
+.hud{
+  position:absolute; inset:var(--gutter) var(--gutter) auto;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  pointer-events:none;
+  opacity:0; transition:opacity .45s ease;
+}
+.hud.live{ opacity:1; }
+
+.stat{ display:flex; flex-direction:column; gap:.15rem; }
+.stat.right{ align-items:flex-end; text-align:right; }
+
+.stat .label{
+  font-size:.6rem; font-weight:500; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--linen-mute); opacity:.7;
+}
+.stat .value{
+  font-size:clamp(1.75rem, 6vw, 3rem); font-weight:700;
+  letter-spacing:-.04em; line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.stat .sub{
+  font-size:.68rem; color:var(--linen-mute); letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Graze flash: the time readout kicks to the grazing pigment's colour. */
+.stat .value.graze{ animation:kick .34s ease-out; }
+@keyframes kick{ 0%{ transform:scale(1.08); } 100%{ transform:scale(1); } }
+
+/* ─── CARDS (title / paused / caught) ───────────────── */
+.card{
+  position:absolute; inset:0; z-index:2;
+  display:grid; place-content:center; justify-items:center;
+  gap:.5rem; padding:var(--gutter);
+  text-align:center;
+  background:
+    radial-gradient(60% 50% at 50% 50%, rgba(26,32,41,.82), rgba(26,32,41,.94));
+  backdrop-filter:blur(2px);
+  transition:opacity .3s ease;
+}
+.card[hidden]{ display:none; }
+
+.card .eyebrow{
+  font-size:.62rem; font-weight:500; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--linen-mute);
+}
+.card .eyebrow b{ font-weight:700; color:var(--pigment, var(--linen)); }
+
+.card h1{
+  margin:.2rem 0 0;
+  font-size:clamp(2.5rem, 11vw, 5.5rem); font-weight:700;
+  letter-spacing:-.06em; line-height:.92;
+}
+.card .score{
+  font-size:clamp(3rem, 16vw, 7rem); font-weight:700;
+  letter-spacing:-.07em; line-height:.9; margin:.1rem 0;
+  font-variant-numeric:tabular-nums;
+}
+.card p{
+  margin:0; max-width:34ch;
+  font-size:.82rem; color:var(--linen-mute); line-height:1.7;
+}
+
+.card .go{
+  margin-top:1.4rem;
+  font-family:var(--mono); font-size:.7rem; font-weight:500;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--ground); background:var(--linen);
+  border:0; border-radius:2px;
+  padding:.85rem 1.6rem;
+  cursor:pointer;
+  transition:transform .12s ease;
+}
+.card .go:hover{ transform:translateY(-1px); }
+.card .go:focus-visible{ outline:2px solid var(--linen); outline-offset:3px; }
+.card .go:active{ transform:translateY(0); }
+
+.card .keys{
+  margin-top:.7rem; font-size:.62rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--linen-mute); opacity:.55;
+}
+
+/* Palette swatch row on the title card — the five pigments you're
+   about to dodge, introduced before you meet them. */
+.swatches{ display:flex; gap:.4rem; margin-top:1.5rem; }
+.swatches i{ width:1.6rem; height:.28rem; border-radius:1px; display:block; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+
+<body>
+
+<main class="board idle" id="board">
+  <canvas id="paint" aria-hidden="true"></canvas>
+
+  <div class="hud" id="hud">
+    <div class="stat">
+      <span class="label">Time clean</span>
+      <span class="value" id="time">0.0</span>
+    </div>
+    <div class="stat right">
+      <span class="label">Grazes</span>
+      <span class="value" id="grazes">0</span>
+      <span class="sub" id="best"></span>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <div id="cardBody"></div>
+  </div>
+</main>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   WET PAINT — dodge the pigment.
+
+   Drops of paint land on the canvas at a quickening pace. They
+   bounce off the edges and dry up after a while. Touch one and
+   you're stained. Passing close scores a graze.
+
+   Structure
+     1.  constants + state
+     2.  size()        — DPR-aware canvas
+     3.  spawn()       — one drop, telegraphed before it goes live
+     4.  update()      — physics, collision, scoring
+     5.  draw()        — render pass
+     6.  states        — attract / ready / playing / paused / caught
+     7.  listeners     — pointer, keyboard, lifecycle
+   ───────────────────────────────────────────────────────────── */
+(function(){
+  'use strict';
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const board    = document.getElementById('board');
+  const canvas   = document.getElementById('paint');
+  const ctx      = canvas.getContext('2d');
+  const hud      = document.getElementById('hud');
+  const elTime   = document.getElementById('time');
+  const elGraze  = document.getElementById('grazes');
+  const elBest   = document.getElementById('best');
+  const card     = document.getElementById('card');
+  const cardBody = document.getElementById('cardBody');
+
+  /* Pigments carry their name so the death card can say which colour
+     got you — small thing, but it gives each run a story. */
+  const PIGMENTS = [
+    { name:'ultramarine',    rgb:[ 68, 99,214] },
+    { name:'cadmium orange', rgb:[226,101, 42] },
+    { name:'viridian',       rgb:[ 46,156,134] },
+    { name:'naples yellow',  rgb:[232,178, 74] },
+    { name:'alizarin',       rgb:[178, 58, 72] }
+  ];
+  const rgba = (c,a)=>'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';
+
+  // ── Tuning knobs ──────────────────────────────────────────
+  const PLAYER_R  = 6;      // collision radius of the linen dot
+  const GRAZE_PAD = 24;     // how close counts as a graze
+  const ARRIVE_MS = 900;    // telegraph window: visible but harmless
+  const LIFE_MS   = 26000;  // total time a drop stays on the board
+  const DRY_MS    = 2200;   // trailing fade — "this one is leaving"
+  const MAX_DROPS = reduced ? 34 : 60;
+  const SPAWN_MIN = 380;    // fastest spawn cadence, ms
+  const SPAWN_MAX = 1250;   // opening spawn cadence, ms
+  const RAMP_MS   = 75000;  // time taken to reach full difficulty
+  const SAFE_R    = 150;    // no drop may arrive closer than this to you
+
+  // ── State ─────────────────────────────────────────────────
+  let w=0, h=0, dpr=1;
+  let drops = [];
+  let state = 'attract';                    // attract | ready | playing | paused | caught
+  let player = { x:0, y:0, seen:false };
+  let elapsed = 0, grazes = 0, best = 0;
+  let spawnClock = 0, readyClock = 0, pigment = 0;
+  let shake = 0, splat = null, lastFrame = 0;
+
+  /* ── Sizing ───────────────────────────────────────────────
+     Backing store = CSS size x DPR (capped at 2), plus a transform so
+     all game maths stays in plain CSS pixels. */
+  function size(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = board.getBoundingClientRect();
+    w = r.width; h = r.height;
+    canvas.width  = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!player.seen){ player.x = w/2; player.y = h/2; }
+  }
+  size();
+
+  let rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){
+      size();
+      // Pull any drop that ended up outside the new bounds back in.
+      for (const d of drops){
+        d.x = Math.min(Math.max(d.x, d.r), Math.max(d.r, w - d.r));
+        d.y = Math.min(Math.max(d.y, d.r), Math.max(d.r, h - d.r));
+      }
+    }, 150);
+  });
+
+  /* Difficulty curve, 0 -> 1 over RAMP_MS. Everything that gets
+     harder reads from this one value. */
+  function ramp(){ return Math.min(elapsed / RAMP_MS, 1); }
+
+  /* ── Spawn ────────────────────────────────────────────────
+     Places one drop at least SAFE_R away from the player, moving in a
+     random direction. It starts in the 'arriving' phase: visible,
+     ringed and harmless, so you are never killed by something that
+     materialised on top of you. */
+  function spawn(opts){
+    const decor = !!(opts && opts.decor);     // attract-mode drop: never lethal
+
+    let x, y, tries = 0;
+    do {
+      x = 40 + Math.random() * Math.max(1, w - 80);
+      y = 40 + Math.random() * Math.max(1, h - 80);
+      tries++;
+    } while (!decor && tries < 24 && Math.hypot(x - player.x, y - player.y) < SAFE_R);
+
+    pigment = (pigment + 1 + Math.floor(Math.random() * 2)) % PIGMENTS.length;
+    const p = PIGMENTS[pigment];
+    const ang = Math.random() * Math.PI * 2;
+    const spd = (decor ? 0.5 : 1.15 + ramp() * 1.7) * (0.7 + Math.random() * 0.6);
+
+    drops.push({
+      x, y,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd,
+      r: decor ? 4 + Math.random() * 7 : 9 + Math.random() * 7,
+      color: p.rgb, name: p.name,
+      age: 0, decor, grazed: false
+    });
+
+    if (drops.length > MAX_DROPS) drops.splice(0, drops.length - MAX_DROPS);
+  }
+
+  const isLethal = d => !d.decor && d.age >= ARRIVE_MS;
+
+  /* ── Update ───────────────────────────────────────────────
+     dt is normalised to 60fps so the game runs at the same speed on a
+     60Hz and a 144Hz display, and delta is clamped so a backgrounded
+     tab cannot teleport everything across the board on return. */
+  function update(delta){
+    const dt = Math.min(delta / 16.667, 3);
+    if (state === 'playing') elapsed += delta;
+
+    // Spawn on a clock, not on pointer movement — standing still must
+    // never be a way to stop the board filling up.
+    if (state === 'playing' || state === 'attract'){
+      spawnClock -= delta;
+      if (spawnClock <= 0){
+        if (state === 'attract'){ spawn({ decor:true }); spawnClock = 900; }
+        else { spawn(); spawnClock = SPAWN_MAX - (SPAWN_MAX - SPAWN_MIN) * ramp(); }
+      }
+    }
+
+    if (state === 'ready'){
+      readyClock -= delta;
+      if (readyClock <= 0) setState('playing');
+    }
+
+    for (let i = drops.length - 1; i >= 0; i--){
+      const d = drops[i];
+      d.age += delta;
+      if (d.age > LIFE_MS){ drops.splice(i, 1); continue; }
+
+      // Arriving drops hold still; they only start travelling once live.
+      if (d.age >= ARRIVE_MS || d.decor){
+        d.x += d.vx * dt;
+        d.y += d.vy * dt;
+      }
+
+      // Bounce at the drop's edge, and clamp so a drop can't get stuck
+      // vibrating just outside the boundary.
+      if (d.x < d.r){ d.x = d.r; d.vx = Math.abs(d.vx); }
+      else if (d.x > w - d.r){ d.x = w - d.r; d.vx = -Math.abs(d.vx); }
+      if (d.y < d.r){ d.y = d.r; d.vy = Math.abs(d.vy); }
+      else if (d.y > h - d.r){ d.y = h - d.r; d.vy = -Math.abs(d.vy); }
+
+      if (state !== 'playing' || !isLethal(d)) continue;
+
+      /* Proper circular collision: centre distance against summed
+         radii, squared on both sides to skip the sqrt. */
+      const dx = d.x - player.x, dy = d.y - player.y;
+      const distSq = dx*dx + dy*dy;
+      const hitR = d.r + PLAYER_R;
+
+      if (distSq < hitR * hitR){ caught(d); return; }
+
+      // Graze: rewards cutting it fine and gives near-misses a readable
+      // payoff instead of silent luck. Counts once per drop.
+      const grazeR = hitR + GRAZE_PAD;
+      if (!d.grazed && distSq < grazeR * grazeR){
+        d.grazed = true;
+        grazes++;
+        elGraze.textContent = grazes;
+        elTime.style.color = rgba(d.color, 1);
+        elTime.classList.remove('graze');
+        void elTime.offsetWidth;                  // force the animation to restart
+        elTime.classList.add('graze');
+        setTimeout(function(){ elTime.style.color = ''; }, 320);
+      }
+    }
+
+    if (shake > 0) shake = Math.max(0, shake - delta);
+    if (splat) splat.age += delta;
+  }
+
+  /* ── Draw ─────────────────────────────────────────────── */
+  function draw(){
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (shake > 0 && !reduced){
+      const k = shake / 320;
+      ctx.translate((Math.random()-.5) * 14 * k, (Math.random()-.5) * 14 * k);
+    }
+    ctx.clearRect(-20, -20, w + 40, h + 40);
+
+    for (const d of drops){
+      const arriving = !d.decor && d.age < ARRIVE_MS;
+      const drying   = d.age > LIFE_MS - DRY_MS;
+
+      let a = 0.62;
+      if (arriving)    a = 0.62 * (d.age / ARRIVE_MS);            // fade in
+      else if (drying) a = 0.62 * (LIFE_MS - d.age) / DRY_MS;     // fade out
+      if (d.decor) a *= 0.5;
+      if (state === 'caught') a *= 0.55;                          // veil the board on death
+
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+      ctx.fillStyle = rgba(d.color, a);
+      ctx.fill();
+
+      /* Telegraph ring: contracts onto the drop over ARRIVE_MS. The
+         moment it lands, the drop is live. The animation IS the
+         warning — no invisible grace period. */
+      if (arriving){
+        const t = d.age / ARRIVE_MS;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r + (1 - t) * 34, 0, Math.PI*2);
+        ctx.strokeStyle = rgba(d.color, 0.5 * (1 - t) + 0.15);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    /* The splatter that got you: overlapping circles scaled in fast.
+       This is the one loud moment in the whole design. */
+    if (splat){
+      const t = Math.min(splat.age / 300, 1);
+      const e = 1 - Math.pow(1 - t, 3);
+      for (const b of splat.blobs){
+        ctx.beginPath();
+        ctx.arc(splat.x + b.dx * e, splat.y + b.dy * e, b.r * e, 0, Math.PI*2);
+        ctx.fillStyle = rgba(splat.color, 0.8);
+        ctx.fill();
+      }
+    }
+
+    // The player: a linen dot with a thin ring, so it stays findable
+    // against five saturated pigments.
+    if (state === 'playing' || state === 'ready'){
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, PLAYER_R, 0, Math.PI*2);
+      ctx.fillStyle = '#EFEAE0';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, PLAYER_R + 5, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(239,234,224,.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Ready beat: a shrinking halo counts you in.
+      if (state === 'ready'){
+        const t = Math.max(readyClock, 0) / 1100;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, PLAYER_R + 6 + t * 60, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(239,234,224,' + (0.5 * (1-t)) + ')';
+        ctx.stroke();
+      }
+    }
+  }
+
+  function loop(now){
+    const delta = Math.min(now - lastFrame || 16, 50);
+    lastFrame = now;
+    update(delta);
+    draw();
+    if (state === 'playing') elTime.textContent = (elapsed/1000).toFixed(1);
+    requestAnimationFrame(loop);
+  }
+
+  /* ── States ───────────────────────────────────────────── */
+  function setState(next){
+    state = next;
+    const active = (next === 'playing' || next === 'ready');
+    board.classList.toggle('idle', !active);
+    hud.classList.toggle('live', active || next === 'paused');
+    card.hidden = active;
+  }
+
+  function bindGo(fn){
+    const b = document.getElementById('go');
+    if (b) b.addEventListener('click', fn);
+  }
+
+  function showTitle(){
+    setState('attract');
+    cardBody.innerHTML =
+      '<span class="eyebrow">A dodging game</span>' +
+      '<h1>Wet Paint</h1>' +
+      '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Passing close scores a graze.</p>' +
+      '<button class="go" id="go">Start painting</button>' +
+      '<span class="keys">Or press space</span>' +
+      '<span class="swatches">' + PIGMENTS.map(p=>'<i style="background:'+rgba(p.rgb,.9)+'"></i>').join('') + '</span>';
+    bindGo(start);
+  }
+
+  function start(){
+    drops = []; splat = null; shake = 0;
+    elapsed = 0; grazes = 0; spawnClock = 600; readyClock = 1100;
+    elTime.textContent = '0.0';
+    elGraze.textContent = '0';
+    setState('ready');
+  }
+
+  function caught(d){
+    setState('caught');
+    shake = reduced ? 0 : 320;
+
+    // Build an irregular splatter around the impact point.
+    const blobs = [];
+    for (let i = 0; i < 9; i++){
+      const a  = Math.random() * Math.PI * 2;
+      const dd = Math.random() * 46;
+      blobs.push({ dx: Math.cos(a)*dd, dy: Math.sin(a)*dd, r: 6 + Math.random()*22 });
+    }
+    splat = { x:d.x, y:d.y, color:d.color, blobs, age:0 };
+
+    const secs = elapsed / 1000;
+    const isBest = secs > best;
+    if (isBest) best = secs;
+    elBest.textContent = 'best ' + best.toFixed(1) + 's';
+
+    cardBody.innerHTML =
+      '<span class="eyebrow" style="--pigment:'+rgba(d.color,1)+'">Caught by <b>'+d.name+'</b></span>' +
+      '<span class="score">' + secs.toFixed(1) + '<span style="font-size:.28em;letter-spacing:0"> s</span></span>' +
+      '<p>' + grazes + ' graze' + (grazes === 1 ? '' : 's') +
+        (isBest ? ' \u00b7 new best' : ' \u00b7 best ' + best.toFixed(1) + 's') + '</p>' +
+      '<button class="go" id="go">Paint again</button>' +
+      '<span class="keys">Or press space</span>';
+    bindGo(start);
+    setTimeout(function(){ const b = document.getElementById('go'); if (b) b.focus(); }, 60);
+  }
+
+  function pause(){
+    if (state !== 'playing') return;
+    setState('paused');
+    cardBody.innerHTML =
+      '<span class="eyebrow">Paused</span>' +
+      '<h1>' + (elapsed/1000).toFixed(1) + 's</h1>' +
+      '<p>The board is frozen. Move the pointer back over the canvas to carry on.</p>' +
+      '<button class="go" id="go">Resume</button>';
+    bindGo(resume);
+  }
+  function resume(){ if (state === 'paused') setState('playing'); }
+
+  /* ── Listeners ────────────────────────────────────────── */
+  board.addEventListener('pointermove', function(e){
+    const r = canvas.getBoundingClientRect();
+    player.x = e.clientX - r.left;
+    player.y = e.clientY - r.top;
+    player.seen = true;
+    if (state === 'paused') resume();
+  }, { passive:true });
+
+  // Leaving the board used to be free invincibility. Now it pauses,
+  // and the clock stops with it.
+  board.addEventListener('pointerleave', pause);
+  window.addEventListener('blur', pause);
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) pause(); });
+
+  window.addEventListener('keydown', function(e){
+    if (e.code === 'Space' || e.code === 'Enter'){
+      if (state === 'attract' || state === 'caught'){ e.preventDefault(); start(); }
+      else if (state === 'paused'){ e.preventDefault(); resume(); }
+    }
+    if (e.code === 'Escape'){
+      pause();
+      /* Embedded in a page? Escape belongs to the host — a keydown in
+         an iframe never reaches the parent document, so hand it over
+         explicitly and let the host decide what to close. */
+      if (window.parent !== window){
+        try { window.parent.postMessage('wetpaint:close', '*'); } catch(_){}
+      }
+    }
+  });
+
+  showTitle();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

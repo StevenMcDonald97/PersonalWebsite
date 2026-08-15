@@ -375,6 +375,166 @@ footer{
   .reveal > *, .portrait, .phases .phase{ animation:none; opacity:1; transform:none; }
   .btn:hover, .btn:hover .arrow{ transform:none; }
 }
+
+/* ---- Dialog --------------------------------------------------------- */
+  .sheet{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;
+    box-shadow:var(--shadow-lift);max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+  .sheet-hero{position:relative;flex:none}
+  .sheet-hero img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;background:var(--accent-soft)}
+  .close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:99px;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center}
+  .close:hover{color:var(--ink);border-color:var(--accent)}
+  .close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .sheet-body{padding:24px 28px;overflow-y:auto}
+  .sheet-body h2{font-family:var(--serif),serif;font-weight:500;font-size:26px;line-height:1.15;
+    letter-spacing:-.01em;margin-bottom:12px}
+  .sheet-body .meta{margin:0 0 16px;padding:0}
+  .sheet-body .desc{color:var(--ink-soft);font-size:15.5px;white-space:pre-wrap}
+  .sheet-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 28px 24px;
+    border-top:1px solid var(--line);flex:none}
+  .start{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+    font-size:15px;font-weight:600;padding:11px 22px;border-radius:var(--radius);
+    transition:opacity .15s ease}
+  .start:hover{opacity:.9}
+  .start:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .foot-note{font-size:13px;color:var(--ink-faint)}
+
+  .empty,.err{color:var(--ink-faint);font-size:15px;padding:48px 0;grid-column:1/-1}
+  .err strong{display:block;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  dialog {
+    color:var(--ink);
+    border:none;
+    padding:0;
+    background:transparent;
+    width: 100%;
+    max-width:min(560px,calc(100vw - 32px));
+    margin:auto;
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    transition: 
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    overlay 0.4s ease allow-discrete,
+    display 0.4s ease allow-discrete;
+  }
+  dialog[open] {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  @starting-style {
+    dialog[open] {
+      opacity: 0;
+      transform: scale(0.9) translateY(20px);
+    }
+  }
+  dialog::backdrop {
+    background:rgba(35,33,28,.52);
+    backdrop-filter:blur(2px);
+    transition: 
+      background-color 0.4s ease,
+      overlay 0.4s ease allow-discrete,
+      display 0.4s ease allow-discrete;
+  }
+  dialog[open]::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  @starting-style {
+    dialog[open]::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  }
+
+  @media (max-width:560px){
+    .wrap{padding:28px 20px 72px}
+    h1{font-size:30px}
+    .sheet-body,.sheet-foot{padding-left:20px;padding-right:20px}
+  }
+
+/* ─── PLAYABLE CARD ───────────────────────── */
+/* The Wet Paint card opens the game in place rather than navigating,
+   so it gets an affordance the other cards don't have. */
+.project-card.playable{ position:relative; }
+.project-card .media{ position:relative; line-height:0; }
+.project-card .media img{ border-radius:4px; }
+
+.play-badge{
+  position:absolute; left:.7rem; bottom:.7rem;
+  display:inline-flex; align-items:center; gap:.45rem;
+  font-family:var(--mono); font-size:.62rem; letter-spacing:.1em;
+  text-transform:uppercase; line-height:1;
+  color:#1A1008; background:var(--naples);
+  padding:.42rem .6rem .42rem .5rem; border-radius:99px;
+  box-shadow:0 4px 14px rgba(12,16,22,.45);
+  transition:transform .18s ease, background .18s ease;
+}
+.play-badge svg{ width:9px; height:9px; fill:currentColor; }
+.project-card.playable:hover .play-badge{ transform:translateY(-2px); background:#F2BE5E; }
+
+/* ─── GAME DIALOG ─────────────────────────── */
+/* The generic dialog rules above cap width at 560px and set a light
+   surface; a game needs the room and the dark ground, so these
+   id-scoped rules win on specificity while inheriting the existing
+   open/close transition and backdrop. */
+#gameDialog{
+  max-width:min(1180px, calc(100vw - 1.5rem));
+  width:100%;
+  color:var(--linen);
+}
+#gameDialog .game-sheet{
+  display:flex; flex-direction:column;
+  height:min(780px, calc(100svh - 1.5rem));
+  background:var(--ground-deep);
+  border:1px solid var(--hairline);
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 40px 90px rgba(10,14,20,.6);
+}
+#gameDialog .game-bar{
+  flex:none;
+  display:flex; align-items:center; gap:.9rem;
+  padding:.85rem 1rem .85rem 1.15rem;
+  border-bottom:1px solid var(--hairline);
+  background:rgba(44,52,63,.5);
+}
+#gameDialog .game-bar h2{
+  font-family:var(--display);
+  font-variation-settings:"wght" 600,"wdth" 84;
+  font-size:1rem; letter-spacing:-.01em; margin:0;
+}
+#gameDialog .game-bar .swatches{ display:flex; gap:.3rem; margin-right:auto; }
+#gameDialog .game-bar .swatches i{ width:1.1rem; height:.22rem; border-radius:1px; display:block; }
+#gameDialog .game-bar .note{
+  font-family:var(--mono); font-size:.64rem; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--linen-mute);
+}
+@media (max-width:640px){ #gameDialog .game-bar .note{ display:none; } }
+
+#gameDialog .game-close{
+  flex:none;
+  width:34px; height:34px; display:grid; place-items:center;
+  border:1px solid var(--hairline); border-radius:99px;
+  background:transparent; color:var(--linen-mute);
+  font-size:1rem; line-height:1; cursor:pointer;
+  transition:color .18s ease, border-color .18s ease, background .18s ease;
+}
+#gameDialog .game-close:hover{
+  color:var(--linen); border-color:var(--linen);
+  background:rgba(239,234,224,.07);
+}
+
+#gameDialog .game-frame{
+  flex:1; min-height:0;
+  width:100%; border:0; display:block;
+  background:var(--ground);
+}
+
+/* The game canvas sits inside an iframe, so the page behind it must
+   not scroll while it's open. */
+html.dialog-open, body.dialog-open{ overflow:hidden; }
+
 </style>
 </head>
 
@@ -481,8 +641,14 @@ footer{
           I volunteered as the front-end developer; built in Next.js on Vercel.</p>
       <div class="tags"><span>Vercel</span><span>User Engagement</span><span>Tech for Good</span></div>
     </a>
-    <a class="project-card" href="https://www.the2senses.com">
-      <img src="images/paint.png" alt="Steven McDonald" width="100%" height="200">
+    <a class="project-card playable" href="wet-paint.html" data-game>
+      <span class="media">
+        <img src="images/wet-paint.svg" alt="Drops of coloured paint scattered across a dark canvas" width="100%" height="200">
+        <span class="play-badge">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0l8 5-8 5z"/></svg>
+          Play here
+        </span>
+      </span>
       <div>
         <span class="index">Project 04</span>
         <h3>Wet Paint</h3>
@@ -507,6 +673,27 @@ footer{
     </div>
   </div>
 </footer>
+
+<!-- Wet Paint runs in an iframe: it sets its own body overflow, hides the
+     cursor and captures the space bar, none of which should leak onto the
+     portfolio. The src is set on open and cleared on close so the game's
+     animation loop only runs while it's on screen. -->
+<dialog id="gameDialog" aria-labelledby="gameTitle">
+  <div class="game-sheet">
+    <div class="game-bar">
+      <h2 id="gameTitle">Wet Paint</h2>
+      <span class="swatches" aria-hidden="true">
+        <i style="background:var(--ultramarine)"></i>
+        <i style="background:var(--cadmium)"></i>
+        <i style="background:var(--viridian)"></i>
+        <i style="background:var(--naples)"></i>
+      </span>
+      <span class="note">Esc to close</span>
+      <button type="button" class="game-close" id="gameClose" aria-label="Close the game">✕</button>
+    </div>
+    <iframe class="game-frame" id="gameFrame" title="Wet Paint — a browser dodge game"></iframe>
+  </div>
+</dialog>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -631,6 +818,58 @@ document.getElementById('yr').textContent = new Date().getFullYear();
       if (performance.now() - lastT > 3200) ambient();
     }, 4200);
   }
+})();
+
+/* ─────────────────────────────────────────────
+   Wet Paint dialog.
+
+   The card stays a real link to wet-paint.html, so it works without
+   JS, survives middle-click, and shows a sensible URL on hover. The
+   click handler intercepts a plain left-click only and opens the
+   game in a modal instead.
+   ───────────────────────────────────────────── */
+(function(){
+  const dlg   = document.getElementById('gameDialog');
+  const frame = document.getElementById('gameFrame');
+  const card  = document.querySelector('.project-card[data-game]');
+  const close = document.getElementById('gameClose');
+  if (!dlg || !frame || !card || typeof dlg.showModal !== 'function') return;
+
+  const SRC = card.getAttribute('href');
+
+  function open(e){
+    // Let modified clicks (new tab, new window, download) behave normally.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    frame.src = SRC;                       // load on demand, not on page load
+    dlg.showModal();
+    document.documentElement.classList.add('dialog-open');
+    document.body.classList.add('dialog-open');
+    // Focus the frame so the game's own key handling works immediately.
+    setTimeout(function(){ try { frame.contentWindow.focus(); } catch(_){} }, 120);
+  }
+
+  card.addEventListener('click', open);
+
+  close.addEventListener('click', function(){ dlg.close(); });
+
+  // Click on the backdrop. Clicks inside the iframe never reach this
+  // listener, so testing the target is enough — no geometry needed.
+  dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+
+  /* The game pauses on Escape and forwards it here, since a keydown
+     inside the iframe never reaches this document. Only accept the
+     message from the frame we opened. */
+  window.addEventListener('message', function(e){
+    if (e.source === frame.contentWindow && e.data === 'wetpaint:close' && dlg.open) dlg.close();
+  });
+
+  dlg.addEventListener('close', function(){
+    frame.removeAttribute('src');          // tears down the game's rAF loop
+    document.documentElement.classList.remove('dialog-open');
+    document.body.classList.remove('dialog-open');
+    card.focus({ preventScroll:true });
+  });
 })();
 
 (function(){

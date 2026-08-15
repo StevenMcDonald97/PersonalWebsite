@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360"
+     width="640" height="360" preserveAspectRatio="xMidYMid slice"
+     role="img" aria-labelledby="wpTitle wpDesc">
+  <title id="wpTitle">Wet Paint</title>
+  <desc id="wpDesc">A dark canvas scattered with drops of coloured paint. A pale
+    dot threads a gap between them while one drop, still ringed, has yet to go live.</desc>
+
+  <defs>
+    <!-- Same two-part lighting as the site hero: a highlight off the
+         top-left, then a vignette weighting the bottom edge. -->
+    <radialGradient id="wpLift" cx="12%" cy="0%" r="115%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity=".055"/>
+      <stop offset="62%"  stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wpVignette" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="55%"  stop-color="#141920" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#141920" stop-opacity=".55"/>
+    </linearGradient>
+
+    <!-- Linen tooth, matching the body texture on the portfolio. -->
+    <filter id="wpTooth" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+    </filter>
+
+    <!-- Soft edge so the drops read as pigment rather than vector circles. -->
+    <filter id="wpWake" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+
+    <filter id="wpBleed" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+  </defs>
+
+  <!-- Ground -->
+  <rect width="640" height="360" fill="#232A34"/>
+  <rect width="640" height="360" fill="url(#wpLift)"/>
+
+  <!-- Wakes. Each drop is travelling, so it leaves a short echo of itself
+       one, two and three steps back — smaller and fainter each time. Circles
+       rather than streaks, so the motion is built from the same vocabulary as
+       everything else on the canvas. -->
+  <g filter="url(#wpWake)">
+    <circle cx="112.9" cy="83.6" r="18.5" fill="#4463D6" opacity="0.22"/>
+    <circle cx="122.8" cy="88.2" r="15.5" fill="#4463D6" opacity="0.14"/>
+    <circle cx="132.7" cy="92.8" r="12.6" fill="#4463D6" opacity="0.07"/>
+    <circle cx="231.2" cy="44.5" r="12.3" fill="#2E9C86" opacity="0.22"/>
+    <circle cx="224.3" cy="42.0" r="10.4" fill="#2E9C86" opacity="0.14"/>
+    <circle cx="217.5" cy="39.5" r="8.4" fill="#2E9C86" opacity="0.07"/>
+    <circle cx="415.4" cy="78.5" r="22.0" fill="#E2652A" opacity="0.22"/>
+    <circle cx="404.7" cy="71.1" r="18.5" fill="#E2652A" opacity="0.14"/>
+    <circle cx="394.1" cy="63.6" r="15.0" fill="#E2652A" opacity="0.07"/>
+    <circle cx="563.8" cy="59.8" r="14.1" fill="#E8B24A" opacity="0.22"/>
+    <circle cx="566.7" cy="67.6" r="11.8" fill="#E8B24A" opacity="0.14"/>
+    <circle cx="569.5" cy="75.5" r="9.6" fill="#E8B24A" opacity="0.07"/>
+    <circle cx="76.4" cy="215.7" r="14.1" fill="#E8B24A" opacity="0.22"/>
+    <circle cx="82.7" cy="210.3" r="11.8" fill="#E8B24A" opacity="0.14"/>
+    <circle cx="89.1" cy="205.0" r="9.6" fill="#E8B24A" opacity="0.07"/>
+    <circle cx="193.5" cy="177.9" r="23.8" fill="#B23A48" opacity="0.22"/>
+    <circle cx="182.0" cy="169.9" r="20.0" fill="#B23A48" opacity="0.14"/>
+    <circle cx="170.5" cy="161.8" r="16.2" fill="#B23A48" opacity="0.07"/>
+    <circle cx="389.2" cy="211.0" r="15.8" fill="#4463D6" opacity="0.22"/>
+    <circle cx="396.3" cy="217.0" r="13.3" fill="#4463D6" opacity="0.14"/>
+    <circle cx="403.5" cy="223.0" r="10.8" fill="#4463D6" opacity="0.07"/>
+    <circle cx="520.1" cy="176.1" r="19.4" fill="#2E9C86" opacity="0.22"/>
+    <circle cx="528.2" cy="184.2" r="16.3" fill="#2E9C86" opacity="0.14"/>
+    <circle cx="536.3" cy="192.3" r="13.2" fill="#2E9C86" opacity="0.07"/>
+    <circle cx="610.8" cy="240.5" r="12.3" fill="#B23A48" opacity="0.22"/>
+    <circle cx="617.7" cy="238.0" r="10.4" fill="#B23A48" opacity="0.14"/>
+    <circle cx="624.5" cy="235.5" r="8.4" fill="#B23A48" opacity="0.07"/>
+    <circle cx="130.9" cy="311.7" r="20.2" fill="#2E9C86" opacity="0.22"/>
+    <circle cx="120.7" cy="305.3" r="17.0" fill="#2E9C86" opacity="0.14"/>
+    <circle cx="110.6" cy="299.0" r="13.8" fill="#2E9C86" opacity="0.07"/>
+    <circle cx="324.3" cy="314.0" r="15.0" fill="#E8B24A" opacity="0.22"/>
+    <circle cx="332.6" cy="317.0" r="12.6" fill="#E8B24A" opacity="0.14"/>
+    <circle cx="340.9" cy="320.1" r="10.2" fill="#E8B24A" opacity="0.07"/>
+    <circle cx="479.0" cy="327.2" r="17.6" fill="#4463D6" opacity="0.22"/>
+    <circle cx="488.0" cy="332.4" r="14.8" fill="#4463D6" opacity="0.14"/>
+    <circle cx="497.0" cy="337.6" r="12.0" fill="#4463D6" opacity="0.07"/>
+  </g>
+
+  <!-- Live drops. Alpha .62 is the in-game value, so the card and the
+       running game read as the same surface. -->
+  <g filter="url(#wpBleed)">
+    <circle cx="103" cy="79"  r="21" fill="#4463D6" opacity=".62"/>
+    <circle cx="238" cy="47"  r="14" fill="#2E9C86" opacity=".62"/>
+    <circle cx="426" cy="86"  r="25" fill="#E2652A" opacity=".62"/>
+    <circle cx="561" cy="52"  r="16" fill="#E8B24A" opacity=".62"/>
+
+    <circle cx="70"  cy="221" r="16" fill="#E8B24A" opacity=".62"/>
+    <circle cx="205" cy="186" r="27" fill="#B23A48" opacity=".62"/>
+    <circle cx="382" cy="205" r="18" fill="#4463D6" opacity=".62"/>
+    <circle cx="512" cy="168" r="22" fill="#2E9C86" opacity=".62"/>
+    <circle cx="604" cy="243" r="14" fill="#B23A48" opacity=".62"/>
+
+    <circle cx="141" cy="318" r="23" fill="#2E9C86" opacity=".62"/>
+    <circle cx="316" cy="311" r="17" fill="#E8B24A" opacity=".62"/>
+    <circle cx="470" cy="322" r="20" fill="#4463D6" opacity=".62"/>
+
+    <!-- Drying out: the last seconds of a drop's life. -->
+    <circle cx="558" cy="288" r="15" fill="#E2652A" opacity=".2"/>
+    <circle cx="27"  cy="140" r="13" fill="#4463D6" opacity=".18"/>
+  </g>
+
+  <!-- Arriving: ringed and harmless until the ring lands on it. -->
+  <g>
+    <circle cx="300" cy="119" r="19" fill="#E2652A" opacity=".3"/>
+    <circle cx="300" cy="119" r="35" fill="none" stroke="#E2652A"
+            stroke-opacity=".55" stroke-width="1.5"/>
+  </g>
+
+  <!-- The player, threading the gap: linen dot inside a thin ring. The
+       wider dashed arc is the graze radius, the scoring move. -->
+  <g transform="translate(273,243)">
+    <circle r="34" fill="#232A34" opacity=".45"/>
+    <circle r="34" fill="none" stroke="#EFEAE0" stroke-opacity=".26"
+            stroke-width="1" stroke-dasharray="3 7"/>
+    <circle r="13" fill="none" stroke="#EFEAE0" stroke-opacity=".4" stroke-width="1.2"/>
+    <circle r="7"  fill="#EFEAE0"/>
+  </g>
+
+  <rect width="640" height="360" fill="url(#wpVignette)"/>
+  <rect width="640" height="360" filter="url(#wpTooth)" opacity=".16"/>
+</svg>
