@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Wet Paint</title>
+<title>Paint Drops</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -176,7 +176,7 @@ body{
 
 <script>
 /* ─────────────────────────────────────────────────────────────
-   WET PAINT — dodge the pigment.
+   Paint Drops — dodge the pigment.
 
    Drops of paint land on the canvas at a quickening pace. They
    bounce off the edges and dry up after a while. Touch one and
@@ -221,7 +221,7 @@ body{
   const PLAYER_R  = 6;      // collision radius of the linen dot
   const GRAZE_PAD = 24;     // how close counts as a graze
   const ARRIVE_MS = 900;    // telegraph window: visible but harmless
-  const LIFE_MS   = 26000;  // total time a drop stays on the board
+  const LIFE_MS   = 78000;  // total time a drop stays on the board
   const DRY_MS    = 2200;   // trailing fade — "this one is leaving"
   const MAX_DROPS = reduced ? 34 : 60;
   const SPAWN_MIN = 380;    // fastest spawn cadence, ms
@@ -474,7 +474,7 @@ body{
     setState('attract');
     cardBody.innerHTML =
       '<span class="eyebrow">A dodging game</span>' +
-      '<h1>Wet Paint</h1>' +
+      '<h1>Paint Drops</h1>' +
       '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Passing close scores a graze.</p>' +
       '<button class="go" id="go">Start painting</button>' +
       '<span class="keys">Or press space</span>' +
