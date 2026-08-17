@@ -544,8 +544,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   cursor:pointer;
   transition:border-color .18s ease, background .18s ease, opacity .18s ease;
 }
-.carousel-btn:hover:not(:disabled){ border-color:var(--linen); background:rgba(239,234,224,.07); }
-.carousel-btn:disabled{ opacity:.28; cursor:default; }
+.carousel-btn:hover{ border-color:var(--linen); background:rgba(239,234,224,.07); }
 .carousel-btn svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.8; }
 
 .carousel{
@@ -1005,9 +1004,12 @@ document.getElementById('yr').textContent = new Date().getFullYear();
    Portfolio carousel.
 
    One card holds focus in the centre with its neighbours faded either
-   side. The track is a scroll-snap container, so swiping, trackpad
-   scrolling and arrow keys work with no JS at all — this adds the
-   buttons, the counter, and the dimming of off-centre cards.
+   side, and the ends wrap round. The track is a scroll-snap container,
+   so swiping, trackpad scrolling and arrow keys work with no JS at all —
+   this adds the buttons, the counter, and the dimming of off-centre
+   cards. Wrapping sweeps the track rather than teleporting: with four
+   cards the trip back to the start is short, and seeing it move keeps
+   the row's order intact in your head.
    ───────────────────────────────────────────── */
 (function(){
   const track = document.getElementById('carouselTrack');
@@ -1045,19 +1047,19 @@ document.getElementById('yr').textContent = new Date().getFullYear();
     });
   }
 
+  // Wrap at both ends: past the last card is the first, and vice versa.
+  const step = dir => center((current() + dir + cards.length) % cards.length, true);
+
   function sync(){
     const i = current();
-    if (i !== active){
-      cards.forEach(function(c, n){ c.classList.toggle('is-active', n === i); });
-      active = i;
-      if (count) count.textContent = pad(i + 1) + ' / ' + pad(cards.length);
-    }
-    prev.disabled = i === 0;
-    next.disabled = i === cards.length - 1;
+    if (i === active) return;
+    cards.forEach(function(c, n){ c.classList.toggle('is-active', n === i); });
+    active = i;
+    if (count) count.textContent = pad(i + 1) + ' / ' + pad(cards.length);
   }
 
-  prev.addEventListener('click', function(){ center(Math.max(current() - 1, 0), true); });
-  next.addEventListener('click', function(){ center(Math.min(current() + 1, cards.length - 1), true); });
+  prev.addEventListener('click', function(){ step(-1); });
+  next.addEventListener('click', function(){ step(1); });
 
   /* Dimming has to keep up with the scroll rather than wait for it to
      settle, so this runs on a frame instead of a timeout. */
@@ -1071,8 +1073,8 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   window.addEventListener('resize', function(){ active = -1; sync(); });
 
   track.addEventListener('keydown', function(e){
-    if (e.key === 'ArrowRight'){ e.preventDefault(); center(Math.min(current() + 1, cards.length - 1), true); }
-    if (e.key === 'ArrowLeft'){ e.preventDefault(); center(Math.max(current() - 1, 0), true); }
+    if (e.key === 'ArrowRight'){ e.preventDefault(); step(1); }
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); step(-1); }
   });
 
   cards.forEach(function(c, i){
