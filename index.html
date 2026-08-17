@@ -550,10 +550,10 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 
 .carousel{
   position:relative;
-  /* Bleed out of the section's gutter so cards run off the viewport edge
-     rather than stopping short — it reads as "more to come" without any
-     hint text. The padding is on the track, not here, so it belongs to
-     the scroll container and the first and last cards can sit flush. */
+  /* One card holds the stage; its neighbours sit just off it as a hint.
+     --card-w is a length, not a percentage, so the track padding below
+     can centre it without the two measurements disagreeing. */
+  --card-w:clamp(272px, 62vw, 680px);
   margin-inline:calc(var(--gutter) * -1);
 }
 .carousel-track{
@@ -561,18 +561,40 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   gap:1.5rem;
   overflow-x:auto;
   scroll-snap-type:x mandatory;
-  padding-inline:var(--gutter);
-  padding-block:.4rem;                    /* room for the card lift on hover */
-  scrollbar-width:none;                   /* the buttons and snap points are the affordance */
+  /* Half the leftover space either side, so the first and last cards can
+     reach the centre instead of jamming against the edge. */
+  padding-inline:max(var(--gutter), calc((100% - var(--card-w)) / 2));
+  padding-block:.4rem;
+  scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
 }
 .carousel-track::-webkit-scrollbar{ display:none; }
 .carousel-track > *{
-  flex:0 0 clamp(268px, 30%, 380px);
-  scroll-snap-align:start;
+  flex:0 0 var(--card-w);
+  scroll-snap-align:center;
 }
-@media (max-width:900px){
-  .carousel-track > *{ flex-basis:min(84%, 340px); }
+/* Dimming is switched on by the script, so if it never runs the track is
+   a plain scroller of full-strength cards rather than permanently faded
+   ones. JS adds .is-active to whichever card is nearest the middle. */
+.carousel-track.is-enhanced > *{
+  opacity:.26;
+  transform:scale(.93);
+  transition:opacity .35s ease, transform .35s ease;
+}
+.carousel-track.is-enhanced > .is-active{ opacity:1; transform:scale(1); }
+
+/* On a wide screen the neighbours would show a few hundred pixels each —
+   more shoulder than hint. Fading the track edges cuts them off softly
+   instead of at a hard line, and doubles as a signal that the row keeps
+   going past the frame. */
+.carousel-track.is-enhanced{
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+          mask-image:linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .carousel-track.is-enhanced > *{ transform:none; transition:opacity .01ms; }
+  .carousel-track.is-enhanced > .is-active{ transform:none; }
 }
 .carousel-track:focus-visible{ outline:2px solid var(--naples); outline-offset:4px; border-radius:4px; }
 
@@ -673,7 +695,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 
   <div class="phases">
     <div class="phase"><span class="swatch" style="background:var(--ultramarine)"></span><span class="name">Research</span><span class="what">Interviews and workflows.</span></div>
-    <div class="phase"><span class="swatch" style="background:var(--cadmium)"></span><span class="name">Design</span><span class="what">UIs and UXs that keep people engaged. </span></div>
+    <div class="phase"><span class="swatch" style="background:var(--cadmium)"></span><span class="name">Design</span><span class="what">Flows, systems, and prototypes people can actually use.</span></div>
     <div class="phase"><span class="swatch" style="background:var(--viridian)"></span><span class="name">Build</span><span class="what">Front end, written to be maintained.</span></div>
     <div class="phase"><span class="swatch" style="background:var(--naples)"></span><span class="name">Ship</span><span class="what">Into production, then measured and revised.</span></div>
   </div>
@@ -798,15 +820,15 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
     <div class="awards">
       <h3>Recognition</h3>
       <ul>
-        <li><span class="yr">2026</span><span class="what"><strong>Second Place</strong><br><span>California Art Clubs Rising Voices Showcase</span></span></li>
-        <li><span class="yr">2026</span><span class="what"><strong>Juried Entry</strong><br><span>American Impressionist Society National Exhibition</span></span></li>
-        <li><span class="yr">2025</span><span class="what"><strong>Top 20</strong><br><span>Modern Impressionist Magazine</span></span></li>
-        <li><span class="yr">2024</span><span class="what"><strong>Genie Scott Award</strong><br><span>Frank Bette Center for the Arts Paint Out</span></span></li>
-        <li><span class="yr">2023</span><span class="what"><strong>BoldBrush Fav 15%</strong><br><span>FASO Boldbrush Contest</span></span></li>
         <li><span class="yr">2022</span><span class="what"><strong>Alameda Award</strong><br><span>Frank Bette Center for the Arts Paint Out</span></span></li>
         <li><span class="yr">2021</span><span class="what"><strong>Second Place</strong><br><span>Capitola Plein Air</span></span></li>
+        <li><span class="yr">2021</span><span class="what"><strong>Honorable Mention</strong><br><span>Stems Plein Air</span></span></li>
+        <li><span class="yr">2021</span><span class="what"><strong>BoldBrush Fav 15%</strong><br><span>March</span></span></li>
         <li><span class="yr">2020</span><span class="what"><strong>Honorable Mention</strong><br><span>Stems Plein Air</span></span></li>
         <li><span class="yr">2019</span><span class="what"><strong>21 Under 31, Artists to Watch and Collect</strong><br><span>Southwest Art Magazine</span></span></li>
+        <li><span class="yr">2019</span><span class="what"><strong>Award of Merit</strong><br><span>Frank Bette Center for the Arts</span></span></li>
+        <li><span class="yr">2019</span><span class="what"><strong>First Place</strong><br><span>Coyote Hills Regional Park Paint Out</span></span></li>
+        <li><span class="yr">2019</span><span class="what"><strong>Honorable Mention</strong><br><span>Greater Bay Area Open, Los Gatos</span></span></li>
       </ul>
     </div>
   </div>
@@ -982,10 +1004,10 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 /* ─────────────────────────────────────────────
    Portfolio carousel.
 
-   The track is a scroll-snap container, so swiping, trackpad scrolling
-   and arrow keys already work with no JS at all. This only adds the
-   buttons, the counter, and disabled states at the ends — if it fails,
-   the carousel still scrolls.
+   One card holds focus in the centre with its neighbours faded either
+   side. The track is a scroll-snap container, so swiping, trackpad
+   scrolling and arrow keys work with no JS at all — this adds the
+   buttons, the counter, and the dimming of off-centre cards.
    ───────────────────────────────────────────── */
 (function(){
   const track = document.getElementById('carouselTrack');
@@ -997,58 +1019,79 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   const cards = Array.from(track.children);
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pad = n => String(n).padStart(2, '0');
+  let active = -1;
 
-  // Index of the card nearest the left edge of the viewport.
+  track.classList.add('is-enhanced');      // hands the dimming over to CSS
+
+  /* Index of the card nearest the centre of the track. Measured against
+     the viewport centre rather than scrollLeft, so it stays correct at
+     both ends where a card can't be scrolled fully into the middle. */
   function current(){
-    const left = track.scrollLeft;
+    const mid = track.scrollLeft + track.clientWidth / 2;
     let best = 0, dist = Infinity;
     cards.forEach(function(c, i){
-      const d = Math.abs(c.offsetLeft - track.offsetLeft - left);
+      const centre = c.offsetLeft - track.offsetLeft + c.offsetWidth / 2;
+      const d = Math.abs(centre - mid);
       if (d < dist){ dist = d; best = i; }
     });
     return best;
   }
 
-  function go(dir){
-    const i = Math.min(Math.max(current() + dir, 0), cards.length - 1);
-    track.scrollTo({
-      left: cards[i].offsetLeft - track.offsetLeft,
-      behavior: reduced ? 'auto' : 'smooth'
+  function center(i, smooth){
+    cards[i].scrollIntoView({
+      behavior: (smooth && !reduced) ? 'smooth' : 'auto',
+      inline: 'center',
+      block: 'nearest'                    // never scroll the page vertically
     });
   }
 
   function sync(){
-    // Compare against the true maximum rather than a card index: the last
-    // card can't always scroll flush to the left edge, so the index alone
-    // would leave "next" enabled with nowhere left to go.
-    const max = track.scrollWidth - track.clientWidth;
-    const atEnd = track.scrollLeft >= max - 1;
-    prev.disabled = track.scrollLeft <= 1;
-    next.disabled = atEnd;
-    // At the end, name the last card even though it isn't left-aligned.
-    if (count) count.textContent = pad(atEnd ? cards.length : current() + 1) + ' / ' + pad(cards.length);
+    const i = current();
+    if (i !== active){
+      cards.forEach(function(c, n){ c.classList.toggle('is-active', n === i); });
+      active = i;
+      if (count) count.textContent = pad(i + 1) + ' / ' + pad(cards.length);
+    }
+    prev.disabled = i === 0;
+    next.disabled = i === cards.length - 1;
   }
 
-  prev.addEventListener('click', function(){ go(-1); });
-  next.addEventListener('click', function(){ go(1); });
+  prev.addEventListener('click', function(){ center(Math.max(current() - 1, 0), true); });
+  next.addEventListener('click', function(){ center(Math.min(current() + 1, cards.length - 1), true); });
 
-  let tick;
+  /* Dimming has to keep up with the scroll rather than wait for it to
+     settle, so this runs on a frame instead of a timeout. */
+  let queued = false;
   track.addEventListener('scroll', function(){
-    clearTimeout(tick);
-    tick = setTimeout(sync, 90);
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function(){ queued = false; sync(); });
   }, { passive:true });
 
-  window.addEventListener('resize', function(){ clearTimeout(tick); tick = setTimeout(sync, 150); });
+  window.addEventListener('resize', function(){ active = -1; sync(); });
 
-  // Left/right arrows when the track itself has focus.
   track.addEventListener('keydown', function(e){
-    if (e.key === 'ArrowRight'){ e.preventDefault(); go(1); }
-    if (e.key === 'ArrowLeft'){ e.preventDefault(); go(-1); }
+    if (e.key === 'ArrowRight'){ e.preventDefault(); center(Math.min(current() + 1, cards.length - 1), true); }
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); center(Math.max(current() - 1, 0), true); }
   });
 
-  /* Tabbing to a card that's scrolled out of view makes the browser jump
-     the track sideways; re-sync so the counter and buttons stay honest. */
-  cards.forEach(function(c){ c.addEventListener('focus', sync); });
+  cards.forEach(function(c, i){
+    // Tabbing to an off-centre card scrolls the track; bring it properly
+    // to the middle so focus and the highlighted card agree.
+    c.addEventListener('focus', function(){ center(i, true); });
+
+    /* A click on a parked card promotes it instead of following its link
+       — you shouldn't have to aim at a card you can barely read. Stopping
+         immediate propagation also holds back the Wet Paint dialog, whose
+         handler is bound to the same element. */
+    c.addEventListener('click', function(e){
+      if (!c.classList.contains('is-active')){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        center(i, true);
+      }
+    });
+  });
 
   sync();
 })();
