@@ -229,6 +229,14 @@ body{
   const RAMP_MS   = 75000;  // time taken to reach full difficulty
   const SAFE_R    = 150;    // no drop may arrive closer than this to you
 
+  // Wet trail — your own path stays wet for a moment and can deflect a drop.
+  const TRAIL_MIN_DIST   = 9;      // px of movement before a new stroke point is laid
+  const TRAIL_LIFE_MS    = 2000;   // total time a stroke stays on the board
+  const TRAIL_SOLID_MS   = 1500;   // only strokes younger than this can deflect a drop
+  const TRAIL_WIDTH      = 7;      // stroke thickness, px
+  const TRAIL_MAX_PTS    = 240;    // hard cap so a long session can't grow this unbounded
+  const DEFLECT_COOLDOWN = 360;    // ms before the same drop can score another deflect
+
   // ── State ─────────────────────────────────────────────────
   let w=0, h=0, dpr=1;
   let drops = [];
@@ -237,6 +245,7 @@ body{
   let elapsed = 0, grazes = 0, best = 0;
   let spawnClock = 0, readyClock = 0, pigment = 0;
   let shake = 0, splat = null, lastFrame = 0;
+  let trail = [], trailPigment = 0, trailClock = 0;
 
   /* ── Sizing ───────────────────────────────────────────────
      Backing store = CSS size x DPR (capped at 2), plus a transform so
@@ -303,6 +312,34 @@ body{
 
   const isLethal = d => !d.decor && d.age >= ARRIVE_MS;
 
+  /* Reflects a drop off a wet-trail segment if it's overlapping it.
+     Closest-point-on-segment against the drop's centre, then a
+     standard mirror of the velocity across the contact normal —
+     same idea as the wall bounce below, just at an arbitrary angle.
+     Returns true if a reflection happened this call. */
+  function segReflect(d, x1, y1, x2, y2, halfW){
+    const ex = x2 - x1, ey = y2 - y1;
+    const len2 = ex*ex + ey*ey || 1;
+    let t = ((d.x - x1) * ex + (d.y - y1) * ey) / len2;
+    t = Math.max(0, Math.min(1, t));
+    const cx = x1 + ex * t, cy = y1 + ey * t;
+    const dx = d.x - cx, dy = d.y - cy;
+    const dist = Math.hypot(dx, dy);
+    const minDist = d.r + halfW;
+    if (dist >= minDist || dist < 0.0001) return false;
+
+    const nx = dx / dist, ny = dy / dist;
+    d.x += nx * (minDist - dist);      // push clear so it can't get stuck inside the stroke
+    d.y += ny * (minDist - dist);
+
+    const vDotN = d.vx * nx + d.vy * ny;
+    if (vDotN < 0){                    // only reflect if it's actually moving into the line
+      d.vx -= 2 * vDotN * nx;
+      d.vy -= 2 * vDotN * ny;
+    }
+    return true;
+  }
+
   /* ── Update ───────────────────────────────────────────────
      dt is normalised to 60fps so the game runs at the same speed on a
      60Hz and a 144Hz display, and delta is clamped so a backgrounded
@@ -326,6 +363,20 @@ body{
       if (readyClock <= 0) setState('playing');
     }
 
+    // Wet trail: age every point and drop the ones that have fully dried.
+    // Points are appended oldest-first, so the front always dries first —
+    // no need to scan the whole array.
+    for (const p of trail) p.age += delta;
+    while (trail.length && trail[0].age > TRAIL_LIFE_MS) trail.shift();
+
+    if (state === 'playing'){
+      trailClock -= delta;
+      if (trailClock <= 0){
+        trailPigment = (trailPigment + 1 + Math.floor(Math.random() * 2)) % PIGMENTS.length;
+        trailClock = 420 + Math.random() * 260;
+      }
+    }
+
     for (let i = drops.length - 1; i >= 0; i--){
       const d = drops[i];
       d.age += delta;
@@ -345,6 +396,28 @@ body{
       else if (d.y > h - d.r){ d.y = h - d.r; d.vy = -Math.abs(d.vy); }
 
       if (state !== 'playing' || !isLethal(d)) continue;
+
+      // A drop that touches the still-wet part of your trail bounces off
+      // it instead of reaching you. One deflection per drop per frame
+      // keeps a tightly-curved stroke from ping-ponging it unreadably.
+      for (let s = 1; s < trail.length; s++){
+        const p1 = trail[s];
+        if (p1.age >= TRAIL_SOLID_MS) continue;
+        const p0 = trail[s - 1];
+        if (segReflect(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){
+          if (!d.lastDeflect || elapsed - d.lastDeflect > DEFLECT_COOLDOWN){
+            d.lastDeflect = elapsed;
+            grazes++;
+            elGraze.textContent = grazes;
+            elTime.style.color = rgba(d.color, 1);
+            elTime.classList.remove('graze');
+            void elTime.offsetWidth;
+            elTime.classList.add('graze');
+            setTimeout(function(){ elTime.style.color = ''; }, 320);
+          }
+          break;
+        }
+      }
 
       /* Proper circular collision: centre distance against summed
          radii, squared on both sides to skip the sqrt. */
@@ -381,6 +454,26 @@ body{
       ctx.translate((Math.random()-.5) * 14 * k, (Math.random()-.5) * 14 * k);
     }
     ctx.clearRect(-20, -20, w + 40, h + 40);
+
+    // Wet trail: solid and bright while it can still deflect a drop,
+    // then thins into a fading afterimage once it's just decoration.
+    if (trail.length > 1){
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (let i = 1; i < trail.length; i++){
+        const p0 = trail[i - 1], p1 = trail[i];
+        const solid = p1.age < TRAIL_SOLID_MS;
+        const a = solid ? 0.68
+          : 0.68 * Math.max(0, (TRAIL_LIFE_MS - p1.age) / (TRAIL_LIFE_MS - TRAIL_SOLID_MS));
+        if (a <= 0.01) continue;
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.strokeStyle = rgba(p1.color, a);
+        ctx.lineWidth = solid ? TRAIL_WIDTH : TRAIL_WIDTH * 0.6;
+        ctx.stroke();
+      }
+    }
 
     for (const d of drops){
       const arriving = !d.decor && d.age < ARRIVE_MS;
@@ -475,7 +568,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow">A dodging game</span>' +
       '<h1>Paint Drops</h1>' +
-      '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Passing close scores a graze.</p>' +
+      '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Your own path stays wet for a moment and can deflect a drop before it reaches you. Passing close, or deflecting one, scores a graze.</p>' +
       '<button class="go" id="go">Start painting</button>' +
       '<span class="keys">Or press space</span>' +
       '<span class="swatches">' + PIGMENTS.map(p=>'<i style="background:'+rgba(p.rgb,.9)+'"></i>').join('') + '</span>';
@@ -484,6 +577,7 @@ body{
 
   function start(){
     drops = []; splat = null; shake = 0;
+    trail = []; trailPigment = Math.floor(Math.random() * PIGMENTS.length); trailClock = 500;
     elapsed = 0; grazes = 0; spawnClock = 600; readyClock = 1100;
     elTime.textContent = '0.0';
     elGraze.textContent = '0';
@@ -538,6 +632,14 @@ body{
     player.y = e.clientY - r.top;
     player.seen = true;
     if (state === 'paused') resume();
+
+    if (state === 'playing'){
+      const last = trail[trail.length - 1];
+      if (!last || Math.hypot(player.x - last.x, player.y - last.y) >= TRAIL_MIN_DIST){
+        trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb });
+        if (trail.length > TRAIL_MAX_PTS) trail.shift();
+      }
+    }
   }, { passive:true });
 
   // Leaving the board used to be free invincibility. Now it pauses,
