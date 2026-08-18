@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="author" content="Steven McDonald">
 <meta name="description" content="Steven McDonald is a UI/UX Technical Lead at Healthlevel. Cornell CS. He designs and ships the whole thing — research through production.">
-<meta name="keywords" content="UI/UX, technical lead, front end, design engineer, Cornell, Healthlevel, product design, software engineer">
+<meta name="keywords" content="UI/UX, data visualizations, technical lead, typescript developer, front end, design engineer, Cornell, Healthlevel, product design, software engineer">
 
 <meta property="og:title" content="Steven McDonald — UI/UX Technical Lead">
 <meta property="og:description" content="I design and ship the whole thing — research through production.">
@@ -27,7 +27,7 @@
   --ultramarine: #4463D6;
   --cadmium:     #E2652A;
   --viridian:    #2E9C86;
-  --naples:      #E8B24A;
+  --hansa:      #E8B24A;
 
   --display: "Helvetica Neue", sans-serif;
   --body:    "Instrument Sans", system-ui, sans-serif;
@@ -58,7 +58,7 @@ body::before{
 }
 a{ color:inherit; }
 :focus-visible{
-  outline:2px solid var(--naples);
+  outline:2px solid var(--hansa);
   outline-offset:3px;
   border-radius:2px;
 }
@@ -170,7 +170,7 @@ h1 .second{ color:var(--linen); opacity:.55; }
   color:var(--linen);
   margin:1.9rem 0 0;
 }
-.lede em{ font-style:normal; color:var(--naples); }
+.lede em{ font-style:normal; color:var(--hansa); }
 .lede .co{
   color:var(--linen); text-decoration:none;
   box-shadow:inset 0 -2px 0 var(--viridian);
@@ -191,6 +191,8 @@ h1 .second{ color:var(--linen); opacity:.55; }
 .btn-fill:hover{ transform:translateY(-2px); background:#F0733A; }
 .btn-ghost{ border-color:var(--hairline); color:var(--linen); }
 .btn-ghost:hover{ transform:translateY(-2px); border-color:var(--linen); }
+.btn-resume{ background:var(--viridian); color:#0B231D; font-weight:500; }
+.btn-resume:hover{ transform:translateY(-2px); background:#37B49B; }
 .btn .arrow{ transition:transform .18s ease; }
 .btn:hover .arrow{ transform:translateX(4px); }
 
@@ -335,10 +337,10 @@ footer{
   max-width:16ch;
 }
 .footer-inner a.mailto{
-  font-family:var(--mono); font-size:.95rem; color:var(--naples);
+  font-family:var(--mono); font-size:.95rem; color:var(--hansa);
   text-decoration:none; border-bottom:1px solid rgba(232,178,74,.4);
 }
-.footer-inner a.mailto:hover{ border-bottom-color:var(--naples); }
+.footer-inner a.mailto:hover{ border-bottom-color:var(--hansa); }
 .colophon{
   font-family:var(--mono); font-size:.7rem; color:var(--linen-mute);
   line-height:1.9; letter-spacing:.04em;
@@ -457,7 +459,7 @@ footer{
   display:inline-flex; align-items:center; gap:.45rem;
   font-family:var(--mono); font-size:.62rem; letter-spacing:.1em;
   text-transform:uppercase; line-height:1;
-  color:#1A1008; background:var(--naples);
+  color:#1A1008; background:var(--hansa);
   padding:.42rem .6rem .42rem .5rem; border-radius:99px;
   box-shadow:0 4px 14px rgba(12,16,22,.45);
   transition:transform .18s ease, background .18s ease;
@@ -521,6 +523,64 @@ footer{
   flex:1; min-height:0;
   width:100%; border:0; display:block;
   background:var(--ground);
+}
+
+/* ─── RESUME DIALOG ───────────────────────── */
+/* Same open/close transition and backdrop as the game dialog, sized for
+   a document instead of a canvas, with a light frame background so the
+   PDF's own page reads correctly. */
+#resumeDialog{
+  max-width:min(880px, calc(100vw - 1.5rem));
+  width:100%;
+  color:var(--linen);
+}
+#resumeDialog .resume-sheet{
+  display:flex; flex-direction:column;
+  height:min(860px, calc(100svh - 1.5rem));
+  background:var(--ground-deep);
+  border:1px solid var(--hairline);
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 40px 90px rgba(10,14,20,.6);
+}
+#resumeDialog .resume-bar{
+  flex:none;
+  display:flex; align-items:center; gap:.9rem;
+  padding:.85rem 1rem .85rem 1.15rem;
+  border-bottom:1px solid var(--hairline);
+  background:rgba(44,52,63,.5);
+}
+#resumeDialog .resume-bar h2{
+  font-family:var(--display);
+  font-variation-settings:"wght" 600,"wdth" 84;
+  font-size:1rem; letter-spacing:-.01em; margin:0 auto 0 0;
+}
+#resumeDialog .resume-download{
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.08em;
+  text-transform:uppercase; text-decoration:none;
+  color:var(--linen-mute); border:1px solid var(--hairline); border-radius:6px;
+  padding:.42rem .7rem;
+  transition:color .18s ease, border-color .18s ease, background .18s ease;
+}
+#resumeDialog .resume-download:hover{
+  color:var(--linen); border-color:var(--linen); background:rgba(239,234,224,.07);
+}
+#resumeDialog .resume-close{
+  flex:none;
+  width:34px; height:34px; display:grid; place-items:center;
+  border:1px solid var(--hairline); border-radius:99px;
+  background:transparent; color:var(--linen-mute);
+  font-size:1rem; line-height:1; cursor:pointer;
+  transition:color .18s ease, border-color .18s ease, background .18s ease;
+}
+#resumeDialog .resume-close:hover{
+  color:var(--linen); border-color:var(--linen);
+  background:rgba(239,234,224,.07);
+}
+#resumeDialog .resume-frame{
+  flex:1; min-height:0;
+  width:100%; border:0; display:block;
+  background:var(--linen);
 }
 
 /* The game canvas sits inside an iframe, so the page behind it must
@@ -595,7 +655,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   .carousel-track.is-enhanced > *{ transform:none; transition:opacity .01ms; }
   .carousel-track.is-enhanced > .is-active{ transform:none; }
 }
-.carousel-track:focus-visible{ outline:2px solid var(--naples); outline-offset:4px; border-radius:4px; }
+.carousel-track:focus-visible{ outline:2px solid var(--hansa); outline-offset:4px; border-radius:4px; }
 
 /* ─── PAINTINGS ───────────────────────────── */
 .paintings-grid{
@@ -610,7 +670,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   font-size:clamp(1.05rem,1rem + .4vw,1.3rem);
   line-height:1.5; margin:0 0 1.2rem; max-width:40ch;
 }
-.paintings-lede em{ font-style:normal; color:var(--naples); }
+.paintings-lede em{ font-style:normal; color:var(--hansa); }
 .paintings-body{ margin:0 0 1.6rem; color:var(--linen-mute); font-size:.95rem; max-width:46ch; }
 .paintings-body strong{ color:var(--linen); font-weight:500; }
 
@@ -679,16 +739,16 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
         <span class="line second"><span>McDonald</span></span>
       </h1>
       <p class="eyebrow"><span class="rule"></span>UI/UX Technical Lead · Healthlevel</p>
-      <p class="lede">I design and ship the whole thing at <a class="co" href="#aboutMe">Healthlevel</a> — <em>research through production</em>.</p>
+      <p class="lede"> I do the whole loop — <em> talk to users, shape the UX, and code the UI </em>.</p>
       <div class="actions">
         <a class="btn btn-fill" href="#portfolio">See my work <span class="arrow">→</span></a>
+        <a class="btn btn-resume" href="./documents/steven-mcdonald-resume.pdf" id="resumeBtn" target="_blank" rel="noopener">See my Resume <span class="arrow">→</span></a>
         <a class="btn btn-ghost" href="mailto:steven.a.mcdonald97@gmail.com">Get in touch</a>
       </div>
     </div>
 
     <figure class="portrait">
       <img src="images/Steven_McDonald.jpeg" alt="Steven McDonald" width="600" height="600">
-      <figcaption>Cornell CS, cum laude </figcaption>
     </figure>
   </div>
 
@@ -696,7 +756,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
     <div class="phase"><span class="swatch" style="background:var(--ultramarine)"></span><span class="name">Research</span><span class="what">Interviews and workflows.</span></div>
     <div class="phase"><span class="swatch" style="background:var(--cadmium)"></span><span class="name">Design</span><span class="what">Flows, systems, and prototypes people can actually use.</span></div>
     <div class="phase"><span class="swatch" style="background:var(--viridian)"></span><span class="name">Build</span><span class="what">Front end, written to be maintained.</span></div>
-    <div class="phase"><span class="swatch" style="background:var(--naples)"></span><span class="name">Ship</span><span class="what">Into production, then measured and revised.</span></div>
+    <div class="phase"><span class="swatch" style="background:var(--hansa)"></span><span class="name">Ship</span><span class="what">Into production, then measured and revised.</span></div>
   </div>
 
   <p class="hint" id="hint">Move your cursor</p>
@@ -794,18 +854,17 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
         serious oil instruction in high school, under <strong>Brigitte Curt</strong> and
         <strong>Jim Smyth</strong>. After finishing my CS degree at Cornell I spent a year in Florence
         studying at the <strong>Lorenzo de' Medici Institute</strong> and <strong>Chiaroscuro
-        Studio</strong>. I've painted the San Francisco Bay, the California coast and the Sierras,
-        chasing the same thing every time: glowing lights, receding shadows, and colour laid down
-        clean while it's still in front of me.</p>
+        Studio</strong>. My favorite place to paint though has always been California, where I can chase the
+        beautiful light and the soaring vistas of my home state.</p>
       <p class="paintings-body">It's not a separate life from the code. The palette this site is
-        built on — ultramarine, cadmium orange, viridian, naples yellow — is the one on my
+        built on — ultramarine blue, cadmium orange, viridian green, hansa yellow — is the one on my
         easel, and judging an edge or a value is the same attention I bring to an interface.</p>
 
       <div class="palette" aria-hidden="true">
         <i style="background:var(--ultramarine)"></i>
         <i style="background:var(--cadmium)"></i>
         <i style="background:var(--viridian)"></i>
-        <i style="background:var(--naples)"></i>
+        <i style="background:var(--hansa)"></i>
         <i style="background:#B23A48"></i>
       </div>
 
@@ -858,12 +917,27 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
         <i style="background:var(--ultramarine)"></i>
         <i style="background:var(--cadmium)"></i>
         <i style="background:var(--viridian)"></i>
-        <i style="background:var(--naples)"></i>
+        <i style="background:var(--hansa)"></i>
       </span>
       <span class="note">Esc to close</span>
       <button type="button" class="game-close" id="gameClose" aria-label="Close the game">✕</button>
     </div>
     <iframe class="game-frame" id="gameFrame" title="Wet Paint — a browser dodge game"></iframe>
+  </div>
+</dialog>
+
+<!-- Resume dialog: the button stays a real link to the PDF, so it works
+     without JS, survives middle-click, and shows a sensible URL on
+     hover. The click handler intercepts a plain left-click only and
+     opens the file in a modal iframe instead. -->
+<dialog id="resumeDialog" aria-labelledby="resumeTitle">
+  <div class="resume-sheet">
+    <div class="resume-bar">
+      <h2 id="resumeTitle">Resume</h2>
+      <a class="resume-download" href="./steven-mcdonald-resume.pdf" download>Download</a>
+      <button type="button" class="resume-close" id="resumeClose" aria-label="Close resume">✕</button>
+    </div>
+    <iframe class="resume-frame" id="resumeFrame" title="Steven McDonald — Resume"></iframe>
   </div>
 </dialog>
 
@@ -886,7 +960,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
     [68,99,214],   // ultramarine
     [226,101,42],  // cadmium orange
     [46,156,134],  // viridian
-    [232,178,74],  // naples yellow
+    [232,178,74],  // hansa yellow
     [178,58,72]    // alizarin
   ];
 
@@ -1139,6 +1213,41 @@ document.getElementById('yr').textContent = new Date().getFullYear();
     document.documentElement.classList.remove('dialog-open');
     document.body.classList.remove('dialog-open');
     card.focus({ preventScroll:true });
+  });
+})();
+
+(function(){
+  const dlg   = document.getElementById('resumeDialog');
+  const frame = document.getElementById('resumeFrame');
+  const btn   = document.getElementById('resumeBtn');
+  const close = document.getElementById('resumeClose');
+  if (!dlg || !frame || !btn || typeof dlg.showModal !== 'function') return;
+
+  const SRC = btn.getAttribute('href');
+
+  function open(e){
+    // Let modified clicks (new tab, new window) and the download link
+    // behave normally.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    frame.src = SRC;                       // load on demand, not on page load
+    dlg.showModal();
+    document.documentElement.classList.add('dialog-open');
+    document.body.classList.add('dialog-open');
+  }
+
+  btn.addEventListener('click', open);
+  close.addEventListener('click', function(){ dlg.close(); });
+
+  // Click on the backdrop closes it; clicks inside the iframe never
+  // reach this listener, so testing the target is enough.
+  dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+
+  dlg.addEventListener('close', function(){
+    frame.removeAttribute('src');
+    document.documentElement.classList.remove('dialog-open');
+    document.body.classList.remove('dialog-open');
+    btn.focus({ preventScroll:true });
   });
 })();
 
