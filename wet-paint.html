@@ -84,8 +84,8 @@ body{
   font-variant-numeric:tabular-nums;
 }
 
-/* Graze flash: the time readout kicks to the grazing pigment's colour. */
-.stat .value.graze{ animation:kick .34s ease-out; }
+/* Bounce flash: the time readout kicks to the grazing pigment's colour. */
+.stat .value.bounce{ animation:kick .34s ease-out; }
 @keyframes kick{ 0%{ transform:scale(1.08); } 100%{ transform:scale(1); } }
 
 /* ─── CARDS (title / paused / caught) ───────────────── */
@@ -137,7 +137,7 @@ body{
 .card .go:active{ transform:translateY(0); }
 
 .card .keys{
-  margin-top:.7rem; font-size:.62rem; letter-spacing:.12em;
+  margin-top:.7rem; margin-left:2em; font-size:.62rem; letter-spacing:.12em;
   text-transform:uppercase; color:var(--linen-mute); opacity:.55;
 }
 
@@ -163,8 +163,8 @@ body{
       <span class="value" id="time">0.0</span>
     </div>
     <div class="stat right">
-      <span class="label">Grazes</span>
-      <span class="value" id="grazes">0</span>
+      <span class="label">Bounces</span>
+      <span class="value" id="bounce">0</span>
       <span class="sub" id="best"></span>
     </div>
   </div>
@@ -180,7 +180,7 @@ body{
 
    Drops of paint land on the canvas at a quickening pace. They
    bounce off the edges and dry up after a while. Touch one and
-   you're stained. Passing close scores a graze.
+   you're stained. Passing close scores a bounce.
 
    Structure
      1.  constants + state
@@ -201,7 +201,7 @@ body{
   const ctx      = canvas.getContext('2d');
   const hud      = document.getElementById('hud');
   const elTime   = document.getElementById('time');
-  const elGraze  = document.getElementById('grazes');
+  const elBounce  = document.getElementById('bounces');
   const elBest   = document.getElementById('best');
   const card     = document.getElementById('card');
   const cardBody = document.getElementById('cardBody');
@@ -219,7 +219,7 @@ body{
 
   // ── Tuning knobs ──────────────────────────────────────────
   const PLAYER_R  = 6;      // collision radius of the linen dot
-  const GRAZE_PAD = 24;     // how close counts as a graze
+  const BOUNCE_PAD = 24;     // how close counts as a bounce
   const ARRIVE_MS = 900;    // telegraph window: visible but harmless
   const LIFE_MS   = 78000;  // total time a drop stays on the board
   const DRY_MS    = 2200;   // trailing fade — "this one is leaving"
@@ -242,7 +242,7 @@ body{
   let drops = [];
   let state = 'attract';                    // attract | ready | playing | paused | caught
   let player = { x:0, y:0, seen:false };
-  let elapsed = 0, grazes = 0, best = 0;
+  let elapsed = 0, bounces = 0, best = 0;
   let spawnClock = 0, readyClock = 0, pigment = 0;
   let shake = 0, splat = null, lastFrame = 0;
   let trail = [], trailPigment = 0, trailClock = 0;
@@ -304,7 +304,7 @@ body{
       vy: Math.sin(ang) * spd,
       r: decor ? 4 + Math.random() * 7 : 9 + Math.random() * 7,
       color: p.rgb, name: p.name,
-      age: 0, decor, grazed: false
+      age: 0, decor, bounced: false
     });
 
     if (drops.length > MAX_DROPS) drops.splice(0, drops.length - MAX_DROPS);
@@ -407,12 +407,12 @@ body{
         if (segReflect(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){
           if (!d.lastDeflect || elapsed - d.lastDeflect > DEFLECT_COOLDOWN){
             d.lastDeflect = elapsed;
-            grazes++;
-            elGraze.textContent = grazes;
+            bounces++;
+            elBounce.textContent = bounces;
             elTime.style.color = rgba(d.color, 1);
-            elTime.classList.remove('graze');
+            elTime.classList.remove('bounce');
             void elTime.offsetWidth;
-            elTime.classList.add('graze');
+            elTime.classList.add('bounce');
             setTimeout(function(){ elTime.style.color = ''; }, 320);
           }
           break;
@@ -427,17 +427,17 @@ body{
 
       if (distSq < hitR * hitR){ caught(d); return; }
 
-      // Graze: rewards cutting it fine and gives near-misses a readable
+      // Bounce: rewards cutting it fine and gives near-misses a readable
       // payoff instead of silent luck. Counts once per drop.
-      const grazeR = hitR + GRAZE_PAD;
-      if (!d.grazed && distSq < grazeR * grazeR){
-        d.grazed = true;
-        grazes++;
-        elGraze.textContent = grazes;
+      const bounceR = hitR + BOUNCE_PAD;
+      if (!d.bounced && distSq < bounceR * bounceR){
+        d.bounced = true;
+        bounces++;
+        elBounce.textContent = bounces;
         elTime.style.color = rgba(d.color, 1);
-        elTime.classList.remove('graze');
+        elTime.classList.remove('bounce');
         void elTime.offsetWidth;                  // force the animation to restart
-        elTime.classList.add('graze');
+        elTime.classList.add('bounce');
         setTimeout(function(){ elTime.style.color = ''; }, 320);
       }
     }
@@ -568,7 +568,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow">A dodging game</span>' +
       '<h1>Paint Drops</h1>' +
-      '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Your own path stays wet for a moment and can deflect a drop before it reaches you. Passing close, or deflecting one, scores a graze.</p>' +
+      '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Your own path stays wet for a moment and can deflect a drop before it reaches you. Passing close, or deflecting one, scores a bounce.</p>' +
       '<button class="go" id="go">Start painting</button>' +
       '<span class="keys">Or press space</span>' +
       '<span class="swatches">' + PIGMENTS.map(p=>'<i style="background:'+rgba(p.rgb,.9)+'"></i>').join('') + '</span>';
@@ -578,9 +578,9 @@ body{
   function start(){
     drops = []; splat = null; shake = 0;
     trail = []; trailPigment = Math.floor(Math.random() * PIGMENTS.length); trailClock = 500;
-    elapsed = 0; grazes = 0; spawnClock = 600; readyClock = 1100;
+    elapsed = 0; bounces = 0; spawnClock = 600; readyClock = 1100;
     elTime.textContent = '0.0';
-    elGraze.textContent = '0';
+    elBounce.textContent = '0';
     setState('ready');
   }
 
@@ -605,7 +605,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow" style="--pigment:'+rgba(d.color,1)+'">Caught by <b>'+d.name+'</b></span>' +
       '<span class="score">' + secs.toFixed(1) + '<span style="font-size:.28em;letter-spacing:0"> s</span></span>' +
-      '<p>' + grazes + ' graze' + (grazes === 1 ? '' : 's') +
+      '<p>' + bounces + ' bounce' + (bounces === 1 ? '' : 's') +
         (isBest ? ' \u00b7 new best' : ' \u00b7 best ' + best.toFixed(1) + 's') + '</p>' +
       '<button class="go" id="go">Paint again</button>' +
       '<span class="keys">Or press space</span>';
