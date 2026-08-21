@@ -84,8 +84,8 @@ body{
   font-variant-numeric:tabular-nums;
 }
 
-/* Bounce flash: the time readout kicks to the grazing pigment's colour. */
-.stat .value.bounce{ animation:kick .34s ease-out; }
+/* Score flash: the time readout kicks to whichever pigment just got wiped. */
+.stat .value.flash{ animation:kick .34s ease-out; }
 @keyframes kick{ 0%{ transform:scale(1.08); } 100%{ transform:scale(1); } }
 
 /* ─── CARDS (title / paused / caught) ───────────────── */
@@ -142,7 +142,7 @@ body{
 }
 
 /* Palette swatch row on the title card — the five pigments you're
-   about to dodge, introduced before you meet them. */
+   about to face, introduced before you meet them. */
 .swatches{ display:flex; gap:.4rem; margin-top:1.5rem; }
 .swatches i{ width:1.6rem; height:.28rem; border-radius:1px; display:block; }
 
@@ -163,8 +163,8 @@ body{
       <span class="value" id="time">0.0</span>
     </div>
     <div class="stat right">
-      <span class="label">Bounces</span>
-      <span class="value" id="bounces">0</span>
+      <span class="label">Eliminated</span>
+      <span class="value" id="eliminated">0</span>
       <span class="sub" id="best"></span>
     </div>
   </div>
@@ -176,17 +176,20 @@ body{
 
 <script>
 /* ─────────────────────────────────────────────────────────────
-   Paint Drops — dodge the pigment.
+   Paint Drops — dodge and defend.
 
-   Drops of paint land on the canvas at a quickening pace. They
-   bounce off the edges and dry up after a while. Touch one and
-   you're stained. Passing close scores a bounce.
+   Drops of paint land on the canvas at a quickening pace, bounce
+   off the edges, and never dry up on their own — left alone, the
+   board only fills up. Touch one with your dot and you're caught.
+   Hold space (or just drag, on touch) to lay a line of wet paint
+   behind your dot; any live drop that touches it while it's still
+   wet is wiped from the board. That's the only way drops go away.
 
    Structure
      1.  constants + state
      2.  size()        — DPR-aware canvas
      3.  spawn()       — one drop, telegraphed before it goes live
-     4.  update()      — physics, collision, scoring
+     4.  update()      — physics, wall collision, elimination
      5.  draw()        — render pass
      6.  states        — attract / ready / playing / paused / caught
      7.  listeners     — pointer, keyboard, lifecycle
@@ -196,15 +199,15 @@ body{
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const board    = document.getElementById('board');
-  const canvas   = document.getElementById('paint');
-  const ctx      = canvas.getContext('2d');
-  const hud      = document.getElementById('hud');
-  const elTime   = document.getElementById('time');
-  const elBounce  = document.getElementById('bounces');
-  const elBest   = document.getElementById('best');
-  const card     = document.getElementById('card');
-  const cardBody = document.getElementById('cardBody');
+  const board       = document.getElementById('board');
+  const canvas      = document.getElementById('paint');
+  const ctx         = canvas.getContext('2d');
+  const hud         = document.getElementById('hud');
+  const elTime      = document.getElementById('time');
+  const elEliminated = document.getElementById('eliminated');
+  const elBest      = document.getElementById('best');
+  const card        = document.getElementById('card');
+  const cardBody    = document.getElementById('cardBody');
 
   /* Pigments carry their name so the death card can say which colour
      got you — small thing, but it gives each run a story. */
@@ -219,33 +222,36 @@ body{
 
   // ── Tuning knobs ──────────────────────────────────────────
   const PLAYER_R  = 6;      // collision radius of the linen dot
-  const BOUNCE_PAD = 24;     // how close counts as a bounce
   const ARRIVE_MS = 900;    // telegraph window: visible but harmless
-  const LIFE_MS   = 78000;  // total time a drop stays on the board
-  const DRY_MS    = 2200;   // trailing fade — "this one is leaving"
-  const MAX_DROPS = reduced ? 34 : 60;
+  const MAX_DROPS_BASE  = reduced ? 34 : 60;    // concurrent-ball cap at the start of a run
+  const MAX_DROPS_PEAK  = reduced ? 56 : 110;   // concurrent-ball cap once density has fully ramped
+  const DENSITY_RAMP_MS = 180000;               // time taken to climb from base to peak density
   const SPAWN_MIN = 380;    // fastest spawn cadence, ms
   const SPAWN_MAX = 1250;   // opening spawn cadence, ms
-  const RAMP_MS   = 75000;  // time taken to reach full difficulty
+  const RAMP_MS   = 75000;  // time taken to reach full spawn speed
   const SAFE_R    = 150;    // no drop may arrive closer than this to you
 
-  // Wet trail — your own path stays wet for a moment and can deflect a drop.
-  const TRAIL_MIN_DIST   = 9;      // px of movement before a new stroke point is laid
-  const TRAIL_LIFE_MS    = 2000;   // total time a stroke stays on the board
-  const TRAIL_SOLID_MS   = 1500;   // only strokes younger than this can deflect a drop
-  const TRAIL_WIDTH      = 7;      // stroke thickness, px
-  const TRAIL_MAX_PTS    = 240;    // hard cap so a long session can't grow this unbounded
-  const DEFLECT_COOLDOWN = 360;    // ms before the same drop can score another deflect
+  // Painted wall — hold space (drag, on touch) to lay a line of wet
+  // paint behind your dot. Any live drop that touches it while it's
+  // still wet is wiped from the board; the line itself fades to
+  // nothing after TRAIL_LIFE_MS, at which point it's just gone.
+  const TRAIL_MIN_DIST = 9;      // px of movement before a new stroke point is laid
+  const TRAIL_LIFE_MS  = 4000;   // total time a wall stays on the board and stays lethal
+  const TRAIL_SOLID_MS = 3000;   // full strength for this long, then eases out over the rest
+  const TRAIL_WIDTH    = 7;      // stroke thickness, px
+  const TRAIL_MAX_PTS  = 480;    // hard cap so a long session can't grow this unbounded
 
   // ── State ─────────────────────────────────────────────────
   let w=0, h=0, dpr=1;
   let drops = [];
   let state = 'attract';                    // attract | ready | playing | paused | caught
   let player = { x:0, y:0, seen:false };
-  let elapsed = 0, bounces = 0, best = 0;
+  let elapsed = 0, eliminated = 0, best = 0;
   let spawnClock = 0, readyClock = 0, pigment = 0;
   let shake = 0, splat = null, lastFrame = 0;
-  let trail = [], trailPigment = 0, trailClock = 0;
+  let trail = [], trailPigment = 0, trailClock = 0, strokeId = 0;
+  let spaceDown = false;
+  let pops = [];
 
   /* ── Sizing ───────────────────────────────────────────────
      Backing store = CSS size x DPR (capped at 2), plus a transform so
@@ -278,13 +284,23 @@ body{
      harder reads from this one value. */
   function ramp(){ return Math.min(elapsed / RAMP_MS, 1); }
 
+  /* Density curve, 0 -> 1 over DENSITY_RAMP_MS — deliberately slower
+     than the spawn-speed ramp above, so the concurrent-ball cap keeps
+     climbing for a while even after spawn cadence has already hit its
+     floor, then levels off at MAX_DROPS_PEAK. */
+  function density(){ return Math.min(elapsed / DENSITY_RAMP_MS, 1); }
+  function maxDrops(){ return Math.round(MAX_DROPS_BASE + (MAX_DROPS_PEAK - MAX_DROPS_BASE) * density()); }
+
   /* ── Spawn ────────────────────────────────────────────────
      Places one drop at least SAFE_R away from the player, moving in a
      random direction. It starts in the 'arriving' phase: visible,
      ringed and harmless, so you are never killed by something that
-     materialised on top of you. */
+     materialised on top of you. If the board is already at capacity,
+     spawning simply pauses until you clear some room — drops never
+     get silently culled to make space. */
   function spawn(opts){
     const decor = !!(opts && opts.decor);     // attract-mode drop: never lethal
+    if (drops.length >= maxDrops()) return;
 
     let x, y, tries = 0;
     do {
@@ -304,40 +320,72 @@ body{
       vy: Math.sin(ang) * spd,
       r: decor ? 4 + Math.random() * 7 : 9 + Math.random() * 7,
       color: p.rgb, name: p.name,
-      age: 0, decor, bounced: false
+      age: 0, decor
     });
-
-    if (drops.length > MAX_DROPS) drops.splice(0, drops.length - MAX_DROPS);
   }
 
   const isLethal = d => !d.decor && d.age >= ARRIVE_MS;
 
-  /* Reflects a drop off a wet-trail segment if it's overlapping it.
-     Closest-point-on-segment against the drop's centre, then a
-     standard mirror of the velocity across the contact normal —
-     same idea as the wall bounce below, just at an arbitrary angle.
-     Returns true if a reflection happened this call. */
-  function segReflect(d, x1, y1, x2, y2, halfW){
+  /* Closest-point-on-segment test against the drop's centre — true if
+     the drop is currently overlapping this piece of painted wall. */
+  function wallTouch(d, x1, y1, x2, y2, halfW){
     const ex = x2 - x1, ey = y2 - y1;
     const len2 = ex*ex + ey*ey || 1;
     let t = ((d.x - x1) * ex + (d.y - y1) * ey) / len2;
     t = Math.max(0, Math.min(1, t));
     const cx = x1 + ex * t, cy = y1 + ey * t;
-    const dx = d.x - cx, dy = d.y - cy;
-    const dist = Math.hypot(dx, dy);
-    const minDist = d.r + halfW;
-    if (dist >= minDist || dist < 0.0001) return false;
+    return Math.hypot(d.x - cx, d.y - cy) < d.r + halfW;
+  }
 
-    const nx = dx / dist, ny = dy / dist;
-    d.x += nx * (minDist - dist);      // push clear so it can't get stuck inside the stroke
-    d.y += ny * (minDist - dist);
-
-    const vDotN = d.vx * nx + d.vy * ny;
-    if (vDotN < 0){                    // only reflect if it's actually moving into the line
-      d.vx -= 2 * vDotN * nx;
-      d.vy -= 2 * vDotN * ny;
+  /* Punch a local hole in the wall where a drop just broke through it
+     — only the paint near the contact point wipes away, so a wall
+     can still catch other drops elsewhere along its length. The
+     stroke is split on either side of the hole (via a fresh strokeId)
+     so draw() and future collision checks never bridge across it. */
+  function eraseWallAround(cx, cy, radius){
+    const out = [];
+    let gapOpen = false;
+    let remapFrom = null, remapTo = null;
+    for (const p of trail){
+      if (Math.hypot(p.x - cx, p.y - cy) < radius){
+        gapOpen = true;
+        continue;
+      }
+      if (gapOpen){
+        remapFrom = p.strokeId;
+        remapTo = ++strokeId;
+        gapOpen = false;
+      }
+      if (remapFrom !== null && p.strokeId === remapFrom){
+        out.push({ x:p.x, y:p.y, age:p.age, color:p.color, strokeId: remapTo });
+      } else {
+        remapFrom = null;
+        out.push(p);
+      }
     }
-    return true;
+    trail = out;
+  }
+
+  /* A drop was just wiped by the wall: remove it, score it, flash the
+     HUD, and leave a small burst of its colour behind so the kill
+     reads clearly instead of the drop just silently vanishing. */
+  function eliminate(d, i){
+    drops.splice(i, 1);
+    eliminated++;
+    elEliminated.textContent = eliminated;
+    elTime.style.color = rgba(d.color, 1);
+    elTime.classList.remove('flash');
+    void elTime.offsetWidth;                  // force the animation to restart
+    elTime.classList.add('flash');
+    setTimeout(function(){ elTime.style.color = ''; }, 320);
+
+    const blobs = [];
+    for (let k = 0; k < 6; k++){
+      const a  = Math.random() * Math.PI * 2;
+      const dd = Math.random() * 20;
+      blobs.push({ dx: Math.cos(a)*dd, dy: Math.sin(a)*dd, r: 3 + Math.random()*8 });
+    }
+    pops.push({ x:d.x, y:d.y, color:d.color, blobs, age:0 });
   }
 
   /* ── Update ───────────────────────────────────────────────
@@ -363,9 +411,9 @@ body{
       if (readyClock <= 0) setState('playing');
     }
 
-    // Wet trail: age every point and drop the ones that have fully dried.
-    // Points are appended oldest-first, so the front always dries first —
-    // no need to scan the whole array.
+    // Painted wall: age every point and drop the ones that have fully
+    // faded. Points are appended oldest-first, so the front always
+    // dries first — no need to scan the whole array.
     for (const p of trail) p.age += delta;
     while (trail.length && trail[0].age > TRAIL_LIFE_MS) trail.shift();
 
@@ -380,7 +428,6 @@ body{
     for (let i = drops.length - 1; i >= 0; i--){
       const d = drops[i];
       d.age += delta;
-      if (d.age > LIFE_MS){ drops.splice(i, 1); continue; }
 
       // Arriving drops hold still; they only start travelling once live.
       if (d.age >= ARRIVE_MS || d.decor){
@@ -397,49 +444,29 @@ body{
 
       if (state !== 'playing' || !isLethal(d)) continue;
 
-      // A drop that touches the still-wet part of your trail bounces off
-      // it instead of reaching you. One deflection per drop per frame
-      // keeps a tightly-curved stroke from ping-ponging it unreadably.
+      // A live drop touching the still-wet wall is wiped from the
+      // board. Segments only connect within the same stroke, so a
+      // gap left by releasing space (or lifting a finger) never
+      // draws — or kills — across it.
+      let wiped = false;
       for (let s = 1; s < trail.length; s++){
-        const p1 = trail[s];
-        if (p1.age >= TRAIL_SOLID_MS) continue;
-        const p0 = trail[s - 1];
-        if (segReflect(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){
-          if (!d.lastDeflect || elapsed - d.lastDeflect > DEFLECT_COOLDOWN){
-            d.lastDeflect = elapsed;
-            bounces++;
-            elBounce.textContent = bounces;
-            elTime.style.color = rgba(d.color, 1);
-            elTime.classList.remove('bounce');
-            void elTime.offsetWidth;
-            elTime.classList.add('bounce');
-            setTimeout(function(){ elTime.style.color = ''; }, 320);
-          }
-          break;
-        }
+        const p1 = trail[s], p0 = trail[s - 1];
+        if (p0.strokeId !== p1.strokeId) continue;
+        if (wallTouch(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){ wiped = true; break; }
       }
+      if (wiped){ eraseWallAround(d.x, d.y, TRAIL_WIDTH / 2 + d.r); eliminate(d, i); continue; }
 
       /* Proper circular collision: centre distance against summed
          radii, squared on both sides to skip the sqrt. */
       const dx = d.x - player.x, dy = d.y - player.y;
       const distSq = dx*dx + dy*dy;
       const hitR = d.r + PLAYER_R;
-
       if (distSq < hitR * hitR){ caught(d); return; }
+    }
 
-      // Bounce: rewards cutting it fine and gives near-misses a readable
-      // payoff instead of silent luck. Counts once per drop.
-      const bounceR = hitR + BOUNCE_PAD;
-      if (!d.bounced && distSq < bounceR * bounceR){
-        d.bounced = true;
-        bounces++;
-        elBounce.textContent = bounces;
-        elTime.style.color = rgba(d.color, 1);
-        elTime.classList.remove('bounce');
-        void elTime.offsetWidth;                  // force the animation to restart
-        elTime.classList.add('bounce');
-        setTimeout(function(){ elTime.style.color = ''; }, 320);
-      }
+    for (let i = pops.length - 1; i >= 0; i--){
+      pops[i].age += delta;
+      if (pops[i].age > 280) pops.splice(i, 1);
     }
 
     if (shake > 0) shake = Math.max(0, shake - delta);
@@ -455,16 +482,18 @@ body{
     }
     ctx.clearRect(-20, -20, w + 40, h + 40);
 
-    // Wet trail: solid and bright while it can still deflect a drop,
-    // then thins into a fading afterimage once it's just decoration.
+    // Painted wall: solid and bright while freshly laid, then thins
+    // into a fading afterimage as it approaches the end of its life.
+    // It stays lethal to drops for its entire visible lifetime.
     if (trail.length > 1){
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       for (let i = 1; i < trail.length; i++){
         const p0 = trail[i - 1], p1 = trail[i];
+        if (p0.strokeId !== p1.strokeId) continue;
         const solid = p1.age < TRAIL_SOLID_MS;
-        const a = solid ? 0.68
-          : 0.68 * Math.max(0, (TRAIL_LIFE_MS - p1.age) / (TRAIL_LIFE_MS - TRAIL_SOLID_MS));
+        const a = solid ? 0.7
+          : 0.7 * Math.max(0, (TRAIL_LIFE_MS - p1.age) / (TRAIL_LIFE_MS - TRAIL_SOLID_MS));
         if (a <= 0.01) continue;
         ctx.beginPath();
         ctx.moveTo(p0.x, p0.y);
@@ -477,13 +506,11 @@ body{
 
     for (const d of drops){
       const arriving = !d.decor && d.age < ARRIVE_MS;
-      const drying   = d.age > LIFE_MS - DRY_MS;
 
       let a = 0.62;
-      if (arriving)    a = 0.62 * (d.age / ARRIVE_MS);            // fade in
-      else if (drying) a = 0.62 * (LIFE_MS - d.age) / DRY_MS;     // fade out
+      if (arriving) a = 0.62 * (d.age / ARRIVE_MS);            // fade in
       if (d.decor) a *= 0.5;
-      if (state === 'caught') a *= 0.55;                          // veil the board on death
+      if (state === 'caught') a *= 0.55;                       // veil the board on death
 
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
@@ -500,6 +527,21 @@ body{
         ctx.strokeStyle = rgba(d.color, 0.5 * (1 - t) + 0.15);
         ctx.lineWidth = 1.5;
         ctx.stroke();
+      }
+    }
+
+    /* Elimination pops: a quick little burst where a drop was just
+       wiped by the wall, so the kill reads clearly frame to frame. */
+    for (const p of pops){
+      const t = Math.min(p.age / 280, 1);
+      const e = 1 - Math.pow(1 - t, 3);
+      const a = 0.75 * (1 - t);
+      if (a <= 0.01) continue;
+      for (const b of p.blobs){
+        ctx.beginPath();
+        ctx.arc(p.x + b.dx * e, p.y + b.dy * e, Math.max(0, b.r * (1 - e * 0.5)), 0, Math.PI*2);
+        ctx.fillStyle = rgba(p.color, a);
+        ctx.fill();
       }
     }
 
@@ -568,7 +610,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow">A dodging game</span>' +
       '<h1>Paint Drops</h1>' +
-      '<p>Paint keeps landing on the canvas. Every drop shows a ring before it goes live \u2014 after that, don\u2019t touch it. Your own path stays wet for a moment and can deflect a drop before it reaches you. Passing close, or deflecting one, scores a bounce.</p>' +
+      '<p>Paint keeps landing on the canvas and never dries on its own \u2014 it only piles up. Hold space (or just drag, on touch) to lay a line of wet paint behind your dot; any drop that touches it while it\u2019s still wet is wiped clean. Touch a drop yourself, though, and that\u2019s the end.</p>' +
       '<button class="go" id="go">Start painting</button>' +
       '<span class="keys">Or press space</span>' +
       '<span class="swatches">' + PIGMENTS.map(p=>'<i style="background:'+rgba(p.rgb,.9)+'"></i>').join('') + '</span>';
@@ -576,17 +618,19 @@ body{
   }
 
   function start(){
-    drops = []; splat = null; shake = 0;
+    drops = []; splat = null; shake = 0; pops = [];
     trail = []; trailPigment = Math.floor(Math.random() * PIGMENTS.length); trailClock = 500;
-    elapsed = 0; bounces = 0; spawnClock = 600; readyClock = 1100;
+    strokeId = 0; spaceDown = false;
+    elapsed = 0; eliminated = 0; spawnClock = 600; readyClock = 1100;
     elTime.textContent = '0.0';
-    elBounce.textContent = '0';
+    elEliminated.textContent = '0';
     setState('ready');
   }
 
   function caught(d){
     setState('caught');
     shake = reduced ? 0 : 320;
+    spaceDown = false;
 
     // Build an irregular splatter around the impact point.
     const blobs = [];
@@ -605,7 +649,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow" style="--pigment:'+rgba(d.color,1)+'">Caught by <b>'+d.name+'</b></span>' +
       '<span class="score">' + secs.toFixed(1) + '<span style="font-size:.28em;letter-spacing:0"> s</span></span>' +
-      '<p>' + bounces + ' bounce' + (bounces === 1 ? '' : 's') +
+      '<p>' + eliminated + ' ball' + (eliminated === 1 ? '' : 's') + ' eliminated' +
         (isBest ? ' \u00b7 new best' : ' \u00b7 best ' + best.toFixed(1) + 's') + '</p>' +
       '<button class="go" id="go">Paint again</button>' +
       '<span class="keys">Or press space</span>';
@@ -616,6 +660,7 @@ body{
   function pause(){
     if (state !== 'playing') return;
     setState('paused');
+    spaceDown = false;
     cardBody.innerHTML =
       '<span class="eyebrow">Paused</span>' +
       '<h1>' + (elapsed/1000).toFixed(1) + 's</h1>' +
@@ -626,6 +671,12 @@ body{
   function resume(){ if (state === 'paused') setState('playing'); }
 
   /* ── Listeners ────────────────────────────────────────── */
+  board.addEventListener('pointerdown', function(e){
+    // A new touch/pen contact always starts a fresh stroke, so a wall
+    // never bridges the gap between two separate drags.
+    if (e.pointerType !== 'mouse') strokeId++;
+  }, { passive:true });
+
   board.addEventListener('pointermove', function(e){
     const r = canvas.getBoundingClientRect();
     player.x = e.clientX - r.left;
@@ -634,10 +685,17 @@ body{
     if (state === 'paused') resume();
 
     if (state === 'playing'){
-      const last = trail[trail.length - 1];
-      if (!last || Math.hypot(player.x - last.x, player.y - last.y) >= TRAIL_MIN_DIST){
-        trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb });
-        if (trail.length > TRAIL_MAX_PTS) trail.shift();
+      // Mouse: only paints while space is held, so you can move
+      // freely without always leaving a wall behind you. Touch has
+      // no spacebar to hold, so dragging paints directly instead —
+      // matching how a finger naturally "draws".
+      const drawing = e.pointerType === 'mouse' ? spaceDown : true;
+      if (drawing){
+        const last = trail[trail.length - 1];
+        if (!last || last.strokeId !== strokeId || Math.hypot(player.x - last.x, player.y - last.y) >= TRAIL_MIN_DIST){
+          trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb, strokeId });
+          if (trail.length > TRAIL_MAX_PTS) trail.shift();
+        }
       }
     }
   }, { passive:true });
@@ -649,9 +707,20 @@ body{
   document.addEventListener('visibilitychange', function(){ if (document.hidden) pause(); });
 
   window.addEventListener('keydown', function(e){
-    if (e.code === 'Space' || e.code === 'Enter'){
+    if (e.code === 'Space'){
+      e.preventDefault();                  // never let space scroll the page
+      if (e.repeat) return;                // held keys must not repeat-trigger start() or new strokes
+      if (state === 'attract' || state === 'caught'){ start(); return; }
+      if ((state === 'playing' || state === 'ready') && !spaceDown){
+        spaceDown = true;
+        strokeId++;                        // begin a fresh stroke each time space goes down
+      }
+      return;
+    }
+    if (e.code === 'Enter'){
+      if (e.repeat) return;
       if (state === 'attract' || state === 'caught'){ e.preventDefault(); start(); }
-      else if (state === 'paused'){ e.preventDefault(); resume(); }
+      return;
     }
     if (e.code === 'Escape'){
       pause();
@@ -662,6 +731,10 @@ body{
         try { window.parent.postMessage('wetpaint:close', '*'); } catch(_){}
       }
     }
+  });
+
+  window.addEventListener('keyup', function(e){
+    if (e.code === 'Space') spaceDown = false;
   });
 
   showTitle();
