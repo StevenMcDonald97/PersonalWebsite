@@ -88,6 +88,40 @@ body{
 .stat .value.flash{ animation:kick .34s ease-out; }
 @keyframes kick{ 0%{ transform:scale(1.08); } 100%{ transform:scale(1); } }
 
+/* ─── PAINT GAUGE ───────────────────────────────────── */
+/* Bottom-centre, deliberately small: it should be readable in
+   peripheral vision without ever pulling your eye off the board. */
+.gauge{
+  position:absolute; left:50%; bottom:var(--gutter);
+  transform:translateX(-50%);
+  width:min(46vw, 280px);
+  pointer-events:none;
+  opacity:0; transition:opacity .45s ease;
+}
+.gauge.live{ opacity:1; }
+
+.gauge .glabel{
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-size:.6rem; font-weight:500; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--linen-mute); opacity:.7;
+  margin-bottom:.35rem;
+  font-variant-numeric:tabular-nums;
+  transition:color .2s ease, opacity .2s ease;
+}
+.gauge .track{
+  height:3px; border-radius:2px; overflow:hidden;
+  background:rgba(239,234,224,.13);
+}
+.gauge .fill{
+  display:block; height:100%; width:100%;
+  border-radius:2px;
+  transition:background-color .25s ease;
+}
+
+/* Dry: the pot is empty and painting is locked out until it recovers. */
+.gauge.dry .glabel{ color:var(--linen); opacity:1; animation:dryPulse 1s ease-in-out infinite; }
+@keyframes dryPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
+
 /* ─── CARDS (title / paused / caught) ───────────────── */
 .card{
   position:absolute; inset:0; z-index:2;
@@ -169,6 +203,11 @@ body{
     </div>
   </div>
 
+  <div class="gauge" id="gauge">
+    <div class="glabel"><span id="inkLabel">Paint</span><span id="inkPct">100</span></div>
+    <div class="track"><i class="fill" id="inkFill"></i></div>
+  </div>
+
   <div class="card" id="card">
     <div id="cardBody"></div>
   </div>
@@ -206,6 +245,10 @@ body{
   const elTime      = document.getElementById('time');
   const elEliminated = document.getElementById('eliminated');
   const elBest      = document.getElementById('best');
+  const gauge       = document.getElementById('gauge');
+  const inkFill     = document.getElementById('inkFill');
+  const inkPct      = document.getElementById('inkPct');
+  const inkLabel    = document.getElementById('inkLabel');
   const card        = document.getElementById('card');
   const cardBody    = document.getElementById('cardBody');
 
@@ -232,14 +275,27 @@ body{
   const SAFE_R    = 150;    // no drop may arrive closer than this to you
 
   // Painted wall — hold space (drag, on touch) to lay a line of wet
-  // paint behind your dot. Any live drop that touches it while it's
-  // still wet is wiped from the board; the line itself fades to
-  // nothing after TRAIL_LIFE_MS, at which point it's just gone.
+  // paint behind your dot. Paint is not lethal the instant it lands:
+  // it has to set. Once a point ARMS it wipes any drop that touches
+  // it — and it will just as happily wipe you. Your own line is a
+  // hazard, so every stroke needs an exit planned before you lay it.
   const TRAIL_MIN_DIST = 9;      // px of movement before a new stroke point is laid
-  const TRAIL_LIFE_MS  = 4000;   // total time a wall stays on the board and stays lethal
+  const TRAIL_LIFE_MS  = 5000;   // total time a wall stays on the board
+  const TRAIL_ARM_MS   = 600;    // harmless while setting; lethal to everything after
   const TRAIL_SOLID_MS = 3000;   // full strength for this long, then eases out over the rest
   const TRAIL_WIDTH    = 7;      // stroke thickness, px
   const TRAIL_MAX_PTS  = 480;    // hard cap so a long session can't grow this unbounded
+  const ARM_CLEAR      = 4;      // px of daylight needed before a point is allowed to arm
+
+  // Paint supply — the pot is finite. Painting drains it; it only
+  // refills while you are not painting, and after a short beat so
+  // that tapping the key can't be used to dodge the drain. Run it
+  // dry and you are locked out until it has recovered to INK_UNLOCK.
+  const INK_MAX          = 100;
+  const INK_DRAIN        = 30;   // units per second while laying paint
+  const INK_REGEN        = 13;   // units per second while the brush is up
+  const INK_REGEN_DELAY  = 700;  // ms of not painting before refilling starts
+  const INK_UNLOCK       = 30;   // must climb back to this before painting resumes
 
   // ── State ─────────────────────────────────────────────────
   let w=0, h=0, dpr=1;
@@ -250,8 +306,14 @@ body{
   let spawnClock = 0, readyClock = 0, pigment = 0;
   let shake = 0, splat = null, lastFrame = 0;
   let trail = [], trailPigment = 0, trailClock = 0, strokeId = 0;
-  let spaceDown = false;
+  let spaceDown = false, touchDown = false;
+  let ink = INK_MAX, inkDry = false, inkIdle = 0;
   let pops = [];
+
+  /* Are we actually laying paint this frame? Mouse paints only while
+     space is held; touch paints while a finger is down. Either way an
+     empty pot means nothing comes out. */
+  function painting(){ return (spaceDown || touchDown) && !inkDry && ink > 0; }
 
   /* ── Sizing ───────────────────────────────────────────────
      Backing store = CSS size x DPR (capped at 2), plus a transform so
@@ -328,13 +390,14 @@ body{
 
   /* Closest-point-on-segment test against the drop's centre — true if
      the drop is currently overlapping this piece of painted wall. */
-  function wallTouch(d, x1, y1, x2, y2, halfW){
+  function wallTouch(d, x1, y1, x2, y2, halfW, radius){
+    const rr = (radius === undefined) ? d.r : radius;
     const ex = x2 - x1, ey = y2 - y1;
     const len2 = ex*ex + ey*ey || 1;
     let t = ((d.x - x1) * ex + (d.y - y1) * ey) / len2;
     t = Math.max(0, Math.min(1, t));
     const cx = x1 + ex * t, cy = y1 + ey * t;
-    return Math.hypot(d.x - cx, d.y - cy) < d.r + halfW;
+    return Math.hypot(d.x - cx, d.y - cy) < rr + halfW;
   }
 
   /* Punch a local hole in the wall where a drop just broke through it
@@ -357,7 +420,7 @@ body{
         gapOpen = false;
       }
       if (remapFrom !== null && p.strokeId === remapFrom){
-        out.push({ x:p.x, y:p.y, age:p.age, color:p.color, strokeId: remapTo });
+        out.push({ x:p.x, y:p.y, age:p.age, color:p.color, armed:p.armed, strokeId: remapTo });
       } else {
         remapFrom = null;
         out.push(p);
@@ -414,8 +477,48 @@ body{
     // Painted wall: age every point and drop the ones that have fully
     // faded. Points are appended oldest-first, so the front always
     // dries first — no need to scan the whole array.
-    for (const p of trail) p.age += delta;
+    /* Arming: a point goes live once it has had TRAIL_ARM_MS to set
+       AND you are standing clear of it. The second condition is what
+       stops the game killing you for painting under your own feet —
+       paint you are still touching simply waits, and arms the moment
+       you step off it. Once armed, a point stays armed for good. */
+    for (const p of trail){
+      p.age += delta;
+      if (!p.armed && p.age >= TRAIL_ARM_MS &&
+          Math.hypot(player.x - p.x, player.y - p.y) > PLAYER_R + TRAIL_WIDTH/2 + ARM_CLEAR){
+        p.armed = true;
+      }
+    }
     while (trail.length && trail[0].age > TRAIL_LIFE_MS) trail.shift();
+
+    // Paint supply: drains while the brush is down, refills only after
+    // a beat with it up. Empty locks you out until INK_UNLOCK.
+    if (state === 'playing'){
+      if (painting()){
+        inkIdle = 0;
+        ink -= INK_DRAIN * delta / 1000;
+        if (ink <= 0){ ink = 0; inkDry = true; }
+      } else {
+        inkIdle += delta;
+        if (inkIdle >= INK_REGEN_DELAY){
+          ink = Math.min(INK_MAX, ink + INK_REGEN * delta / 1000);
+          if (inkDry && ink >= INK_UNLOCK) inkDry = false;
+        }
+      }
+    }
+
+    /* Your own set paint is as lethal to you as it is to the drops.
+       Same segment test as the drops use, against your dot. */
+    if (state === 'playing'){
+      for (let s = 1; s < trail.length; s++){
+        const p1 = trail[s], p0 = trail[s - 1];
+        if (p0.strokeId !== p1.strokeId || !p0.armed || !p1.armed) continue;
+        if (wallTouch(player, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2, PLAYER_R)){
+          caught({ x:player.x, y:player.y, color:p1.color, name:'your own paint' });
+          return;
+        }
+      }
+    }
 
     if (state === 'playing'){
       trailClock -= delta;
@@ -451,7 +554,7 @@ body{
       let wiped = false;
       for (let s = 1; s < trail.length; s++){
         const p1 = trail[s], p0 = trail[s - 1];
-        if (p0.strokeId !== p1.strokeId) continue;
+        if (p0.strokeId !== p1.strokeId || !p0.armed || !p1.armed) continue;
         if (wallTouch(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){ wiped = true; break; }
       }
       if (wiped){ eraseWallAround(d.x, d.y, TRAIL_WIDTH / 2 + d.r); eliminate(d, i); continue; }
@@ -491,15 +594,21 @@ body{
       for (let i = 1; i < trail.length; i++){
         const p0 = trail[i - 1], p1 = trail[i];
         if (p0.strokeId !== p1.strokeId) continue;
+        const armed = p0.armed && p1.armed;
         const solid = p1.age < TRAIL_SOLID_MS;
-        const a = solid ? 0.7
+        let a = solid ? 0.7
           : 0.7 * Math.max(0, (TRAIL_LIFE_MS - p1.age) / (TRAIL_LIFE_MS - TRAIL_SOLID_MS));
+        // Still setting: thin and faint, so "harmless" and "lethal"
+        // are told apart at a glance mid-dodge.
+        if (!armed) a *= 0.4;
         if (a <= 0.01) continue;
         ctx.beginPath();
         ctx.moveTo(p0.x, p0.y);
         ctx.lineTo(p1.x, p1.y);
         ctx.strokeStyle = rgba(p1.color, a);
-        ctx.lineWidth = solid ? TRAIL_WIDTH : TRAIL_WIDTH * 0.6;
+        ctx.lineWidth = !armed ? TRAIL_WIDTH * 0.45
+                      : solid  ? TRAIL_WIDTH
+                               : TRAIL_WIDTH * 0.6;
         ctx.stroke();
       }
     }
@@ -587,7 +696,17 @@ body{
     lastFrame = now;
     update(delta);
     draw();
-    if (state === 'playing') elTime.textContent = (elapsed/1000).toFixed(1);
+    if (state === 'playing'){
+      elTime.textContent = (elapsed/1000).toFixed(1);
+      const pct = Math.round(ink);
+      inkFill.style.width = pct + '%';
+      inkFill.style.background = inkDry
+        ? 'rgba(239,234,224,.28)'
+        : rgba(PIGMENTS[trailPigment].rgb, 0.9);
+      inkPct.textContent = pct;
+      inkLabel.textContent = inkDry ? 'Out of paint' : 'Paint';
+      gauge.classList.toggle('dry', inkDry);
+    }
     requestAnimationFrame(loop);
   }
 
@@ -597,6 +716,7 @@ body{
     const active = (next === 'playing' || next === 'ready');
     board.classList.toggle('idle', !active);
     hud.classList.toggle('live', active || next === 'paused');
+    gauge.classList.toggle('live', active || next === 'paused');
     card.hidden = active;
   }
 
@@ -610,7 +730,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow">A dodging game</span>' +
       '<h1>Paint Drops</h1>' +
-      '<p>Paint keeps landing on the canvas and never dries on its own \u2014 it only piles up. Hold space (or just drag, on touch) to lay a line of wet paint behind your dot; any drop that touches it while it\u2019s still wet is wiped clean. Touch a drop yourself, though, and that\u2019s the end.</p>' +
+      '<p>Paint keeps landing on the canvas and never dries on its own \u2014 it only piles up. Hold space (or hold a finger down, on touch) to lay a line behind your dot. It takes a moment to set; once it does, it wipes any drop that touches it \u2014 and it will wipe you just as fast. Mind the pot: paint runs out, and refills only while the brush is up.</p>' +
       '<button class="go" id="go">Start painting</button>' +
       '<span class="keys">Or press space</span>' +
       '<span class="swatches">' + PIGMENTS.map(p=>'<i style="background:'+rgba(p.rgb,.9)+'"></i>').join('') + '</span>';
@@ -620,7 +740,12 @@ body{
   function start(){
     drops = []; splat = null; shake = 0; pops = [];
     trail = []; trailPigment = Math.floor(Math.random() * PIGMENTS.length); trailClock = 500;
-    strokeId = 0; spaceDown = false;
+    strokeId = 0; spaceDown = false; touchDown = false;
+    ink = INK_MAX; inkDry = false; inkIdle = 0;
+    inkFill.style.width = '100%';
+    inkPct.textContent = '100';
+    inkLabel.textContent = 'Paint';
+    gauge.classList.remove('dry');
     elapsed = 0; eliminated = 0; spawnClock = 600; readyClock = 1100;
     elTime.textContent = '0.0';
     elEliminated.textContent = '0';
@@ -630,7 +755,7 @@ body{
   function caught(d){
     setState('caught');
     shake = reduced ? 0 : 320;
-    spaceDown = false;
+    spaceDown = false; touchDown = false;
 
     // Build an irregular splatter around the impact point.
     const blobs = [];
@@ -660,7 +785,7 @@ body{
   function pause(){
     if (state !== 'playing') return;
     setState('paused');
-    spaceDown = false;
+    spaceDown = false; touchDown = false;
     cardBody.innerHTML =
       '<span class="eyebrow">Paused</span>' +
       '<h1>' + (elapsed/1000).toFixed(1) + 's</h1>' +
@@ -674,8 +799,16 @@ body{
   board.addEventListener('pointerdown', function(e){
     // A new touch/pen contact always starts a fresh stroke, so a wall
     // never bridges the gap between two separate drags.
-    if (e.pointerType !== 'mouse') strokeId++;
+    if (e.pointerType !== 'mouse'){ strokeId++; touchDown = true; }
   }, { passive:true });
+
+  // A finger lifting is the touch equivalent of releasing space: the
+  // brush comes up, the drain stops and the pot starts refilling.
+  ['pointerup','pointercancel'].forEach(function(ev){
+    board.addEventListener(ev, function(e){
+      if (e.pointerType !== 'mouse') touchDown = false;
+    }, { passive:true });
+  });
 
   board.addEventListener('pointermove', function(e){
     const r = canvas.getBoundingClientRect();
@@ -685,15 +818,14 @@ body{
     if (state === 'paused') resume();
 
     if (state === 'playing'){
-      // Mouse: only paints while space is held, so you can move
-      // freely without always leaving a wall behind you. Touch has
-      // no spacebar to hold, so dragging paints directly instead —
-      // matching how a finger naturally "draws".
-      const drawing = e.pointerType === 'mouse' ? spaceDown : true;
-      if (drawing){
+      // Mouse: only paints while space is held. Touch has no spacebar
+      // to hold, so a finger down paints directly instead — matching
+      // how a finger naturally "draws". Both are metered by painting(),
+      // so an empty pot stops the brush either way.
+      if (painting()){
         const last = trail[trail.length - 1];
         if (!last || last.strokeId !== strokeId || Math.hypot(player.x - last.x, player.y - last.y) >= TRAIL_MIN_DIST){
-          trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb, strokeId });
+          trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb, armed:false, strokeId });
           if (trail.length > TRAIL_MAX_PTS) trail.shift();
         }
       }
