@@ -197,8 +197,8 @@ body{
       <span class="value" id="time">0.0</span>
     </div>
     <div class="stat right">
-      <span class="label">Eliminated</span>
-      <span class="value" id="eliminated">0</span>
+      <span class="label">Score</span>
+      <span class="value" id="score">0</span>
       <span class="sub" id="best"></span>
     </div>
   </div>
@@ -243,7 +243,7 @@ body{
   const ctx         = canvas.getContext('2d');
   const hud         = document.getElementById('hud');
   const elTime      = document.getElementById('time');
-  const elEliminated = document.getElementById('eliminated');
+  const elScore     = document.getElementById('score');
   const elBest      = document.getElementById('best');
   const gauge       = document.getElementById('gauge');
   const inkFill     = document.getElementById('inkFill');
@@ -293,16 +293,32 @@ body{
   // dry and you are locked out until it has recovered to INK_UNLOCK.
   const INK_MAX          = 100;
   const INK_DRAIN        = 30;   // units per second while laying paint
-  const INK_REGEN        = 13;   // units per second while the brush is up
+  const INK_REGEN        = 6.5;  // units per second while the brush is up
   const INK_REGEN_DELAY  = 700;  // ms of not painting before refilling starts
   const INK_UNLOCK       = 30;   // must climb back to this before painting resumes
+
+  // Kills pay for themselves. Wiping a drop returns paint, and a run
+  // of drops taken by ONE continuous stroke pays progressively more —
+  // so the long, planned cut through three drifting drops is worth
+  // committing to, and hunting is a live alternative to retreating.
+  const INK_KILL_BASE  = 12;     // refund for the first drop a stroke takes
+  const INK_KILL_STEP  = 8;      // extra refund per additional drop on the same stroke
+  const INK_KILL_CAP   = 34;     // ceiling, so a lucky sweep can't top the pot off forever
+  const SCORE_PER_DROP = 100;    // k-th drop on a stroke scores SCORE_PER_DROP * k
 
   // ── State ─────────────────────────────────────────────────
   let w=0, h=0, dpr=1;
   let drops = [];
   let state = 'attract';                    // attract | ready | playing | paused | caught
   let player = { x:0, y:0, seen:false };
-  let elapsed = 0, eliminated = 0, best = 0;
+  let elapsed = 0, eliminated = 0, score = 0, best = 0;
+  /* Combo run, keyed on strokeId. That is only safe because nothing
+     reassigns a point's strokeId after it is laid — if anything ever
+     splits or renumbers a live stroke again, combos must key on a
+     separate birth id instead, or a split will silently reset a run
+     mid-sweep. */
+  let comboStroke = -1, comboCount = 0;
+  let flyers = [];
   let spawnClock = 0, readyClock = 0, pigment = 0;
   let shake = 0, splat = null, lastFrame = 0;
   let trail = [], trailPigment = 0, trailClock = 0, strokeId = 0;
@@ -400,47 +416,47 @@ body{
     return Math.hypot(d.x - cx, d.y - cy) < rr + halfW;
   }
 
-  /* Punch a local hole in the wall where a drop just broke through it
-     — only the paint near the contact point wipes away, so a wall
-     can still catch other drops elsewhere along its length. The
-     stroke is split on either side of the hole (via a fresh strokeId)
-     so draw() and future collision checks never bridge across it. */
-  function eraseWallAround(cx, cy, radius){
-    const out = [];
-    let gapOpen = false;
-    let remapFrom = null, remapTo = null;
-    for (const p of trail){
-      if (Math.hypot(p.x - cx, p.y - cy) < radius){
-        gapOpen = true;
-        continue;
-      }
-      if (gapOpen){
-        remapFrom = p.strokeId;
-        remapTo = ++strokeId;
-        gapOpen = false;
-      }
-      if (remapFrom !== null && p.strokeId === remapFrom){
-        out.push({ x:p.x, y:p.y, age:p.age, color:p.color, armed:p.armed, strokeId: remapTo });
-      } else {
-        remapFrom = null;
-        out.push(p);
-      }
-    }
-    trail = out;
-  }
-
-  /* A drop was just wiped by the wall: remove it, score it, flash the
-     HUD, and leave a small burst of its colour behind so the kill
-     reads clearly instead of the drop just silently vanishing. */
-  function eliminate(d, i){
+  /* A drop was just wiped. Work out where it sits in the current
+     stroke's run, pay out score and paint accordingly, flash the HUD,
+     and leave a burst plus a floating figure so the reward is legible
+     at the moment and place it was earned. */
+  function eliminate(d, i, lineage){
     drops.splice(i, 1);
     eliminated++;
-    elEliminated.textContent = eliminated;
+
+    // Same line as the last kill? The run continues. Otherwise it's
+    // the start of a new one.
+    if (lineage === comboStroke) comboCount++;
+    else { comboStroke = lineage; comboCount = 1; }
+
+    const gained = SCORE_PER_DROP * comboCount;
+    score += gained;
+    elScore.textContent = score;
+
+    // Refund paint — this is what makes a kill an investment rather
+    // than a consolation. A big enough refund can break a dry lockout,
+    // so running the pot down chasing a combo is a real gamble.
+    const refund = Math.min(INK_KILL_BASE + INK_KILL_STEP * (comboCount - 1), INK_KILL_CAP);
+    ink = Math.min(INK_MAX, ink + refund);
+    if (inkDry && ink >= INK_UNLOCK) inkDry = false;
+
     elTime.style.color = rgba(d.color, 1);
     elTime.classList.remove('flash');
     void elTime.offsetWidth;                  // force the animation to restart
     elTime.classList.add('flash');
     setTimeout(function(){ elTime.style.color = ''; }, 320);
+
+    elScore.classList.remove('flash');
+    void elScore.offsetWidth;
+    elScore.classList.add('flash');
+
+    // Floating figure: plain points for a single, points plus the
+    // multiplier once a run is actually going.
+    flyers.push({
+      x: d.x, y: d.y, color: d.color, age: 0,
+      text: '+' + gained + (comboCount > 1 ? '  \u00d7' + comboCount : ''),
+      big: comboCount > 1
+    });
 
     const blobs = [];
     for (let k = 0; k < 6; k++){
@@ -547,17 +563,20 @@ body{
 
       if (state !== 'playing' || !isLethal(d)) continue;
 
-      // A live drop touching the still-wet wall is wiped from the
-      // board. Segments only connect within the same stroke, so a
-      // gap left by releasing space (or lifting a finger) never
-      // draws — or kills — across it.
-      let wiped = false;
+      // A live drop touching set paint is wiped from the board, and
+      // the line comes through it undamaged — one stroke can take any
+      // number of drops along its length. Segments only connect within
+      // the same stroke, so a gap left by releasing space (or lifting
+      // a finger) never draws — or kills — across it.
+      let wiped = false, wipedBy = -1;
       for (let s = 1; s < trail.length; s++){
         const p1 = trail[s], p0 = trail[s - 1];
         if (p0.strokeId !== p1.strokeId || !p0.armed || !p1.armed) continue;
-        if (wallTouch(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){ wiped = true; break; }
+        if (wallTouch(d, p0.x, p0.y, p1.x, p1.y, TRAIL_WIDTH / 2)){
+          wiped = true; wipedBy = p1.strokeId; break;
+        }
       }
-      if (wiped){ eraseWallAround(d.x, d.y, TRAIL_WIDTH / 2 + d.r); eliminate(d, i); continue; }
+      if (wiped){ eliminate(d, i, wipedBy); continue; }
 
       /* Proper circular collision: centre distance against summed
          radii, squared on both sides to skip the sqrt. */
@@ -565,6 +584,11 @@ body{
       const distSq = dx*dx + dy*dy;
       const hitR = d.r + PLAYER_R;
       if (distSq < hitR * hitR){ caught(d); return; }
+    }
+
+    for (let i = flyers.length - 1; i >= 0; i--){
+      flyers[i].age += delta;
+      if (flyers[i].age > 900) flyers.splice(i, 1);
     }
 
     for (let i = pops.length - 1; i >= 0; i--){
@@ -654,6 +678,23 @@ body{
       }
     }
 
+    /* Floating payout: rises and fades from where the drop died, so
+       the reward reads at the place it was earned rather than only in
+       the corner of the screen. Combo hits are larger and brighter. */
+    for (const f of flyers){
+      const t = Math.min(f.age / 900, 1);
+      const a = 1 - Math.pow(t, 2);
+      if (a <= 0.01) continue;
+      ctx.save();
+      ctx.font = (f.big ? '600 20px ' : '500 14px ') +
+                 'ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = f.big ? rgba(f.color, a) : 'rgba(239,234,224,' + (a * 0.75) + ')';
+      ctx.fillText(f.text, f.x, f.y - 14 - t * 30);
+      ctx.restore();
+    }
+
     /* The splatter that got you: overlapping circles scaled in fast.
        This is the one loud moment in the whole design. */
     if (splat){
@@ -730,7 +771,8 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow">A dodging game</span>' +
       '<h1>Paint Drops</h1>' +
-      '<p>Paint keeps landing on the canvas and never dries on its own \u2014 it only piles up. Hold space (or hold a finger down, on touch) to lay a line behind your dot. It takes a moment to set; once it does, it wipes any drop that touches it \u2014 and it will wipe you just as fast. Mind the pot: paint runs out, and refills only while the brush is up.</p>' +
+      '<p>Paint keeps landing on the canvas and never dries on its own \u2014 it only piles up. Hold space (or hold a finger down, on touch) to lay a line behind your dot. It takes a moment to set; once it does, it wipes any drop that touches it \u2014 and it will wipe you just as fast.</p>' +
+      '<p>Every wipe pays paint back into the pot, and a run of drops taken by one unbroken line pays more with each drop it catches. Sweep three at once and the line has more than paid for itself.</p>' +
       '<button class="go" id="go">Start painting</button>' +
       '<span class="keys">Or press space</span>' +
       '<span class="swatches">' + PIGMENTS.map(p=>'<i style="background:'+rgba(p.rgb,.9)+'"></i>').join('') + '</span>';
@@ -738,7 +780,7 @@ body{
   }
 
   function start(){
-    drops = []; splat = null; shake = 0; pops = [];
+    drops = []; splat = null; shake = 0; pops = []; flyers = [];
     trail = []; trailPigment = Math.floor(Math.random() * PIGMENTS.length); trailClock = 500;
     strokeId = 0; spaceDown = false; touchDown = false;
     ink = INK_MAX; inkDry = false; inkIdle = 0;
@@ -746,9 +788,10 @@ body{
     inkPct.textContent = '100';
     inkLabel.textContent = 'Paint';
     gauge.classList.remove('dry');
-    elapsed = 0; eliminated = 0; spawnClock = 600; readyClock = 1100;
+    elapsed = 0; eliminated = 0; score = 0; spawnClock = 600; readyClock = 1100;
+    comboStroke = -1; comboCount = 0;
     elTime.textContent = '0.0';
-    elEliminated.textContent = '0';
+    elScore.textContent = '0';
     setState('ready');
   }
 
@@ -767,15 +810,15 @@ body{
     splat = { x:d.x, y:d.y, color:d.color, blobs, age:0 };
 
     const secs = elapsed / 1000;
-    const isBest = secs > best;
-    if (isBest) best = secs;
-    elBest.textContent = 'best ' + best.toFixed(1) + 's';
+    const isBest = score > best;
+    if (isBest) best = score;
+    elBest.textContent = 'best ' + best;
 
     cardBody.innerHTML =
       '<span class="eyebrow" style="--pigment:'+rgba(d.color,1)+'">Caught by <b>'+d.name+'</b></span>' +
-      '<span class="score">' + secs.toFixed(1) + '<span style="font-size:.28em;letter-spacing:0"> s</span></span>' +
-      '<p>' + eliminated + ' ball' + (eliminated === 1 ? '' : 's') + ' eliminated' +
-        (isBest ? ' \u00b7 new best' : ' \u00b7 best ' + best.toFixed(1) + 's') + '</p>' +
+      '<span class="score">' + score + '<span style="font-size:.28em;letter-spacing:0"> pts</span></span>' +
+      '<p>' + secs.toFixed(1) + 's survived \u00b7 ' + eliminated + ' ball' + (eliminated === 1 ? '' : 's') + ' wiped' +
+        (isBest ? ' \u00b7 new best' : ' \u00b7 best ' + best) + '</p>' +
       '<button class="go" id="go">Paint again</button>' +
       '<span class="keys">Or press space</span>';
     bindGo(start);
@@ -834,7 +877,8 @@ body{
       if (painting()){
         const last = trail[trail.length - 1];
         if (!last || last.strokeId !== strokeId || Math.hypot(player.x - last.x, player.y - last.y) >= TRAIL_MIN_DIST){
-          trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb, armed:false, strokeId });
+          trail.push({ x: player.x, y: player.y, age: 0, color: PIGMENTS[trailPigment].rgb,
+                       armed:false, strokeId });
           if (trail.length > TRAIL_MAX_PTS) trail.shift();
         }
       }
