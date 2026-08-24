@@ -280,7 +280,7 @@ body{
   // it — and it will just as happily wipe you. Your own line is a
   // hazard, so every stroke needs an exit planned before you lay it.
   const TRAIL_MIN_DIST = 9;      // px of movement before a new stroke point is laid
-  const TRAIL_LIFE_MS  = 5000;   // total time a wall stays on the board
+  const TRAIL_LIFE_MS  = 4000;   // total time a wall stays on the board
   const TRAIL_ARM_MS   = 600;    // harmless while setting; lethal to everything after
   const TRAIL_SOLID_MS = 3000;   // full strength for this long, then eases out over the rest
   const TRAIL_WIDTH    = 7;      // stroke thickness, px
@@ -789,7 +789,7 @@ body{
     cardBody.innerHTML =
       '<span class="eyebrow">Paused</span>' +
       '<h1>' + (elapsed/1000).toFixed(1) + 's</h1>' +
-      '<p>The board is frozen. Move the pointer back over the canvas to carry on.</p>' +
+      '<p>The board is frozen. Move the pointer to carry on.</p>' +
       '<button class="go" id="go">Resume</button>';
     bindGo(resume);
   }
@@ -805,15 +805,24 @@ body{
   // A finger lifting is the touch equivalent of releasing space: the
   // brush comes up, the drain stops and the pot starts refilling.
   ['pointerup','pointercancel'].forEach(function(ev){
-    board.addEventListener(ev, function(e){
+    // Window-level: a finger can be lifted past the edge of the board,
+    // and that must still put the brush down.
+    window.addEventListener(ev, function(e){
       if (e.pointerType !== 'mouse') touchDown = false;
     }, { passive:true });
   });
 
-  board.addEventListener('pointermove', function(e){
+  /* Bound to the window, not the board, so the dot keeps tracking a
+     pointer that has wandered off the playfield. Coordinates are
+     clamped to the board so the dot pins itself to the nearest edge
+     and stays fully on screen — running for the border is no longer
+     an escape, it just backs you into a wall you can't retreat past. */
+  window.addEventListener('pointermove', function(e){
     const r = canvas.getBoundingClientRect();
-    player.x = e.clientX - r.left;
-    player.y = e.clientY - r.top;
+    const px = e.clientX - r.left;
+    const py = e.clientY - r.top;
+    player.x = Math.min(Math.max(px, PLAYER_R), Math.max(PLAYER_R, w - PLAYER_R));
+    player.y = Math.min(Math.max(py, PLAYER_R), Math.max(PLAYER_R, h - PLAYER_R));
     player.seen = true;
     if (state === 'paused') resume();
 
@@ -832,9 +841,10 @@ body{
     }
   }, { passive:true });
 
-  // Leaving the board used to be free invincibility. Now it pauses,
-  // and the clock stops with it.
-  board.addEventListener('pointerleave', pause);
+  // Leaving the board is not a pause and not invincibility — the run
+  // carries on with the dot pinned to the edge. Only genuinely losing
+  // the page (tab switch, window blur) stops the clock, since the game
+  // can't read the pointer at all once that happens.
   window.addEventListener('blur', pause);
   document.addEventListener('visibilitychange', function(){ if (document.hidden) pause(); });
 
