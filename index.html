@@ -317,6 +317,18 @@ h1 .second{ color:var(--linen); opacity:.55; }
   object-fit: cover;  
 }
 
+/* case study grid — four cards, no carousel motion. These are
+   confidential client projects with no screenshots to show, so the
+   card leads with a labelled placeholder instead of an image. */
+.cases-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1.75rem;
+}
+@media (max-width:860px){
+  .cases-grid{ grid-template-columns:1fr; }
+}
+
 /* ─── FOOTER ──────────────────────────────── */
 footer{
   position:relative; z-index:1;
@@ -768,7 +780,8 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   <a class="mark" href="#top"><span class="dot"></span>Steven McDonald</a>
   <ul class="nav-links">
     <li><a href="#aboutMe">Bio</a></li>
-    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#Projects">Projects</a></li>
     <li><a href="#paintings">Paintings</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
@@ -794,7 +807,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
       <p class="eyebrow"><span class="rule"></span>UI/UX Technical Lead · Healthlevel</p>
       <p class="lede"> I handle the whole thing — <em> Research, design, and code</em>.</p>
       <div class="actions">
-        <a class="btn btn-fill" href="#portfolio">See my work <span class="arrow">→</span></a>
+        <a class="btn btn-fill" href="#work">See my work <span class="arrow">→</span></a>
         <a class="btn btn-resume" href="./documents/steven-mcdonald-resume.pdf" id="resumeBtn" target="_blank" rel="noopener">See my Resume <span class="arrow">→</span></a>
         <a class="btn btn-ghost" href="#contact">Get in touch</a>
       </div>
@@ -825,9 +838,61 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
     needed. 
 </section>
 
-<section class="section" id="portfolio">
+<section class="section" id="work">
+  <div class="section-head"><h2>Case Studies</h2></div>
+  <div class="cases-grid">
+    <article class="project-card">
+      <div class="thumb" style="border-top:3px solid var(--ultramarine)">Client Work — NDA</div>
+      <div>x
+        <span class="index">Case Study 01</span>
+        <h3>Tele-Stroke Clinical Portal</h3>
+      </div>
+      <p>Owned the client-design relationship end to end for a new enterprise customer for patient records, case detail, 
+         follow-up, and case history modules — including researching requirements, creating mockups,
+         running usability sessions, and writing the front end code. Shipped for the VA hospital system.</p>
+      <div class="tags"><span>Healthcare</span><span>Client Design</span><span>React</span></div>
+    </article>
+    <article class="project-card">
+      <div class="thumb" style="border-top:3px solid var(--cadmium)">Client Work — NDA</div>
+      <div>
+        <span class="index">Case Study 02</span>
+        <h3>Legacy-to-React Migration</h3>
+      </div>
+      <p>Architected a strangler-pattern compatibility layer so React components could render inside our legacy Backbone
+         front end, letting a live production product migrate incrementally with zero feature freeze. Selected
+         and standardized the state layer (Redux Toolkit, RTK Query, Zustand), cutting data-fetching boilerplate
+         and raising Lighthouse scores from 32 to 80.</p>
+      <div class="tags"><span>Architecture</span><span>React</span><span>Performance</span></div>
+    </article>
+    <article class="project-card">
+      <div class="thumb" style="border-top:3px solid var(--viridian)">Client Work — NDA</div>
+      <div>
+        <span class="index">Case Study 03</span>
+        <h3>WCAG / Section 508 Audit System</h3>
+      </div>
+      <p>Built an internal accessibility audit and test system so the product can reliably pass the WCAG and
+         Section 508 reviews required to hold federal VA contracts — turning compliance from a pre-audit
+         scramble into part of the release process.</p>
+      <div class="tags"><span>Accessibility</span><span>WCAG</span><span>Compliance</span></div>
+    </article>
+    <article class="project-card">
+      <div class="thumb" style="border-top:3px solid var(--hansa)">Client Work — NDA</div>
+      <div>
+        <span class="index">Case Study 04</span>
+        <h3>Foundations Design Overhaul</h3>
+      </div>
+      <p>Led a full visual overhaul of Foundations, the company's core software, to bring it in line with company
+         branding and strip out visual clutter. Introduced a flat color scheme built for quick scanning, a
+         library of standard reusable components, and a reworked information architecture that cut the number of
+         clicks needed to reach core content.</p>
+      <div class="tags"><span>Design System</span><span>Visual Design</span><span>Information Architecture</span></div>
+    </article>
+  </div>
+</section>
+
+<section class="section" id="Projects">
   <div class="section-head with-controls">
-    <h2>Portfolio</h2>
+    <h2>Projects</h2>
     <div class="carousel-controls">
       <span class="carousel-count" id="carouselCount" aria-hidden="true"></span>
       <button type="button" class="carousel-btn" id="carouselPrev" aria-label="Previous project" aria-controls="carouselTrack">
