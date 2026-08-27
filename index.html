@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="author" content="Steven McDonald">
 <meta name="description" content="Steven McDonald is a UI/UX Technical Lead at Healthlevel. Cornell CS. He designs and ships the whole thing — research through production.">
-<meta name="keywords" content="UI/UX, data visualizations, technical lead, typescript developer, front end, design engineer, Cornell, Healthlevel, product design, software engineer">
 
 <meta property="og:title" content="Steven McDonald — UI/UX Technical Lead">
 <meta property="og:description" content="I design and ship the whole thing — research through production.">
@@ -63,7 +62,7 @@ a{ color:inherit; }
   border-radius:2px;
 }
 
-/* ─── NAV ─────────────────────────────────── */
+/* nav */
 .nav{
   position:fixed; top:0; left:0; right:0; z-index:50;
   height:var(--nav-h);
@@ -110,7 +109,7 @@ a{ color:inherit; }
   .socials a:nth-child(1){ display:none; }
 }
 
-/* ─── HERO ────────────────────────────────── */
+/* hero */
 .hero{
   position:relative;
   min-height:100svh;
@@ -317,9 +316,7 @@ h1 .second{ color:var(--linen); opacity:.55; }
   object-fit: cover;  
 }
 
-/* case study grid — four cards, no carousel motion. These are
-   confidential client projects with no screenshots to show, so the
-   card leads with a labelled placeholder instead of an image. */
+/* case study grid — NDA work, no screenshots, so cards lead with a label instead */
 .cases-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -329,7 +326,7 @@ h1 .second{ color:var(--linen); opacity:.55; }
   .cases-grid{ grid-template-columns:1fr; }
 }
 
-/* ─── FOOTER ──────────────────────────────── */
+/* footer */
 footer{
   position:relative; z-index:1;
   background:var(--ground-deep);
@@ -414,7 +411,7 @@ footer{
   line-height:1.9; letter-spacing:.04em;
 }
 
-/* ─── LOAD SEQUENCE ───────────────────────── */
+/* load-in animation */
 .reveal > *{
   opacity:0; transform:translateY(14px);
   animation:settle .85s cubic-bezier(.2,.7,.25,1) forwards;
@@ -438,35 +435,8 @@ footer{
   .btn:hover, .btn:hover .arrow{ transform:none; }
 }
 
-/* ---- Dialog --------------------------------------------------------- */
-  .sheet{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;
-    box-shadow:var(--shadow-lift);max-height:calc(100vh - 48px);display:flex;flex-direction:column}
-  .sheet-hero{position:relative;flex:none}
-  .sheet-hero img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;background:var(--accent-soft)}
-  .close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:99px;
-    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
-    font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center}
-  .close:hover{color:var(--ink);border-color:var(--accent)}
-  .close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .sheet-body{padding:24px 28px;overflow-y:auto}
-  .sheet-body h2{font-family:var(--serif),serif;font-weight:500;font-size:26px;line-height:1.15;
-    letter-spacing:-.01em;margin-bottom:12px}
-  .sheet-body .meta{margin:0 0 16px;padding:0}
-  .sheet-body .desc{color:var(--ink-soft);font-size:15.5px;white-space:pre-wrap}
-  .sheet-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 28px 24px;
-    border-top:1px solid var(--line);flex:none}
-  .start{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
-    font-size:15px;font-weight:600;padding:11px 22px;border-radius:var(--radius);
-    transition:opacity .15s ease}
-  .start:hover{opacity:.9}
-  .start:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-  .foot-note{font-size:13px;color:var(--ink-faint)}
-
-  .empty,.err{color:var(--ink-faint);font-size:15px;padding:48px 0;grid-column:1/-1}
-  .err strong{display:block;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
-  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   dialog {
-    color:var(--ink);
+    color:var(--linen);
     border:none;
     padding:0;
     background:transparent;
@@ -509,15 +479,7 @@ footer{
     }
   }
 
-  @media (max-width:560px){
-    .wrap{padding:28px 20px 72px}
-    h1{font-size:30px}
-    .sheet-body,.sheet-foot{padding-left:20px;padding-right:20px}
-  }
-
-/* ─── PLAYABLE CARD ───────────────────────── */
-/* The Paint Drops card opens the game in place rather than navigating,
-   so it gets an affordance the other cards don't have. */
+/* playable card — Paint Drops opens in place instead of navigating away */
 .project-card.playable{ position:relative; }
 .project-card .media{ position:relative; line-height:0; }
 .project-card .media img{ border-radius:4px; }
@@ -535,11 +497,7 @@ footer{
 .play-badge svg{ width:9px; height:9px; fill:currentColor; }
 .project-card.playable:hover .play-badge{ transform:translateY(-2px); background:#F2BE5E; }
 
-/* ─── GAME DIALOG ─────────────────────────── */
-/* The generic dialog rules above cap width at 560px and set a light
-   surface; a game needs the room and the dark ground, so these
-   id-scoped rules win on specificity while inheriting the existing
-   open/close transition and backdrop. */
+/* game dialog — wider than the default 560px cap, needs room for the canvas */
 #gameDialog{
   max-width:min(1180px, calc(100vw - 1.5rem));
   width:100%;
@@ -593,10 +551,7 @@ footer{
   background:var(--ground);
 }
 
-/* ─── RESUME DIALOG ───────────────────────── */
-/* Same open/close transition and backdrop as the game dialog, sized for
-   a document instead of a canvas, with a light frame background so the
-   PDF's own page reads correctly. */
+/* resume dialog — same open/close as the game dialog, light frame for the PDF */
 #resumeDialog{
   max-width:min(880px, calc(100vw - 1.5rem));
   width:100%;
@@ -651,13 +606,9 @@ footer{
   background:var(--linen);
 }
 
-/* The game canvas sits inside an iframe, so the page behind it must
-   not scroll while it's open. */
-html.dialog-open, body.dialog-open{ overflow:hidden; }
-/* ─── CAROUSEL ────────────────────────────── */
-/* Native scroll-snap does the work: touch swipe, trackpad and keyboard
-   scrolling all come free, and the track still scrolls if the JS below
-   never runs. The buttons are an enhancement layered on top. */
+html.dialog-open, body.dialog-open{ overflow:hidden; } /* keep the page still while a dialog's open */
+
+/* carousel — scroll-snap handles swipe/trackpad/keyboard, this layers on buttons */
 .section-head.with-controls{ justify-content:space-between; }
 .carousel-controls{ display:flex; align-items:center; gap:.75rem; }
 .carousel-count{
@@ -677,10 +628,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 
 .carousel{
   position:relative;
-  /* One card holds the stage; its neighbours sit just off it as a hint.
-     --card-w is a length, not a percentage, so the track padding below
-     can centre it without the two measurements disagreeing. */
-  --card-w:clamp(272px, 62vw, 680px);
+  --card-w:clamp(272px, 62vw, 680px); /* a length, not %, so padding below can centre it */
   margin-inline:calc(var(--gutter) * -1);
 }
 .carousel-track{
@@ -688,9 +636,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   gap:1.5rem;
   overflow-x:auto;
   scroll-snap-type:x mandatory;
-  /* Half the leftover space either side, so the first and last cards can
-     reach the centre instead of jamming against the edge. */
-  padding-inline:max(var(--gutter), calc((100% - var(--card-w)) / 2));
+  padding-inline:max(var(--gutter), calc((100% - var(--card-w)) / 2)); /* lets end cards reach centre */
   padding-block:.4rem;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
@@ -700,9 +646,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   flex:0 0 var(--card-w);
   scroll-snap-align:center;
 }
-/* Dimming is switched on by the script, so if it never runs the track is
-   a plain scroller of full-strength cards rather than permanently faded
-   ones. JS adds .is-active to whichever card is nearest the middle. */
+/* .is-enhanced is added by JS, so a no-JS track just scrolls at full opacity */
 .carousel-track.is-enhanced > *{
   opacity:.26;
   transform:scale(.93);
@@ -710,10 +654,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 }
 .carousel-track.is-enhanced > .is-active{ opacity:1; transform:scale(1); }
 
-/* On a wide screen the neighbours would show a few hundred pixels each —
-   more shoulder than hint. Fading the track edges cuts them off softly
-   instead of at a hard line, and doubles as a signal that the row keeps
-   going past the frame. */
+/* fades the track edges instead of cutting neighbour cards off hard */
 .carousel-track.is-enhanced{
   -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
           mask-image:linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
@@ -725,7 +666,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 }
 .carousel-track:focus-visible{ outline:2px solid var(--hansa); outline-offset:4px; border-radius:4px; }
 
-/* ─── PAINTINGS ───────────────────────────── */
+/* paintings */
 .paintings-grid{
   display:grid;
   grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
@@ -742,9 +683,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 .paintings-body{ margin:0 0 1.6rem; color:var(--linen-mute); font-size:.95rem; max-width:46ch; }
 .paintings-body strong{ color:var(--linen); font-weight:500; }
 
-/* Palette strip: the same pigments the site is built from, used here as
-   a bridge between the paintings and the code. */
-.palette{ display:flex; gap:.35rem; margin-bottom:1.8rem; }
+.palette{ display:flex; gap:.35rem; margin-bottom:1.8rem; } /* same pigments the site's built from */
 .palette i{ height:6px; flex:1; border-radius:99px; display:block; }
 
 .awards{
@@ -843,7 +782,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   <div class="cases-grid">
     <article class="project-card">
       <div class="thumb" style="border-top:3px solid var(--ultramarine)">Client Work — NDA</div>
-      <div>x
+      <div>
         <span class="index">Case Study 01</span>
         <h3>Tele-Stroke Clinical Portal</h3>
       </div>
@@ -1064,7 +1003,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
   <div class="resume-sheet">
     <div class="resume-bar">
       <h2 id="resumeTitle">Resume</h2>
-      <a class="resume-download" href="./steven-mcdonald-resume.pdf" download>Download</a>
+      <a class="resume-download" href="./documents/steven-mcdonald-resume.pdf" download>Download</a>
       <button type="button" class="resume-close" id="resumeClose" aria-label="Close resume">✕</button>
     </div>
     <iframe class="resume-frame" id="resumeFrame" title="Steven McDonald — Resume"></iframe>
@@ -1074,11 +1013,7 @@ html.dialog-open, body.dialog-open{ overflow:hidden; }
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* ─────────────────────────────────────────────
-   Pigment spray: dragging across the ground
-   throws circles of paint outward from the
-   cursor. They travel until they leave the page.
-   ───────────────────────────────────────────── */
+// pigment spray — throws paint circles from the cursor as you move
 (function(){
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = document.getElementById('paint');
@@ -1196,25 +1131,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   }
 })();
 
-/* ─────────────────────────────────────────────
-   Paint Drops dialog.
-
-   The card stays a real link to wet-paint.html, so it works without
-   JS, survives middle-click, and shows a sensible URL on hover. The
-   click handler intercepts a plain left-click only and opens the
-   game in a modal instead.
-   ───────────────────────────────────────────── */
-/* ─────────────────────────────────────────────
-   Portfolio carousel.
-
-   One card holds focus in the centre with its neighbours faded either
-   side, and the ends wrap round. The track is a scroll-snap container,
-   so swiping, trackpad scrolling and arrow keys work with no JS at all —
-   this adds the buttons, the counter, and the dimming of off-centre
-   cards. Wrapping sweeps the track rather than teleporting: with four
-   cards the trip back to the start is short, and seeing it move keeps
-   the row's order intact in your head.
-   ───────────────────────────────────────────── */
+// portfolio carousel — this layers buttons/counter/dimming on top of native scroll-snap
 (function(){
   const track = document.getElementById('carouselTrack');
   const prev  = document.getElementById('carouselPrev');
@@ -1229,9 +1146,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
   track.classList.add('is-enhanced');      // hands the dimming over to CSS
 
-  /* Index of the card nearest the centre of the track. Measured against
-     the viewport centre rather than scrollLeft, so it stays correct at
-     both ends where a card can't be scrolled fully into the middle. */
+  // index of the card nearest the track's centre (viewport-based, not scrollLeft)
   function current(){
     const mid = track.scrollLeft + track.clientWidth / 2;
     let best = 0, dist = Infinity;
@@ -1265,9 +1180,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   prev.addEventListener('click', function(){ step(-1); });
   next.addEventListener('click', function(){ step(1); });
 
-  /* Dimming has to keep up with the scroll rather than wait for it to
-     settle, so this runs on a frame instead of a timeout. */
-  let queued = false;
+  let queued = false; // rAF instead of a timeout so dimming tracks the scroll live
   track.addEventListener('scroll', function(){
     if (queued) return;
     queued = true;
@@ -1282,14 +1195,9 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   });
 
   cards.forEach(function(c, i){
-    // Tabbing to an off-centre card scrolls the track; bring it properly
-    // to the middle so focus and the highlighted card agree.
-    c.addEventListener('focus', function(){ center(i, true); });
+    c.addEventListener('focus', function(){ center(i, true); }); // keep focus and centring in sync
 
-    /* A click on a parked card promotes it instead of following its link
-       — you shouldn't have to aim at a card you can barely read. Stopping
-         immediate propagation also holds back the Paint Drops dialog, whose
-         handler is bound to the same element. */
+    // clicking a parked (dimmed) card centres it instead of following the link
     c.addEventListener('click', function(e){
       if (!c.classList.contains('is-active')){
         e.preventDefault();
@@ -1302,6 +1210,8 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   sync();
 })();
 
+// Paint Drops dialog — card stays a real link to wet-paint.html so it
+// still works without JS; a plain left-click opens it in a modal instead
 (function(){
   const dlg   = document.getElementById('gameDialog');
   const frame = document.getElementById('gameFrame');
@@ -1312,28 +1222,22 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   const SRC = card.getAttribute('href');
 
   function open(e){
-    // Let modified clicks (new tab, new window, download) behave normally.
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return; // let cmd/ctrl-click through
     e.preventDefault();
     frame.src = SRC;                       // load on demand, not on page load
     dlg.showModal();
     document.documentElement.classList.add('dialog-open');
     document.body.classList.add('dialog-open');
-    // Focus the frame so the game's own key handling works immediately.
-    setTimeout(function(){ try { frame.contentWindow.focus(); } catch(_){} }, 120);
+    setTimeout(function(){ try { frame.contentWindow.focus(); } catch(_){} }, 120); // so game keys work right away
   }
 
   card.addEventListener('click', open);
 
   close.addEventListener('click', function(){ dlg.close(); });
 
-  // Click on the backdrop. Clicks inside the iframe never reach this
-  // listener, so testing the target is enough — no geometry needed.
-  dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); }); // backdrop click closes it
 
-  /* The game pauses on Escape and forwards it here, since a keydown
-     inside the iframe never reaches this document. Only accept the
-     message from the frame we opened. */
+  // game forwards Escape via postMessage since iframe keydowns don't bubble out
   window.addEventListener('message', function(e){
     if (e.source === frame.contentWindow && e.data === 'wetpaint:close' && dlg.open) dlg.close();
   });
@@ -1356,8 +1260,6 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   const SRC = btn.getAttribute('href');
 
   function open(e){
-    // Let modified clicks (new tab, new window) and the download link
-    // behave normally.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
     frame.src = SRC;                       // load on demand, not on page load
@@ -1369,8 +1271,6 @@ document.getElementById('yr').textContent = new Date().getFullYear();
   btn.addEventListener('click', open);
   close.addEventListener('click', function(){ dlg.close(); });
 
-  // Click on the backdrop closes it; clicks inside the iframe never
-  // reach this listener, so testing the target is enough.
   dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
 
   dlg.addEventListener('close', function(){
