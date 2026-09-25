@@ -1,11 +1,1227 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Figure Study · Anatomy Atelier</title><meta name="description" content="An interactive anatomy construction studio for artists. Pose a figure, explore anatomical layers, and study drawing construction."><link rel="stylesheet" href="style.css?v=15"></head><body>
-<header><a class="brand" href="./"><span class="brandmark">F / S</span><span>FIGURE STUDY<small>ANATOMY ATELIER</small></span></a><a class="headernote" href="?schemas=all">Drawing schema collection ↗</a><button id="help">How to study <span>?</span></button></header>
-<main class="schemas-closed"><section class="workspace"><div class="toolbar"><div><span class="eyebrow">01 / EXPLORE THE FIGURE</span><h1>Anatomy in form</h1></div><div class="segmented" id="sex"><button data-sex="male" aria-pressed="true">Male</button><button data-sex="female" aria-pressed="false" disabled title="Female anatomy is temporarily disabled">Female (unavailable)</button></div></div>
-<div class="interactionbar"><div class="segmented" aria-label="Interaction mode"><button data-mode="study" aria-pressed="true">Study</button><button data-mode="pose" aria-pressed="false">Pose</button></div><span id="modeHint">Click a body part to explore its drawing schemas.</span><label class="sr" for="region">Select a body part to study</label><select id="region" aria-controls="drawingPanel"><option value="" disabled selected>Study a body part…</option></select><button id="undoPose" disabled>Undo pose</button></div><div class="layerbar" id="layers"><button data-layer="construction">Construction</button><button data-layer="skeleton">Skeleton</button><button class="active" data-layer="muscle">Muscle</button></div>
-<div id="viewport" tabindex="0" role="application" aria-label="Interactive figure. Drag to orbit, scroll to zoom, click anatomy to study. Use view buttons and region selector for keyboard access."><div class="stagelabel"><span id="modelLabel">MALE / MUSCLE</span><small id="modelDetail">Loading detailed anatomy</small><small id="selectedStructure"></small></div><div id="loading">Preparing the figure…</div><div class="viewtools"><button data-view="front">Front</button><button data-view="side">Side</button><button data-view="back">Back</button><button id="fit">Fit figure</button><button id="zoomIn" aria-label="Zoom in">＋</button><button id="zoomOut" aria-label="Zoom out">−</button></div><div id="jointMarkers" hidden aria-label="Pose joints"></div><section id="jointPanel" hidden aria-label="Selected joint controls"><div class="jointpanelhead"><span class="eyebrow">POSE / SELECTED JOINT</span><button id="closeJoint" aria-label="Close joint controls">×</button></div><label class="sr" for="joint">Selected joint</label><select id="joint"></select><p id="jointNote"></p><div id="sliders"></div><div id="handActions" hidden><button id="zoomHand">Zoom to hand</button><button id="openHand">Open hand</button></div><div class="jointactions"><button id="resetJoint">Reset joint</button><span>Angles in degrees</span></div></section><div id="anatomyHover" role="tooltip" hidden></div><div class="stagehint">Drag to orbit <b>·</b> Scroll / pinch to zoom <b>·</b> Click a body part for schemas</div></div>
-<p id="anatomyNotice" class="anatomynotice"></p><div class="posebar"><label>POSE <select id="preset"><option value="neutral">Original standing</option></select></label><button id="reset">Reset selected pose</button><label class="light">LIGHT <input aria-label="Lighting direction" id="light" type="range" min="-180" max="180" value="-40"></label></div>
-<p class="muted">Pose mode: click a joint marker to reveal its movements. Reference-based écorché poses use approximate soft-tissue deformation.</p>
-</section><aside class="lessons" id="drawingPanel" hidden aria-label="Drawing schemas"><div class="schema-panel-head"><span class="eyebrow">02 / STUDY THE STRUCTURE</span><button id="hideDrawings" aria-label="Hide drawing schemas" title="Hide drawings">×</button></div><div class="lessonheading"><h2 id="regionTitle">Chest</h2><button id="focus">Focus in 3D ↗</button></div><p id="intro"></p><div class="anglebar" id="angles"><span>DIAGRAM VIEW</span><button data-angle="front" class="active">Front</button><button data-angle="quarter">¾</button><button data-angle="side">Side</button><button data-angle="back">Back</button></div><div id="cards"></div><div class="practice"><span class="eyebrow">TRY IT ON PAPER</span><p id="exercise"></p></div><p class="lessonfoot">Diagrams are fixed neutral studies. Model posing does not change them. All three stages are simplified constructions, not finished anatomical illustrations.</p></aside></main>
-<footer><span>DRAWING SCHEMAS <b> / </b> Detailed bone & muscle reference · approximate posing</span><span><a href="figure-study-v13.zip" download>Download website</a> &nbsp; · &nbsp; <a href="README.txt" target="_blank">About & self-hosting</a> &nbsp; · &nbsp; <a href="ANATOMY-CREDITS.txt" target="_blank">Anatomy credits</a></span></footer>
-<dialog id="helpDialog"><button id="closeHelp" class="close" aria-label="Close">×</button><span class="eyebrow">A SMALL STUDIO ROUTINE</span><h2>From gesture to form.</h2><ol><li>Choose a figure and pose. In Pose mode, click a joint marker to open its movement controls. Reset joint restores that joint; Undo pose reverses your last adjustment.</li><li>Switch to Construction. Draw the rib cage, pelvis, and limb directions first.</li><li>Select a region. Open an approved drawing sheet to compare its construction and developed forms.</li><li>Return to the whole figure. Connect the part to neighboring forms.</li><li>Change the light. Notice which planes face it before adding tone.</li></ol><p>Bone and muscle views use adapted Z-Anatomy / BodyParts3D meshes. Female anatomy is temporarily disabled while its remaining structures are reviewed. Neutral source anatomy is preserved; posed deformation is approximate. Construction remains a teaching mannequin. Joint contact and muscle contraction are not simulated. Use validated anatomical references alongside it.</p></dialog>
-<script type="module" src="app.js?v=15"></script><script type="module" src="download.js?v=13"></script></body></html>
+<title>Écorché Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#E7EAE8; --panel:#F5F6F4; --ink:#1C2220; --muted:#5E6864; --line:#CBD1CD;
+  --accent:#2F5FC4; --accent-soft:#DCE5F7; --bone:#E9E0CC; --muscle:#A23B2F;
+  --stage:#DDE1DE; --stage2:#C9CFCB; --paper:#F3F1EA;
+  --serif:"Cormorant", "Iowan Old Style", Georgia, serif;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#15181A; --panel:#1D2124; --ink:#E3E6E3; --muted:#9AA39F; --line:#30363A;
+  --accent:#7FA3F0; --accent-soft:#233252; --stage:#202427; --stage2:#121416; --paper:#EDEAE2; color-scheme:dark; }}
+:root[data-theme="dark"]{
+  --bg:#15181A; --panel:#1D2124; --ink:#E3E6E3; --muted:#9AA39F; --line:#30363A;
+  --accent:#7FA3F0; --accent-soft:#233252; --stage:#202427; --stage2:#121416; --paper:#EDEAE2; color-scheme:dark; }
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;margin:0}
+.app{height:100%;display:grid;grid-template-columns:320px 1fr;min-height:0}
+aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:20px 20px 28px;display:flex;flex-direction:column;gap:22px}
+.brand h1{font-family:var(--serif);font-weight:600;font-size:34px;line-height:1;margin:0;letter-spacing:.01em}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:12.5px;line-height:1.45}
+.sec{display:flex;flex-direction:column;gap:10px}
+.sec h2{margin:0;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px;background:var(--bg)}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:7px 6px;border-radius:5px;font-size:13px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg button:focus-visible,.pose:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.poses{display:flex;flex-direction:column;gap:2px}
+.pose{all:unset;cursor:pointer;display:grid;grid-template-columns:22px 1fr;gap:10px;padding:8px 10px;border-radius:7px;align-items:baseline}
+.pose:hover{background:var(--bg)}
+.pose[aria-pressed="true"]{background:var(--accent-soft)}
+.pose .num{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pose b{font-family:var(--serif);font-size:19px;font-weight:600;display:block;line-height:1.1}
+.pose small{color:var(--muted);font-size:12px;line-height:1.35;display:block;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:500;color:var(--muted)}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c);opacity:.35}
+.chip[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.chip[aria-pressed="true"] i{opacity:1}
+.row{display:grid;grid-template-columns:78px 1fr 38px;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.row output{font-family:var(--mono);font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{all:unset;cursor:pointer;font-size:12px;padding:4px 9px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.presets button:hover{color:var(--ink);border-color:var(--ink)}
+.note{font-size:11.5px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:14px}
+.note a{color:var(--accent)}
+main{position:relative;min-width:0;min-height:0;background:radial-gradient(ellipse at 50% 40%,var(--stage),var(--stage2))}
+canvas#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:absolute;left:16px;top:14px;pointer-events:none;display:flex;flex-direction:column;gap:2px}
+.hud .t{font-family:var(--serif);font-size:26px;font-weight:600;font-style:italic;line-height:1.05}
+.hud .s{font-size:12px;color:var(--muted)}
+.plates{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);pointer-events:none}
+.plates div{border-left:1px solid rgba(0,0,0,.12);display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px}
+.plates div:first-child{border-left:0}
+.plates span{font-family:var(--serif);font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:#4a4238;background:rgba(243,241,234,.8);padding:2px 8px}
+.plates::before{content:"";position:absolute;inset:0;background:#F3F1EA;z-index:-1}
+.tip{position:absolute;pointer-events:none;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 10px;box-shadow:0 6px 18px rgba(0,0,0,.18);max-width:260px;transform:translate(14px,14px)}
+.tip b{display:block;font-family:var(--serif);font-size:18px;font-weight:600;line-height:1.1}
+.tip span{font-size:11.5px;color:var(--muted)}
+.tip em{font-style:normal;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:22px;font-style:italic;color:var(--muted)}
+.hint{position:absolute;right:16px;top:16px;font-size:11.5px;color:var(--muted);pointer-events:none}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto}
+  main{grid-row:1;min-height:62vh}
+  aside{grid-row:2;border-right:0;border-top:1px solid var(--line);padding:18px 16px 28px}
+  .brand{display:none}
+  .hint{display:none}
+  .hud .t{font-size:21px}
+  .plates span{font-size:11px;letter-spacing:.12em}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* ---- v2: modes, lessons, posing ---- */
+.modebar{display:flex;flex-direction:column;gap:8px}
+select.region{all:unset;box-sizing:border-box;width:100%;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:8px 30px 8px 11px;font-size:13px;color:var(--ink);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23788' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 11px center}
+select.region:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.poseactions{display:flex;gap:6px;flex-wrap:wrap}
+.btn{all:unset;cursor:pointer;font-size:12.5px;font-weight:500;padding:6px 11px;border-radius:6px;border:1px solid var(--line);color:var(--ink);background:var(--panel)}
+.btn:hover{border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default;border-color:var(--line)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.pose .edited{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-left:6px}
+
+/* joint markers */
+#markers{position:absolute;inset:0;pointer-events:none}
+.jm{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:2px solid #fff;background:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.45);pointer-events:auto;cursor:pointer;padding:0}
+.jm.small{width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-width:1.5px}
+.jm[aria-pressed="true"]{background:#fff;border-color:var(--accent);box-shadow:0 0 0 4px rgba(47,95,196,.35)}
+.jm:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.jm span{display:none;position:absolute;left:14px;top:-4px;white-space:nowrap;font-size:11px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.jm:hover span,.jm:focus-visible span{display:block}
+.jpanel{box-sizing:border-box;position:absolute;width:260px;max-width:calc(100% - 24px);background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);padding:12px 14px 12px;display:flex;flex-direction:column;gap:10px;z-index:5}
+.jpanel .jh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.jpanel .jh b{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.1}
+.x{all:unset;cursor:pointer;width:26px;height:26px;display:grid;place-items:center;border-radius:6px;font-size:18px;color:var(--muted)}
+.x:hover{background:var(--bg);color:var(--ink)}
+.x:focus-visible{outline:2px solid var(--accent)}
+.jpanel .note2{font-size:11.5px;color:var(--muted);line-height:1.45;margin:0}
+.slider{display:grid;grid-template-columns:1fr 44px;gap:2px 8px;align-items:center;font-size:12px;color:var(--muted)}
+.slider input{grid-column:1 / -1}
+.slider output{font-family:var(--mono);font-size:11.5px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.jpanel .row2{display:flex;gap:6px;flex-wrap:wrap}
+
+/* lesson drawer */
+.lesson{box-sizing:border-box;position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:-12px 0 30px rgba(0,0,0,.12);overflow-y:auto;padding:18px 18px 28px;display:flex;flex-direction:column;gap:14px;z-index:6}
+.lesson .lh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lesson h2{font-family:var(--serif);font-size:32px;font-weight:600;margin:2px 0 0;line-height:1}
+.lesson .intro{margin:0;font-size:13.5px;line-height:1.55}
+.stagecard{display:flex;flex-direction:column;gap:6px}
+.stagecard .sh{display:flex;align-items:baseline;gap:8px}
+.stagecard .num{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.stagecard h3{margin:0;font-family:var(--serif);font-size:19px;font-weight:600}
+.stagecard .img{background:#F3F1EA;border:1px solid var(--line);border-radius:6px;aspect-ratio:760/560;display:grid;place-items:center;overflow:hidden}
+.stagecard img{width:100%;height:100%;object-fit:contain;display:block}
+.stagecard .img em{font-family:var(--serif);font-style:italic;color:#7b746a}
+.stagecard p{margin:0;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.practice{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.practice p{margin:0;font-size:13px;line-height:1.5}
+.lfoot{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.sheets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sheet{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink)}
+.sheet img{width:100%;aspect-ratio:3/2;object-fit:cover;border:1px solid var(--line);border-radius:5px;background:#F3F1EA}
+.sheet:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:820px){ .lesson{position:fixed;left:0;top:auto;height:72vh;width:100%;border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))} .jpanel{left:12px!important;right:12px;bottom:12px;top:auto!important;width:auto} }
+
+.stagecard button.img{all:unset;cursor:zoom-in;display:grid;background:#F3F1EA;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stagecard button.img:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stagecard button.img img{width:100%;height:auto;aspect-ratio:auto}
+.legend h3{margin:0 0 6px;font-family:var(--serif);font-size:18px;font-weight:600}
+.lmlist{display:flex;flex-direction:column;gap:4px}
+.lm{all:unset;cursor:pointer;display:flex;gap:9px;align-items:center;font-size:12.5px;padding:5px 6px;border-radius:6px}
+.lm:hover{background:var(--bg)}
+.lm:focus-visible{outline:2px solid var(--accent)}
+.lm span{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid #B4492C;color:#B4492C;display:grid;place-items:center;font-family:var(--mono);font-size:11px}
+.viewer{position:fixed;inset:0;z-index:30;background:rgba(20,22,24,.95);display:flex;flex-direction:column;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.vbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:#fff;padding-bottom:10px}
+.vbar b{font-family:var(--serif);font-size:22px;font-weight:600;margin-right:auto}
+.vbar select.region{width:auto;background-color:var(--panel)}
+.vbar .x{color:#fff}
+.vscroll{flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:#F3F1EA;border-radius:6px}
+.vscroll img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.vscroll.actual{align-items:flex-start;justify-content:flex-start}
+.vscroll.actual img{max-width:none;max-height:none}
+</style>
+
+<div class="app">
+  <aside>
+    <div class="brand">
+      <h1>Écorché Atlas</h1>
+      <p>Posable skeleton, muscles and construction forms for figure drawing. Study a region, or pose every joint yourself.</p>
+    </div>
+
+    <div class="sec">
+      <h2>Figure</h2>
+      <div class="seg" id="sexSeg">
+        <button id="sexM" aria-pressed="true" data-sex="0">Male</button>
+        <button id="sexF" aria-pressed="false" data-sex="1">Female</button>
+      </div>
+    </div>
+
+    <div class="sec modebar">
+      <h2>Mode</h2>
+      <div class="seg" id="modeSeg">
+        <button id="modeStudy" aria-pressed="true" data-mode="study">Study</button>
+        <button id="modePose" aria-pressed="false" data-mode="pose">Pose</button>
+      </div>
+      <label class="sr-only" for="regionSel" hidden>Study a body part</label>
+      <select class="region" id="regionSel" aria-label="Study a body part"><option value="" selected disabled>Study a body part…</option></select>
+    </div>
+
+    <div class="sec">
+      <h2>View</h2>
+      <div class="seg" id="viewSeg">
+        <button id="view3d" aria-pressed="true" data-view="3d">3D model</button>
+        <button id="view2d" aria-pressed="false" data-view="2d">2D plates</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Layers</h2>
+      <div class="chips" id="layers">
+        <button class="chip" id="lySkel" data-layer="skeleton" aria-pressed="false" style="--c:#CDBF9F"><i></i>Skeleton</button>
+        <button class="chip" id="lyMus" data-layer="muscle" aria-pressed="true" style="--c:#A23B2F"><i></i>Muscles</button>
+        <button class="chip" id="lyCon" data-layer="construction" aria-pressed="false" style="--c:#2F5FC4"><i></i>Construction</button>
+      </div>
+      <div class="seg" id="depthSeg" title="Muscle depth">
+        <button id="dSup" aria-pressed="true" data-depth="0">Superficial</button>
+        <button id="dAll" aria-pressed="false" data-depth="1">All</button>
+        <button id="dDeep" aria-pressed="false" data-depth="2">Deep only</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Pose</h2>
+      <div class="poses" id="poses"></div>
+      <div class="poseactions">
+        <button class="btn" id="undoPose" disabled>Undo</button>
+        <button class="btn" id="resetPose">Reset pose</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>Light</h2>
+      <div class="row"><label for="lAz">Direction</label><input id="lAz" type="range" min="-180" max="180" value="-40"><output id="oAz">-40°</output></div>
+      <div class="row"><label for="lEl">Height</label><input id="lEl" type="range" min="-30" max="85" value="38"><output id="oEl">38°</output></div>
+      <div class="row"><label for="lIn">Strength</label><input id="lIn" type="range" min="0" max="100" value="70"><output id="oIn">70</output></div>
+      <div class="row"><label for="lAm">Fill</label><input id="lAm" type="range" min="0" max="100" value="35"><output id="oAm">35</output></div>
+      <div class="presets" id="presets">
+        <button data-p="-40,38,70,35">Studio</button>
+        <button data-p="-100,12,85,15">Raking</button>
+        <button data-p="0,80,80,20">Overhead</button>
+        <button data-p="-45,45,90,8">Rembrandt</button>
+        <button data-p="150,20,80,25">Backlit</button>
+      </div>
+    </div>
+
+    <div class="note" id="credit">
+      Anatomy meshes: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D</a>, © Database Center for Life Science (CC BY-SA 2.1 JP). Reduced, rigged and posed for this atlas; shared under CC BY-SA 4.0.<br><br>
+      The source is one adult male. The female figure re-proportions that same anatomy (pelvis, ribcage, shoulders, limb length, muscle mass, Q-angle) and adds breast forms, so treat it as a proportional guide rather than a scan. Poses are after the named works, not measured from them. Posed muscles use approximate deformation; joint contact and contraction are not simulated.
+    </div>
+  </aside>
+
+  <main id="stage">
+    <canvas id="gl"></canvas>
+    <div class="plates" id="plates" hidden><div><span>Anterior</span></div><div><span>Lateral</span></div><div><span>Posterior</span></div></div>
+    <div class="hud"><div class="t" id="hudT"></div><div class="s" id="hudS"></div></div>
+    <div id="markers" hidden></div>
+    <section class="jpanel" id="jpanel" hidden aria-label="Joint controls">
+      <div class="jh"><b id="jName">Joint</b><button class="x" id="jClose" aria-label="Close joint controls">×</button></div>
+      <p class="note2" id="jNote"></p>
+      <div id="jSliders" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="row2" id="jHand" hidden>
+        <button class="btn" id="jZoomHand">Zoom to hand</button>
+        <button class="btn" id="jOpenHand">Open hand</button>
+        <button class="btn" id="jFist">Make fist</button>
+      </div>
+      <div class="row2"><button class="btn" id="jReset">Reset joint</button><button class="btn" id="jUndo">Undo</button></div>
+    </section>
+    <aside class="lesson" id="lesson" hidden aria-label="Study panel">
+      <div class="lh"><div><span class="eyebrow" id="lEyebrow">Study the structure</span><h2 id="lTitle">Chest</h2></div><button class="x" id="lClose" aria-label="Close study panel">×</button></div>
+      <p class="intro" id="lIntro"></p>
+      <div class="seg" id="angleSeg">
+        <button aria-pressed="true" data-angle="front">Front</button>
+        <button aria-pressed="false" data-angle="quarter">¾</button>
+        <button aria-pressed="false" data-angle="side">Side</button>
+        <button aria-pressed="false" data-angle="back">Back</button>
+      </div>
+      <div id="lStages" style="display:flex;flex-direction:column;gap:16px"></div>
+      <div id="lStudy" hidden style="display:flex;flex-direction:column;gap:12px">
+        <div style="border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px"><span class="eyebrow">Landmark study</span><p class="lfoot" id="lStudyNote"></p></div>
+        <div id="lStudyCards" style="display:flex;flex-direction:column;gap:16px"></div>
+        <div class="legend"><h3>Locate the numbered structures</h3><div id="lStudyLegend" class="lmlist"></div><p class="lfoot">Each button shows that point on the 3D skeleton.</p></div>
+      </div>
+      <div id="lSheets" hidden style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Drawing schema sheets</span><div class="sheets" id="lSheetGrid"></div></div>
+      <div class="practice"><span class="eyebrow">Try it on paper</span><p id="lExercise"></p></div>
+      <div class="row2" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" id="lFocus">Focus in 3D</button></div>
+      <p class="lfoot">Stage drawings are rendered from the same anatomy in a neutral stance, so posing the figure does not change them.</p>
+    </aside>
+    <div class="tip" id="tip" hidden></div>
+    <div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Drawing sheet viewer">
+      <div class="vbar"><b id="vTitle"></b><select class="region" id="vSel" aria-label="Choose drawing sheet"></select><button class="btn" id="vZoom">Actual size</button><button class="x" id="vClose" aria-label="Close viewer">×</button></div>
+      <div class="vscroll" id="vScroll"><img id="vImg" alt=""></div>
+    </div>
+    <div class="loading" id="loading">Preparing the figure…</div>
+    <div class="hint" id="hint">Click a body part to study it · drag to orbit · scroll to zoom</div>
+  </main>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const $ = id => document.getElementById(id);
+const D2R = Math.PI/180;
+const V3 = (x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
+const AX = { x:V3(1,0,0), y:V3(0,1,0), z:V3(0,0,1) };
+const qa = (axis, deg) => new THREE.Quaternion().setFromAxisAngle(axis.clone().normalize(), deg*D2R);
+
+/* ================================================================ lesson text (from the Figure Study project) */
+const REGIONS={head:'Head',eye:'Eye',nose:'Nose',mouth:'Mouth & chin',ear:'Ear',neck:'Neck',chest:'Front torso',back:'Back torso',pelvis:'Pelvis',shoulder:'Shoulder',upperarm:'Upper arm',elbow:'Elbow',forearm:'Forearm',hand:'Hand',thigh:'Thigh',knee:'Knee',calf:'Lower leg',foot:'Foot'};
+const LESSONS={
+head:['Treat the head as a cranial mass with an attached jaw, not a flat oval.','Establish the cranial volume and the tilt of its centerline.','Locate the brow, cheek planes, and wedge of the jaw.','Connect forehead, cheek, and chin without losing the larger mass.','Draw the head as two masses from three angles. Keep the brow wrapping around the skull.'],
+eye:['The lids wrap around a globe seated inside the orbit. Study it within the head as well as in isolation.','Place the eye globe inside the larger socket.','Mark the brow shelf and the upper and lower lid planes.','Follow the lids around the globe; avoid a flat almond symbol.','Draw a sphere, then wrap two lids around it. Repeat with the gaze tilted upward.'],
+nose:['Construct the nose as a projecting wedge with a bridge, side planes, and a base.','Block in the overall projection as a wedge.','Separate the bridge, side walls, and underside.','Soften the tip and wings while preserving the underlying planes.','Draw three nose wedges. Indicate the underside before adding nostrils.'],
+mouth:['The lips sit on a curved muzzle; their corners turn back around the face.','Locate a shallow rounded muzzle beneath the nose.','Find the central lip division and the turn toward the corners.','Keep the upper and lower lip volumes subordinate to the muzzle.','Draw a mouth on a rounded block. Check that the corners turn away from you.'],
+ear:['The ear is a tilted shell attached between the brow and base-of-nose region, with individual variation.','Place a thin oval shell on the side of the head.','Establish the rim, inner bowl, and attachment.','Develop the folds without turning them into equally weighted outlines.','Place ears on three head blocks before drawing any internal folds.'],
+neck:['The neck connects head and rib cage at an angle; it is not a vertical peg.','Connect the base of the skull to the upper torso with a tilted cylinder.','Find the front neck direction and the shoulder slope.','Relate visible neck forms to the clavicles and jaw.','Draw a head turning away from the chest. Show the two different centerlines.'],
+chest:['Start with the rib cage as one volume. Surface forms sit on that mass and change with pose.','Enclose the rib cage in an egg-like volume; mark its centerline.','Locate the sternum, lower rib boundary, and clavicle direction.','Lay the pectoral and abdominal masses over the larger construction.','Draw the rib cage and pelvis at different tilts. Connect them with the flexible waist.'],
+back:['The back combines the rib cage, shoulder girdle, and pelvis. Preserve their separate orientations.','Begin with the rib cage volume and spinal direction.','Place the scapular region and the taper toward the waist.','Group the back into broad masses before adding small surface changes.','Draw a rear torso with one arm raised. Track the shoulder girdle against the rib cage.'],
+pelvis:['The pelvis is the bridge between the trunk and the weight-bearing legs.','Block in a short basin with a clear top plane.','Locate the side-to-side tilt and the attachment of the thighs.','Wrap the hip and gluteal masses around the underlying basin.','Draw a pelvis tilted toward the supporting leg. Keep both hip landmarks visible in construction.'],
+shoulder:['The shoulder cap overlaps the upper arm and connects to the chest and back.','Place a rounded cap at the end of the shoulder girdle.','Show the cap overlapping the cylinder of the upper arm.','Connect the deltoid mass into the arm rather than outlining a ball.','Sketch the shoulder with the arm down, then raised. Compare the overlap.'],
+upperarm:['The upper arm tapers from the shoulder toward the elbow. Its front and back masses differ.','Draw one tapered volume from shoulder to elbow.','Separate its front, side, and rear orientation.','Group biceps and triceps masses around the underlying axis.','Draw a bent arm with an axis through each segment. Keep the elbow location explicit.'],
+elbow:['The elbow is a directional hinge between two differently shaped limb segments.','Connect the upper-arm and forearm axes at a hinge.','Block in the bony width and rear projection.','Let surrounding masses narrow around the joint.','Draw three bent-arm silhouettes. Mark the hinge before describing the contour.'],
+forearm:['The forearm changes from a fuller upper mass to a flatter, narrower wrist.','Use a tapered volume rather than a uniform tube.','Show the broad elbow end and the flattened wrist end.','Organize the muscle mass and tendon direction toward the hand.','Draw an elbow-to-wrist taper, then attach a palm block at a different angle.'],
+hand:['Build the palm first, then attach finger groups. The thumb has its own direction.','Use a flattened palm block and a separate thumb wedge.','Map the knuckle arc and divide fingers into articulated segments.','Round the segments while keeping joint changes and finger spacing.','Draw the palm as a block from three angles, then add fingers without losing its thickness.'],
+thigh:['The thigh is a substantial taper connecting the pelvis to a narrower knee.','Place a tapered volume along the hip-to-knee axis.','Separate front, inner, and outer planes.','Group the larger muscle masses around that taper.','Draw both thighs beneath a tilted pelvis. Compare their axes and apparent lengths.'],
+knee:['The knee has a bony front and changes its appearance strongly when bent.','Join thigh and lower-leg axes with a compact block.','Locate the front kneecap region and the joint width.','Connect thigh masses into the joint while preserving its bony character.','Draw a straight and bent knee as blocks. Compare the front corner and back compression.'],
+calf:['The lower leg combines a relatively direct shin with a fuller calf behind it.','Taper from the knee toward the ankle.','Distinguish the front shin direction from the rear calf volume.','Connect the calf into the narrower Achilles region.','Draw front and side lower legs. Avoid placing the calf fullness halfway down by habit.'],
+foot:['The foot is a weight-bearing wedge with a heel, arch, and toe platform.','Place a low wedge on the ground, with a separate heel mass.','Indicate the instep slope and the broad toe platform.','Group the toes, then separate them without losing the overall wedge.','Draw three grounded foot wedges. Establish the floor contact before drawing toes.']};
+const CONTEXT={head:['head','eye','nose','mouth','ear'],eye:['head','eye','nose','mouth','ear'],nose:['head','eye','nose','mouth','ear'],mouth:['head','eye','nose','mouth','ear'],ear:['head','eye','nose','mouth','ear'],
+  neck:['neck','head','mouth','shoulder'],chest:['chest','back','shoulder','pelvis'],back:['back','chest','shoulder','pelvis','neck'],pelvis:['pelvis','back','thigh'],shoulder:['shoulder','chest','back','upperarm'],
+  upperarm:['upperarm','shoulder','elbow'],elbow:['upperarm','elbow','forearm'],forearm:['forearm','elbow','hand'],hand:['hand'],thigh:['thigh','pelvis','knee'],knee:['thigh','knee','calf'],calf:['calf','knee','foot'],foot:['foot','calf']};
+const BILATERAL = new Set(['shoulder','upperarm','elbow','forearm','hand','thigh','knee','calf','foot','ear']);
+
+/* ================================================================ joints: anatomical controls */
+const FINGERS = ['index','middle','ring','little'];
+const JOINTS = {};
+function defJ(id, name, kind, bones, axes, side=null){ JOINTS[id] = { id, name, kind, bones, axes, side }; }
+defJ('pelvis','Pelvis','trunk',['root'],[['Tilt forward',-25,30],['Turn',-45,45],['Side tilt',-25,25]]);
+defJ('waist','Waist','trunk',['spine1','spine2'],[['Bend forward',-30,50],['Twist',-40,40],['Side bend',-30,30]]);
+defJ('ribcage','Rib cage','trunk',['chest'],[['Bend forward',-25,30],['Twist',-30,30],['Side bend',-25,25]]);
+defJ('neck','Neck','trunk',['neck'],[['Nod',-45,45],['Turn',-55,55],['Tilt',-35,35]]);
+defJ('head','Head','trunk',['head'],[['Nod',-30,30],['Turn',-35,35],['Tilt',-20,20]]);
+for (const S of ['R','L']){
+  const side = S==='R'?'Right':'Left';
+  defJ('clav'+S, side+' shoulder girdle','clav',['clav'+S],[['Shrug',-10,40],['Forward',-25,30]],S);
+  defJ('shoulder'+S, side+' shoulder','shoulder',['upperarm'+S],[['Arm elevation',0,180],['Reach direction',-90,135],['Upper-arm rotation',-70,90]],S);
+  defJ('elbow'+S, side+' elbow','elbow',['forearm'+S],[['Bend',-12,150],['Forearm turn',-80,85]],S);
+  defJ('wrist'+S, side+' wrist','wrist',['hand'+S],[['Flex',-70,80],['Side bend',-25,35]],S);
+  for (const f of FINGERS){
+    defJ(f+'Mcp'+S, `${side} ${f} · base`,'mcp',[f+'Mcp'+S],[['Bend',-15,90],['Spread',-20,20]],S);
+    defJ(f+'Pip'+S, `${side} ${f} · middle`,'pip',[f+'Pip'+S],[['Bend',0,110]],S);
+    defJ(f+'Dip'+S, `${side} ${f} · tip`,'dip',[f+'Dip'+S],[['Bend',0,80]],S);
+  }
+  defJ('thumbCmc'+S, side+' thumb · base','tcmc',['thumbCmc'+S],[['Across palm',-10,55],['Opposition',0,60],['Open',-10,45]],S);
+  defJ('thumbMcp'+S, side+' thumb · knuckle','tbend',['thumbMcp'+S],[['Bend',0,60]],S);
+  defJ('thumbIp'+S, side+' thumb · tip','tbend',['thumbIp'+S],[['Bend',-10,80]],S);
+  defJ('hip'+S, side+' hip','hip',['thigh'+S],[['Forward',-30,125],['Out',-30,50],['Rotate',-40,45]],S);
+  defJ('knee'+S, side+' knee','knee',['shin'+S],[['Bend',-6,150]],S);
+  defJ('ankle'+S, side+' ankle','ankle',['foot'+S],[['Point toes',-30,50],['Roll in',-20,30],['Turn in',-15,20]],S);
+  defJ('toes'+S, side+' toes','toes',['toes'+S],[['Curl',-60,40]],S);
+}
+const HAND_KIND = new Set(['mcp','pip','dip','tcmc','tbend']);
+function limits(id, a){
+  const J = JOINTS[id], ax = J.axes.map(x=>[...x]);
+  if (J.kind==='shoulder'){ // conservative reach envelope
+    const el=a[0]||0, pl=a[1]||0;
+    ax[0][2] = pl<0 ? 180+pl*4/3 : pl>90 ? 180-(pl-90)*4/3 : 180;
+    ax[1][2] = 90+45*Math.min(1,Math.max(0,(el-60)/30));
+    ax[2][1] = -70+Math.max(0,el-90)*1.1;
+  } else if (J.kind==='mcp'){ const sp=20*(1-Math.max(0,a[0]||0)/90); ax[1][1]=-sp; ax[1][2]=sp; }
+  return ax;
+}
+function clampJoint(id, a){ let v=[...a]; for (let n=0;n<2;n++){ const L=limits(id,v); v=v.map((x,i)=>Math.min(L[i][2],Math.max(L[i][1],x))); } return v; }
+const NOTES = { shoulder:'Elevation lifts the arm from the side. Reach direction: −90° back · 0° out to the side · 90° forward · 135° across. Rotation: negative inward, positive outward. The reach envelope is approximate.',
+  elbow:'Forearm turn: positive turns the palm down (pronation), negative turns it up.', wrist:'Flex bends toward the palm. Side bend: positive toward the thumb.',
+  mcp:'Spread narrows as the finger bends, as it does at a real knuckle.', tcmc:'The thumb base combines across-palm movement, opposition and opening.',
+  hip:'Forward flexes the thigh; negative extends it behind the body.', ankle:'Point toes: positive points the foot down.', trunk:'Bend: positive curls forward. Turn/twist: positive turns toward the figure’s left.' };
+
+/* ================================================================ preset poses (authored as limb aims, fitted to joint angles at load) */
+const A = (x,y,z,t=0)=>({aim:[x,y,z], twist:t}), KEEP = {keep:true};
+const POSES = [
+  { id:'stance', name:'Anatomical stance', sub:'Neutral reference, palms forward', bones:{
+      upperarmR:A(-0.13,-1,0.02), upperarmL:A(0.13,-1,0.02), forearmR:A(-0.2,-1,0.08), forearmL:A(0.2,-1,0.08),
+      thighR:A(-0.03,-1,0), thighL:A(0.03,-1,0), footR:KEEP, footL:KEEP } },
+  { id:'houdon', name:'Houdon’s Écorché', sub:'After J.-A. Houdon, 1767 · arm raised, head turned', bones:{
+      root:[0,-6,3], spine1:[0,-2,-1], spine2:[-2,-3,-1], chest:[-3,-4,-2], neck:[-4,-10,0], head:[-6,-26,0],
+      clavR:[0,0,-12], upperarmR:A(-0.45,0.16,0.88,-60), forearmR:A(-0.46,0.2,0.86,-30), handR:[0,0,-6], fingersR:10, fingers2R:10,
+      upperarmL:A(0.2,-0.95,0.18), forearmL:A(0.12,-0.8,0.58,20), handL:[0,0,8], fingersL:25, fingers2L:30,
+      thighL:A(0.03,-1,0.02), shinL:A(0.03,-1,-0.01), footL:KEEP,
+      thighR:A(-0.1,-0.97,-0.14), shinR:A(-0.08,-0.9,-0.42), footR:[34,0,0], toesR:[-34,0,0] } },
+  { id:'gladiator', name:'Borghese Gladiator', sub:'After Agasias, c. 100 BC · lunge, arm thrust up', bones:{
+      root:[6,12,0], spine1:[10,2,-2], spine2:[12,4,-2], chest:[10,6,-3], neck:[-22,8,0], head:[-24,14,0],
+      clavL:[0,0,14], upperarmL:A(0.35,0.72,0.6,0), forearmL:A(0.12,0.3,0.95,40), fingersL:45, fingers2L:55,
+      upperarmR:A(-0.3,-0.7,-0.65), forearmR:A(-0.22,-0.86,-0.46), fingersR:70, fingers2R:80, fistR:true,
+      thighL:A(0.14,-0.46,0.88), shinL:A(0.05,-0.99,-0.08), footL:KEEP,
+      thighR:A(-0.1,-0.72,-0.69), shinR:A(-0.1,-0.7,-0.71), footR:[40,0,0], toesR:[-50,0,0] } },
+  { id:'doryphoros', name:'Doryphoros', sub:'After Polykleitos, c. 440 BC · contrapposto', bones:{
+      root:[0,4,-5], spine1:[0,-1,3], spine2:[0,-1,3], chest:[0,-4,3], neck:[4,-6,-2], head:[6,-14,-3],
+      upperarmR:A(-0.12,-1,0.02), forearmR:A(-0.15,-1,0.1), fingersR:20, fingers2R:25,
+      upperarmL:A(0.14,-0.97,0.1), forearmL:A(0.12,-0.08,0.99,60), fingersL:70, fingers2L:80, fistL:true,
+      thighR:A(-0.05,-1,0.02), shinR:A(-0.03,-1,0), footR:KEEP,
+      thighL:A(0.1,-0.97,-0.14), shinL:A(0.08,-0.85,-0.52), footL:[30,0,0], toesL:[-30,0,0] } },
+  { id:'thinker', name:'The Thinker', sub:'After Rodin, 1904 · seated, torso twisted', ground:'seat', bones:{
+      root:[-4,0,0], spine1:[16,8,0], spine2:[18,10,0], chest:[14,12,0], neck:[20,0,0], head:[2,-6,0],
+      thighR:A(-0.14,0.06,0.99), shinR:A(-0.08,-0.94,0.3), footR:KEEP,
+      thighL:A(0.1,0.1,0.99), shinL:A(0.08,-0.9,0.42), footL:KEEP,
+      upperarmR:A(0.55,-0.6,0.58), forearmR:A(0.02,0.86,0.5,-50), handR:[-45,0,0], fingersR:60, fingers2R:60,
+      upperarmL:A(0.12,-0.62,0.78), forearmL:A(0.05,-0.55,0.83), handL:[40,0,0], fingersL:30, fingers2L:30 } },
+  { id:'crouch', name:'Crouching Youth', sub:'After Michelangelo, c. 1530 · one knee down', ground:'all', bones:{
+      root:[14,0,0], spine1:[18,0,0], spine2:[18,4,0], chest:[14,4,0], neck:[14,0,0], head:[18,-8,0],
+      thighR:A(-0.05,-0.97,0.22), shinR:A(0,-0.1,-0.99), footR:A(0,-0.93,-0.37), toesR:[-70,0,0],
+      thighL:A(0.14,0.2,0.97), shinL:A(0.05,-0.99,0.08), footL:KEEP,
+      upperarmR:A(0.08,-0.84,0.54), forearmR:A(0.2,-0.9,0.38), fingersR:30, fingers2R:30,
+      upperarmL:A(0.16,-0.9,0.4), forearmL:A(0.1,-0.95,0.28), fingersL:30, fingers2L:30 } },
+];
+
+/* ================================================================ renderer & scene */
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.02, 20);
+camera.position.set(0.9, 1.25, 3.6);
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 0.92, 0); controls.enableDamping = true; controls.minDistance = 0.15; controls.maxDistance = 8;
+const hemi = new THREE.HemisphereLight(0xf2f0ea, 0x3a3530, 0.5); scene.add(hemi);
+const key = new THREE.DirectionalLight(0xfff6ea, 2.2); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048); Object.assign(key.shadow.camera, {left:-1.3,right:1.3,top:1.3,bottom:-1.3,near:0.1,far:8});
+key.shadow.bias = -0.0004; key.shadow.normalBias = 0.012;
+scene.add(key); scene.add(key.target); key.target.position.set(0,0.9,0);
+const rim = new THREE.DirectionalLight(0xcfdcff, 0.35); rim.position.set(1.5,2,-2.5); scene.add(rim);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(1.4, 64), new THREE.ShadowMaterial({ opacity:0.22 }));
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+const seat = new THREE.Mesh(new THREE.BoxGeometry(0.46,1,0.42), new THREE.MeshStandardMaterial({color:0xcfc9bd, roughness:0.95}));
+seat.castShadow = seat.receiveShadow = true; seat.visible = false; scene.add(seat);
+const plateLightDir = new THREE.Vector3();
+function setLight(){
+  const az = +$('lAz').value*D2R, el = +$('lEl').value*D2R, I = +$('lIn').value/100, Am = +$('lAm').value/100;
+  key.position.set(Math.sin(az)*Math.cos(el)*3, 0.9+Math.sin(el)*3, Math.cos(az)*Math.cos(el)*3);
+  key.intensity = 3.4*I; hemi.intensity = 0.15+1.3*Am; rim.intensity = 0.1+0.4*Am;
+  $('oAz').textContent = $('lAz').value+'°'; $('oEl').textContent = $('lEl').value+'°'; $('oIn').textContent = $('lIn').value; $('oAm').textContent = $('lAm').value;
+  plateLightDir.copy(key.position).sub(key.target.position).normalize();
+  requestRender();
+}
+
+/* ================================================================ data */
+let RIG, NB, parts, layers = {}, sex = 0, sexT = 0;
+const hoverUniform = { value:-1 }, depthUniform = { value:0 };
+const CONNECTIVE = /tract|aponeurosis|fascia|retinaculum|Linea alba|sheath/i;
+function hash(s){ let h=2166136261; for (const ch of s) h=Math.imul(h^ch.charCodeAt(0),16777619); return ((h>>>0)%1000)/1000; }
+async function loadData(){
+  const [meta, bin] = await Promise.all([fetch('anatomy.json').then(r=>{ if(!r.ok) throw Error('anatomy.json'); return r.json(); }), fetch('anatomy-mesh.wasm').then(r=>{ if(!r.ok) throw Error('mesh'); return r.arrayBuffer(); })]);
+  return { meta, bin };
+}
+function buildLayers(meta, bin){
+  RIG = meta.rig; NB = RIG.length; parts = meta.parts; const S = meta.scale;
+  RIG.forEach((r,i)=>{ r.i=i; });
+  parts.forEach((p,i)=>{ p.gid=i; p.side = /\.r$/.test(p.id)?'R':/\.l$/.test(p.id)?'L':''; });
+  const groups = { skeleton: parts.filter(p=>p.b), muscle: parts.filter(p=>!p.b) };
+  for (const [ln, list] of Object.entries(groups)){
+    let nv=0, ni=0; list.forEach(p=>{ p.vo=nv; p.layer=ln; nv+=p.nv; ni+=p.nf*3; });
+    const pm=new Float32Array(nv*3), pf=new Float32Array(nv*3), si=new Uint8Array(nv*4), sw=new Float32Array(nv*4), pid=new Float32Array(nv), deep=new Float32Array(nv), col=new Float32Array(nv*3), mask=new Float32Array(nv).fill(1);
+    const idx = new Uint32Array(ni); let io=0; const c = new THREE.Color();
+    for (const p of list){
+      const a=new Int16Array(bin,p.pm,p.nv*3), b=new Int16Array(bin,p.pf,p.nv*3);
+      for (let k=0;k<p.nv*3;k++){ pm[p.vo*3+k]=a[k]*S; pf[p.vo*3+k]=b[k]*S; }
+      si.set(new Uint8Array(bin,p.si,p.nv*4), p.vo*4);
+      const w=new Uint8Array(bin,p.sw,p.nv*4); for (let k=0;k<p.nv*4;k++) sw[p.vo*4+k]=w[k]/255;
+      const f = p.i32 ? new Uint32Array(bin,p.ix,p.nf*3) : new Uint16Array(bin,p.ix,p.nf*3);
+      for (let k=0;k<f.length;k++) idx[io++]=f[k]+p.vo;
+      const h = hash(p.id);
+      if (p.b) c.setHSL(0.11+0.02*h, 0.28, 0.80+0.05*h);
+      else if (CONNECTIVE.test(p.id)) c.setHSL(0.12, 0.18, 0.86+0.03*h);
+      else c.setHSL(0.005+0.018*h, 0.55+0.1*h, 0.36+0.08*h);
+      for (let k=0;k<p.nv;k++){ pid[p.vo+k]=p.gid; deep[p.vo+k]=p.d; col.set([c.r,c.g,c.b],(p.vo+k)*3); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nv*3),3));
+    g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(nv*3),3));
+    g.setAttribute('color', new THREE.BufferAttribute(col,3));
+    g.setAttribute('partId', new THREE.BufferAttribute(pid,1));
+    g.setAttribute('deep', new THREE.BufferAttribute(deep,1));
+    g.setAttribute('mask', new THREE.BufferAttribute(mask,1));
+    g.setIndex(new THREE.BufferAttribute(idx,1));
+    const mesh = new THREE.Mesh(g, makeMaterial(ln)); mesh.castShadow = mesh.receiveShadow = true; mesh.frustumCulled = false;
+    mesh.customDepthMaterial = depthMat(ln);
+    mesh.userData.layer = ln; scene.add(mesh);
+    layers[ln] = { mesh, pm, pf, si, sw, nv, list };
+  }
+}
+const DISCARD = `if (vMask<0.5) discard; if (vIsMuscle>0.5 && ((depthMode<0.5 && vDeep>0.5) || (depthMode>1.5 && vDeep<0.5))) discard;`;
+function makeMaterial(ln){
+  const m = new THREE.MeshStandardMaterial({ vertexColors:true, roughness: ln==='skeleton'?0.78:0.58, metalness:0 });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.hoverId = hoverUniform; sh.uniforms.depthMode = depthUniform;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float partId; attribute float deep; attribute float mask; varying float vPid; varying float vDeep; varying float vMask;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPid = partId; vDeep = deep; vMask = mask;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>\nuniform float hoverId; uniform float depthMode; varying float vPid; varying float vDeep; varying float vMask; const float vIsMuscle = ${ln==='muscle'?'1.0':'0.0'};`)
+      .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n'+DISCARD)
+      .replace('#include <color_fragment>', '#include <color_fragment>\nif (vMask>1.5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0,0.78,0.42), 0.22);\nif (abs(vPid-hoverId)<0.5) diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.30,0.52,1.0), 0.55);');
+  };
+  m.customProgramCacheKey = () => 'anat2-'+ln;
+  return m;
+}
+function depthMat(ln){
+  const m = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.depthMode = depthUniform;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float deep; attribute float mask; varying float vDeep; varying float vMask;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvDeep=deep; vMask=mask;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>\nuniform float depthMode; varying float vDeep; varying float vMask; const float vIsMuscle = ${ln==='muscle'?'1.0':'0.0'};`).replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n'+DISCARD);
+  };
+  m.customProgramCacheKey = () => 'anatd-'+ln;
+  return m;
+}
+
+/* ================================================================ rig & skinning */
+const boneW = new Float32Array(64*12);
+const _w = [];
+const boneIndex = n => RIG.findIndex(r=>r.n===n);
+function pivot(b){ const a=RIG[b].m, c=RIG[b].f; return V3(a[0]+(c[0]-a[0])*sexT, a[1]+(c[1]-a[1])*sexT, a[2]+(c[2]-a[2])*sexT); }
+function endPt(b){ const a=RIG[b].em, c=RIG[b].ef; return a ? V3(a[0]+(c[0]-a[0])*sexT, a[1]+(c[1]-a[1])*sexT, a[2]+(c[2]-a[2])*sexT) : null; }
+const CHILD = {};
+function buildChildMap(){
+  for (const S of ['R','L']){
+    Object.assign(CHILD, { ['clav'+S]:'upperarm'+S, ['upperarm'+S]:'forearm'+S, ['forearm'+S]:'hand'+S, ['hand'+S]:'middleMcp'+S, ['thigh'+S]:'shin'+S, ['shin'+S]:'foot'+S, ['foot'+S]:'toes'+S, ['thumbCmc'+S]:'thumbMcp'+S, ['thumbMcp'+S]:'thumbIp'+S });
+    for (const f of FINGERS){ CHILD[f+'Mcp'+S]=f+'Pip'+S; CHILD[f+'Pip'+S]=f+'Dip'+S; }
+  }
+  CHILD.neck='head';
+}
+function restDir(name){ const b=boneIndex(name); const e = CHILD[name] ? pivot(boneIndex(CHILD[name])) : endPt(b); return e.sub(pivot(b)).normalize(); }
+function computeBones(qs, lift){
+  const T1=new THREE.Matrix4(), T2=new THREE.Matrix4(), R=new THREE.Matrix4();
+  for (let b=0;b<NB;b++){
+    const p = pivot(b);
+    const L = T1.makeTranslation(p.x,p.y,p.z).clone().multiply(R.makeRotationFromQuaternion(qs[b])).multiply(T2.makeTranslation(-p.x,-p.y,-p.z));
+    const W = RIG[b].p===null ? new THREE.Matrix4().makeTranslation(0,lift,0).multiply(L) : _w[RIG[b].p].clone().multiply(L);
+    _w[b] = W; const e = W.elements;
+    boneW.set([e[0],e[4],e[8],e[12], e[1],e[5],e[9],e[13], e[2],e[6],e[10],e[14]], b*12);
+  }
+}
+function skinLayer(L){
+  const pos = L.mesh.geometry.attributes.position.array, pm=L.pm, pf=L.pf, si=L.si, sw=L.sw, s=sexT;
+  for (let i=0;i<L.nv;i++){
+    const i3=i*3, x=pm[i3]+(pf[i3]-pm[i3])*s, y=pm[i3+1]+(pf[i3+1]-pm[i3+1])*s, z=pm[i3+2]+(pf[i3+2]-pm[i3+2])*s;
+    let ox=0, oy=0, oz=0;
+    for (let k=0;k<4;k++){ const w=sw[i*4+k]; if (w===0) continue; const o=si[i*4+k]*12;
+      ox += w*(boneW[o]*x+boneW[o+1]*y+boneW[o+2]*z+boneW[o+3]); oy += w*(boneW[o+4]*x+boneW[o+5]*y+boneW[o+6]*z+boneW[o+7]); oz += w*(boneW[o+8]*x+boneW[o+9]*y+boneW[o+10]*z+boneW[o+11]); }
+    pos[i3]=ox; pos[i3+1]=oy; pos[i3+2]=oz;
+  }
+  const g = L.mesh.geometry; g.attributes.position.needsUpdate = true; g.computeVertexNormals(); g.computeBoundingSphere();
+}
+function groundLift(qs, mode){
+  computeBones(qs, 0);
+  const L = layers.skeleton; let minY = 1e9, minPel = 1e9, minAll = 1e9;
+  const feet = new Set(['footR','footL','toesR','toesL', ...(mode==='all'?['shinR','shinL']:[])].map(boneIndex));
+  const pm=L.pm, pf=L.pf, s=sexT;
+  for (let i=0;i<L.nv;i+=3){
+    const b = L.si[i*4]; const i3=i*3, x=pm[i3]+(pf[i3]-pm[i3])*s, y=pm[i3+1]+(pf[i3+1]-pm[i3+1])*s, z=pm[i3+2]+(pf[i3+2]-pm[i3+2])*s, o=b*12;
+    const Y = boneW[o+4]*x+boneW[o+5]*y+boneW[o+6]*z+boneW[o+7];
+    minAll = Math.min(minAll, Y);
+    if (b===0) minPel=Math.min(minPel,Y); else if (feet.has(b)) minY=Math.min(minY,Y);
+  }
+  if (mode==='free') minY = minAll;
+  return { lift:-minY, pel:minPel-minY };
+}
+
+/* ---- angles -> local quaternions ---- */
+function jointQuats(id, a, out){
+  const J = JOINTS[id], sg = J.side==='L'?1:J.side==='R'?-1:0, k = J.kind;
+  const set = (bone,q)=>{ out[boneIndex(bone)] = q; };
+  if (k==='trunk'){
+    const n = J.bones.length, f = 1/n;
+    const q = qa(AX.y,a[1]*f).multiply(qa(AX.x,a[0]*f)).multiply(qa(AX.z,-a[2]*f));
+    J.bones.forEach(b=>set(b,q.clone()));
+  } else if (k==='clav') set(J.bones[0], qa(AX.z, sg*a[0]).multiply(qa(AX.y, -sg*a[1])));
+  else if (k==='shoulder'){
+    const el=a[0]*D2R, pl=a[1]*D2R, d0=restDir(J.bones[0]);
+    const d = V3(sg*Math.sin(el)*Math.cos(pl), -Math.cos(el), Math.sin(el)*Math.sin(pl)).normalize();
+    set(J.bones[0], qa(d, -sg*a[2]).multiply(new THREE.Quaternion().setFromUnitVectors(d0, d)));
+  } else if (k==='elbow') set(J.bones[0], qa(AX.x, -a[0]).multiply(qa(restDir(J.bones[0]), sg*a[1])));
+  else if (k==='wrist') set(J.bones[0], qa(AX.x, -a[0]).multiply(qa(AX.z, sg*a[1])));
+  else if (k==='mcp'||k==='pip'||k==='dip'){
+    const d = restDir(J.bones[0]), kx = V3().crossVectors(d, AX.z).normalize();
+    set(J.bones[0], qa(kx, a[0]).multiply(qa(AX.z, sg*(a[1]||0))));
+  } else if (k==='tcmc') set(J.bones[0], qa(AX.z, -sg*a[0]).multiply(qa(AX.x, -a[2])).multiply(qa(restDir(J.bones[0]), sg*a[1])));
+  else if (k==='tbend'){
+    const d = restDir(J.bones[0]), u = V3(-sg,0,0.6).normalize(), kx = V3().crossVectors(d,u).normalize();
+    set(J.bones[0], qa(kx, a[0]));
+  } else if (k==='hip') set(J.bones[0], qa(AX.x, -a[0]).multiply(qa(AX.z, sg*a[1])).multiply(qa(restDir(J.bones[0]), -sg*a[2])));
+  else if (k==='knee') set(J.bones[0], qa(AX.x, a[0]));
+  else if (k==='ankle') set(J.bones[0], qa(AX.x, a[0]).multiply(qa(AX.z, -sg*a[1])).multiply(qa(AX.y, -sg*a[2])));
+  else if (k==='toes') set(J.bones[0], qa(AX.x, a[0]));
+}
+function anglesToQuats(angles, rhythm=true){
+  const out = Array.from({length:NB}, ()=>new THREE.Quaternion());
+  for (const id of Object.keys(JOINTS)) if (angles[id]) jointQuats(id, angles[id], out);
+  // scapulohumeral rhythm: past ~30° of elevation the shoulder girdle carries part of the lift
+  if (rhythm) for (const S of ['R','L']){
+    const a = angles['shoulder'+S]; if (!a || a[0]<=30) continue;
+    const sg = S==='L'?1:-1, pl=a[1]*D2R, ax = V3(-Math.sin(pl), 0, sg*Math.cos(pl)).normalize();
+    const Rs = qa(ax, Math.min(28, (a[0]-30)*0.22));
+    const ci = boneIndex('clav'+S), ui = boneIndex('upperarm'+S);
+    out[ci] = out[ci].clone().multiply(Rs); out[ui] = Rs.clone().invert().multiply(out[ui]);
+  }
+  return out;
+}
+
+/* ---- preset fitting: authored aims -> local quats -> joint angles ---- */
+function presetQuats(P){
+  const qs = [], Q = [];
+  for (let b=0;b<NB;b++){
+    const n = RIG[b].n, r = P.bones[n], Qp = RIG[b].p===null ? new THREE.Quaternion() : Q[RIG[b].p];
+    let q = new THREE.Quaternion();
+    if (Array.isArray(r)) q.setFromEuler(new THREE.Euler(r[0]*D2R, r[1]*D2R, r[2]*D2R, 'YXZ'));
+    else if (r && r.keep) q.copy(Qp).invert();
+    else if (r && r.aim){
+      const rest = restDir(n).applyQuaternion(Qp), aim = V3(...r.aim).normalize();
+      const Qb = qa(aim, r.twist||0).multiply(new THREE.Quaternion().setFromUnitVectors(rest, aim)).multiply(Qp);
+      q = Qp.clone().invert().multiply(Qb);
+    }
+    qs.push(q); Q.push(Qp.clone().multiply(q));
+  }
+  return qs;
+}
+function fitJoint(id, target){
+  const J = JOINTS[id], n = J.axes.length; let a = new Array(n).fill(0);
+  const bones = J.bones.map(boneIndex);
+  const tq = bones.length===1 ? target[bones[0]] : target[bones[0]].clone().multiply(target[bones[1]]);
+  const cost = v => { const out=[]; jointQuats(id, v, out); const q = bones.length===1 ? out[bones[0]] : out[bones[0]].clone().multiply(out[bones[1]]); return 1-Math.abs(q.dot(tq)); };
+  let c = cost(a);
+  for (let step=32; step>=0.25; step/=2){
+    let improved = true;
+    while (improved){ improved=false;
+      for (let i=0;i<n;i++) for (const d of [step,-step]){ const v=[...a]; v[i]+=d; const cv=cost(v); if (cv<c-1e-9){ a=v; c=cv; improved=true; } }
+    }
+  }
+  return a.map(x=>Math.round(x*10)/10);
+}
+function presetAngles(P){
+  const target = presetQuats(P), ang = {};
+  for (const id of Object.keys(JOINTS)){
+    const J = JOINTS[id]; if (HAND_KIND.has(J.kind)) continue;
+    const a = fitJoint(id, target); if (a.some(v=>Math.abs(v)>0.4)) ang[id]=a;
+  }
+  for (const S of ['R','L']){
+    const f1 = P.bones['fingers'+S] ?? 8, f2 = P.bones['fingers2'+S] ?? 10;
+    FINGERS.forEach((f,i)=>{ ang[f+'Mcp'+S]=[f1+i*2,0]; ang[f+'Pip'+S]=[f2]; ang[f+'Dip'+S]=[f2*0.6]; });
+    if (P.bones['fist'+S]){ ang['thumbCmc'+S]=[35,45,8]; ang['thumbMcp'+S]=[40]; ang['thumbIp'+S]=[45]; }
+  }
+  return ang;
+}
+
+/* ================================================================ pose state */
+const state = { mode:'study', view:'3d', preset:0, edited:false, angles:{}, ground:undefined, joint:null, region:null, side:'L', angle:'front' };
+const history = [];
+let presetAng = [];
+let qCur = null, qFrom = null, qTo = null, poseT = 1, poseDirty = true, retarget = true, seatTop = 0;
+function pushHistory(){ history.push(structuredClone({ angles:state.angles, preset:state.preset, edited:state.edited, ground:state.ground })); if (history.length>60) history.shift(); syncUndo(); }
+function syncUndo(){ $('undoPose').disabled = !history.length; $('jUndo').disabled = !history.length; }
+function undo(){ const h = history.pop(); if (!h) return; Object.assign(state, h); setTarget(false); refreshPoseList(); updatePanel(); syncUndo(); }
+function setTarget(animate){
+  qTo = anglesToQuats(state.angles);
+  qFrom = qCur ? qCur.map(q=>q.clone()) : qTo.map(q=>q.clone());
+  poseT = animate && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1; poseDirty = true; requestRender();
+}
+function setPreset(i, animate=true){
+  if (state.edited || state.preset!==i) pushHistory();
+  state.preset=i; state.edited=false; state.angles=structuredClone(presetAng[i]); state.ground=POSES[i].ground;
+  retarget = true; setTarget(animate); refreshPoseList(); updatePanel(); updateHud();
+}
+function editJoint(id, a){ state.angles[id] = clampJoint(id, a); state.edited = true; qTo = anglesToQuats(state.angles); qFrom = qTo; poseT = 1; poseDirty = true; refreshPoseList(); requestRender(); }
+function applyPose(qs){
+  const g = groundLift(qs, state.ground);
+  computeBones(qs, g.lift);
+  for (const L of Object.values(layers)) skinLayer(L);
+  seat.visible = state.ground==='seat'; if (seat.visible){ seatTop = g.pel+0.005; seat.scale.y = seatTop; seat.position.set(0, seatTop/2, pivot(0).z-0.05); }
+  updateConstruction(); updateBreasts(); updateLandmark();
+  if (poseT>=1 && retarget){ retarget=false; const b = new THREE.Box3(); layers.skeleton.mesh.geometry.computeBoundingBox(); b.copy(layers.skeleton.mesh.geometry.boundingBox);
+    const cy=(b.min.y+b.max.y)/2+0.02, dy=cy-controls.target.y; controls.target.y+=dy; camera.position.y+=dy; controls.update(); }
+  requestRender();
+}
+
+/* ================================================================ construction forms */
+const conGroup = new THREE.Group(); scene.add(conGroup);
+const breastGroup = new THREE.Group(); scene.add(breastGroup);
+const forms = [];
+const conFill = new THREE.MeshStandardMaterial({ color:0xf1f3f7, roughness:0.9, transparent:true, opacity:0.92 });
+const conLine = new THREE.LineBasicMaterial({ color:0x2F5FC4 });
+const conLineFaint = new THREE.LineBasicMaterial({ color:0xb9b4aa });
+function partBox(re, sx){ const L = layers.skeleton, arr = sx? L.pf : L.pm, bb = new THREE.Box3(), v=V3();
+  for (const p of L.list) if (re.test(p.id)) for (let k=0;k<p.nv;k++){ const o=(p.vo+k)*3; bb.expandByPoint(v.set(arr[o],arr[o+1],arr[o+2])); } return bb; }
+const PIV = { sc:'clav', shoulder:'upperarm', elbow:'forearm', wrist:'hand', hip:'thigh', knee:'shin', ankle:'foot', toe:'toes' };
+function J(n, sx){ const m=n.match(/^([a-z]+)([RL])$/); if (m && PIV[m[1]]) n=PIV[m[1]]+m[2]; const r=RIG[boneIndex(n)]; return V3(...(sx? r.f : r.m)); }
+function JE(n, sx){ const r=RIG[boneIndex(n)]; return V3(...(sx? r.ef : r.em)); }
+function lines(pts){ return new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), conLine); }
+function ellipseRing(ax, n=48){ const r=[]; for (let i=0;i<n;i++){ const a=i/n*Math.PI*2, c=Math.cos(a), s=Math.sin(a); r.push(ax==='x'? V3(0,c,s) : ax==='y'? V3(c,0,s) : V3(c,s,0)); } return r; }
+function latRing(h, n=48){ const r=[], rad=Math.sqrt(1-h*h); for (let i=0;i<n;i++){ const a=i/n*Math.PI*2; r.push(V3(Math.cos(a)*rad,h,Math.sin(a)*rad)); } return r; }
+const ringPts = rings => { const pts=[]; for (const r of rings) for (let i=0;i<r.length;i++) pts.push(r[i], r[(i+1)%r.length]); return pts; };
+function egg(){ const o=new THREE.Group(); o.add(new THREE.Mesh(new THREE.SphereGeometry(1,36,24),conFill)); o.add(lines(ringPts([ellipseRing('x'),ellipseRing('y'),ellipseRing('z'),latRing(0.5),latRing(-0.5)]))); return o; }
+function taper(r0,r1,flat=1){
+  const g=new THREE.CylinderGeometry(r1,r0,1,28,1,false); g.translate(0,0.5,0); g.scale(1,1,flat);
+  const o=new THREE.Group(); o.add(new THREE.Mesh(g,conFill)); const rings=[];
+  for (const t of [0,0.33,0.66,1]){ const r=r0+(r1-r0)*t, ring=[]; for (let i=0;i<32;i++){ const a=i/32*Math.PI*2; ring.push(V3(Math.cos(a)*r,t,Math.sin(a)*r*flat)); } rings.push(ring); }
+  const pts=ringPts(rings); for (const a of [0,Math.PI/2,Math.PI,Math.PI*1.5]) pts.push(V3(Math.cos(a)*r0,0,Math.sin(a)*r0*flat), V3(Math.cos(a)*r1,1,Math.sin(a)*r1*flat));
+  o.add(lines(pts)); return o;
+}
+function block(topW=1, topD=1){
+  const g=new THREE.BoxGeometry(1,1,1); g.translate(0,0.5,0);
+  const p=g.attributes.position; for (let i=0;i<p.count;i++) if (p.getY(i)>0.5){ p.setX(i,p.getX(i)*topW); p.setZ(i,p.getZ(i)*topD); }
+  g.computeVertexNormals(); const o=new THREE.Group(); o.add(new THREE.Mesh(g,conFill));
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(g),conLine); o.add(e);
+  o.add(lines([V3(0,0,0.5),V3(0,1,0.5*topD)])); return o;
+}
+function addForm(bone, region, obj, placeFn, name){ obj.traverse(c=>{ if(c.isMesh){ c.castShadow=c.receiveShadow=true; c.userData.pick=name; } }); conGroup.add(obj); forms.push({ b:boneIndex(bone), region, obj, placeFn, name }); }
+function segMatrix(a,b,r){ const d=b.clone().sub(a), len=d.length(); const q=new THREE.Quaternion().setFromUnitVectors(V3(0,1,0), d.normalize()); return new THREE.Matrix4().compose(a, q, V3(r,len,r)); }
+function basis(origin, ydir, xhint, sc){ const y=ydir.clone().normalize(), z=V3().crossVectors(xhint,y).normalize(), x=V3().crossVectors(y,z);
+  const m=new THREE.Matrix4().makeBasis(x,y,z); m.scale(sc); m.setPosition(origin); return m; }
+function across(S,s){ const l=S.toLowerCase(); return partBox(new RegExp('Second metacarpal bone\\.'+l),s).getCenter(V3()).sub(partBox(new RegExp('Fifth metacarpal bone\\.'+l),s).getCenter(V3())); }
+function buildConstruction(){
+  const skull=/Frontal bone|Parietal|Occipital bone|Temporal bone|Sphenoid/;
+  addForm('head','head', egg(), s=>{ const bb=partBox(skull,s), c=bb.getCenter(V3()), z=bb.getSize(V3()); return new THREE.Matrix4().compose(c.add(V3(0,-0.005,0)), new THREE.Quaternion(), V3(z.x*0.5,z.y*0.5,z.z*0.5)); }, 'Cranium (ball)');
+  addForm('head','head', block(1.25,1.1), s=>{ const bb=partBox(/Mandible|Maxilla|Zygomatic|Nasal bone/,s), c=bb.getCenter(V3()), z=bb.getSize(V3()); return new THREE.Matrix4().compose(V3(c.x,bb.min.y,c.z+z.z*0.08), new THREE.Quaternion(), V3(z.x*0.62,z.y*1.0,z.z*0.7)); }, 'Face and jaw (block)');
+  addForm('neck','neck', taper(1,0.9,0.95), s=>segMatrix(J('neck',s).add(V3(0,-0.01,-0.012)), J('head',s).add(V3(0,0.03,-0.005)), 0.052*(s?0.9:1)), 'Neck (cylinder)');
+  addForm('chest','chest', egg(), s=>{ const bb=partBox(/rib|sternum|Xiphoid|Manubrium/,s), c=bb.getCenter(V3()), z=bb.getSize(V3()); return new THREE.Matrix4().compose(c.add(V3(0,0.01,0)), new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.18,0,0)), V3(z.x*0.47,z.y*0.56,z.z*0.5)); }, 'Rib cage (egg)');
+  addForm('root','pelvis', block(1.12,1.0), s=>{ const bb=partBox(/Hip bone|Sacrum/,s), c=bb.getCenter(V3()), z=bb.getSize(V3()); return new THREE.Matrix4().compose(V3(c.x,bb.min.y+z.y*0.12,c.z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0.12,0,0)), V3(z.x*0.84,z.y*0.8,z.z*0.9)); }, 'Pelvis (block)');
+  addForm('spine2','chest', egg(), s=>{ const a=partBox(/rib/,s), b=partBox(/Hip bone/,s); const c=V3(0,(a.min.y+b.max.y)/2+0.015,(a.getCenter(V3()).z+b.getCenter(V3()).z)/2+0.01); return new THREE.Matrix4().compose(c, new THREE.Quaternion(), V3(a.getSize(V3()).x*0.36,0.085,0.085)); }, 'Abdomen (connector)');
+  for (const S of ['R','L']){
+    const sg = S==='R'?-1:1, k = s=>s?0.9:1;
+    addForm('clav'+S,'shoulder', taper(1,1), s=>segMatrix(J('sc'+S,s), J('shoulder'+S,s).add(V3(-sg*0.01,0.03,0)), 0.012), 'Clavicle line');
+    addForm('upperarm'+S,'shoulder', egg(), s=>new THREE.Matrix4().compose(J('shoulder'+S,s).add(V3(sg*0.018,-0.02,0)), new THREE.Quaternion(), V3(0.05,0.062,0.056).multiplyScalar(s?0.88:1)), 'Shoulder (deltoid ball)');
+    addForm('upperarm'+S,'upperarm', taper(0.043,0.034,0.95), s=>segMatrix(J('shoulder'+S,s).add(V3(0,-0.03,0)), J('elbow'+S,s), s?0.88:1), 'Upper arm (cylinder)');
+    addForm('forearm'+S,'forearm', taper(0.042,0.026,0.72), s=>segMatrix(J('elbow'+S,s), J('wrist'+S,s), s?0.88:1), 'Forearm (tapered box)');
+    addForm('hand'+S,'hand', block(0.9,0.75), s=>{ const a=J('wrist'+S,s), b=J('middleMcp'+S,s); return basis(a.clone().add(V3(0,0.005,0)), b.clone().sub(a), across(S,s), V3(0.075*k(s), a.distanceTo(b)*1.05, 0.03*k(s))); }, 'Palm (box)');
+    FINGERS.forEach((f,i)=>{
+      const w = [0.019,0.02,0.018,0.016][i];
+      addForm(f+'Mcp'+S,'hand', block(0.9,0.85), s=>{ const a=J(f+'Mcp'+S,s), b=J(f+'Pip'+S,s); return basis(a, b.clone().sub(a), across(S,s), V3(w*k(s), a.distanceTo(b), 0.02*k(s))); }, 'Finger, first segment');
+      addForm(f+'Pip'+S,'hand', block(0.9,0.85), s=>{ const a=J(f+'Pip'+S,s), b=J(f+'Dip'+S,s); return basis(a, b.clone().sub(a), across(S,s), V3(w*0.92*k(s), a.distanceTo(b), 0.018*k(s))); }, 'Finger, middle segment');
+      addForm(f+'Dip'+S,'hand', block(0.8,0.75), s=>{ const a=J(f+'Dip'+S,s), b=JE(f+'Dip'+S,s); return basis(a, b.clone().sub(a), across(S,s), V3(w*0.85*k(s), a.distanceTo(b), 0.016*k(s))); }, 'Finger, tip segment');
+    });
+    addForm('thumbCmc'+S,'hand', taper(0.012,0.01), s=>segMatrix(J('thumbCmc'+S,s), J('thumbMcp'+S,s), 1), 'Thumb, metacarpal');
+    addForm('thumbMcp'+S,'hand', taper(0.0095,0.0085), s=>segMatrix(J('thumbMcp'+S,s), J('thumbIp'+S,s), 1), 'Thumb, first segment');
+    addForm('thumbIp'+S,'hand', taper(0.0085,0.007), s=>segMatrix(J('thumbIp'+S,s), JE('thumbIp'+S,s), 1), 'Thumb, tip');
+    addForm('thigh'+S,'thigh', taper(0.078,0.05,0.95), s=>segMatrix(J('hip'+S,s).add(V3(sg*0.03,0.01,0)), J('knee'+S,s).add(V3(0,0.03,-0.004)), s?1.02:1), 'Thigh (tapered cylinder)');
+    addForm('shin'+S,'knee', block(1,1), s=>{ const bb=partBox(new RegExp('Patella\\.'+S.toLowerCase()),s), c=bb.getCenter(V3()); return new THREE.Matrix4().compose(V3(c.x,bb.min.y-0.012,c.z+0.004), new THREE.Quaternion(), V3(0.065,0.07,0.028)); }, 'Knee (box)');
+    addForm('shin'+S,'calf', taper(0.05,0.03,0.9), s=>segMatrix(J('knee'+S,s).add(V3(0,-0.02,0.005)), J('ankle'+S,s), s?0.94:1), 'Lower leg (cylinder)');
+    addForm('shin'+S,'calf', egg(), s=>new THREE.Matrix4().compose(J('knee'+S,s).add(V3(0,-0.13,0.035)), new THREE.Quaternion(), V3(0.048,0.1,0.045).multiplyScalar(s?0.92:1)), 'Calf (gastrocnemius mass)');
+    addForm('foot'+S,'foot', block(0.55,0.6), s=>{ const bb=partBox(new RegExp('(Calcaneus|metatarsal|Talus|cuneiform|Cuboid|Navicular).*\\.'+S.toLowerCase()),s), c=bb.getCenter(V3()), z=bb.getSize(V3()); return new THREE.Matrix4().compose(V3(c.x,bb.min.y,c.z), new THREE.Quaternion(), V3(z.x*0.95,z.y*0.95,z.z)); }, 'Foot (wedge)');
+    addForm('toes'+S,'foot', block(0.8,0.9), s=>{ const bb=partBox(new RegExp('phalanx.*foot\\.'+S.toLowerCase()),s), c=bb.getCenter(V3()), z=bb.getSize(V3()); return new THREE.Matrix4().compose(V3(c.x,bb.min.y,c.z), new THREE.Quaternion(), V3(z.x,z.y*1.4,z.z)); }, 'Toes (block)');
+    const o = egg(); o.userData.female = true;
+    addForm('chest','chest', o, s=>breastMatrix(S,s).multiply(new THREE.Matrix4().makeScale(0.92,0.92,0.92)), 'Breast (sphere)');
+  }
+  forms.forEach(f=>{ f.rest=[f.placeFn(0), f.placeFn(1)]; f.obj.matrixAutoUpdate=false; f.side = /[RL]$/.test(RIG[f.b].n) ? RIG[f.b].n.slice(-1) : ''; });
+}
+function breastMatrix(S, s){
+  const sg=S==='R'?-1:1, bb=partBox(/rib|sternum/,s), sz=bb.getSize(V3());
+  return new THREE.Matrix4().compose(V3(sg*sz.x*0.29, bb.max.y - sz.y*0.44, bb.max.z - 0.012), new THREE.Quaternion().setFromEuler(new THREE.Euler(0.2,sg*0.4,0)), V3(0.056,0.052,0.042));
+}
+const lerpM = (A,B,t)=>{ const m=new THREE.Matrix4(); for(let i=0;i<16;i++) m.elements[i]=A.elements[i]+(B.elements[i]-A.elements[i])*t; return m; };
+function updateConstruction(){ for (const f of forms){ f.obj.matrix.copy(_w[f.b]).multiply(lerpM(f.rest[0], f.rest[1], sexT)); if (f.obj.userData.female) f.obj.visible = sexT>0.5; } }
+let breastMesh=[];
+function buildBreasts(){
+  const g=new THREE.SphereGeometry(1,40,28), p=g.attributes.position;
+  for (let i=0;i<p.count;i++){ const y=p.getY(i), z=p.getZ(i), low=y<0? 1+0.25*(-y) : 1-0.15*y; p.setZ(i, z>0? z*low : z*0.35); p.setY(i, y*(y<0?1.05:0.95)); }
+  g.computeVertexNormals(); const m=new THREE.MeshStandardMaterial({ color:0xD9B98C, roughness:0.7 });
+  for (const S of ['R','L']){ const mesh=new THREE.Mesh(g,m); mesh.castShadow=mesh.receiveShadow=true; mesh.matrixAutoUpdate=false; mesh.userData={pick:'Breast (fat and mammary gland)'+(S==='R'?' (right)':' (left)'), S, region:'chest'}; breastGroup.add(mesh); breastMesh.push(mesh); }
+}
+function updateBreasts(){ if (!_w.length) return; const ci=boneIndex('chest');
+  for (const m of breastMesh){ m.matrix.copy(_w[ci]).multiply(lerpM(breastMatrix(m.userData.S,0),breastMatrix(m.userData.S,1),sexT)); m.visible = sexT>0.5 && layerOn.muscle && depthUniform.value<1.5 && !m.userData.hide; } }
+
+/* ================================================================ picking */
+const pickRT = new THREE.WebGLRenderTarget(1,1);
+const pickMats = {};
+function pickMaterial(ln){
+  return pickMats[ln] ||= new THREE.ShaderMaterial({ uniforms:{ depthMode:depthUniform },
+    vertexShader:`attribute float partId; attribute float deep; attribute float mask; varying float vPid; varying float vDeep; varying float vMask; void main(){ vPid=partId; vDeep=deep; vMask=mask; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`uniform float depthMode; varying float vPid; varying float vDeep; varying float vMask; const float vIsMuscle=${ln==='muscle'?'1.0':'0.0'}; void main(){ ${DISCARD} float id=vPid+1.; gl_FragColor=vec4(mod(id,256.)/255., floor(id/256.)/255., 0., 1.); }` });
+}
+function pickAt(cam, x, y, w, h){
+  cam.setViewOffset(w, h, x, y, 1, 1);
+  const saved = []; scene.traverse(o=>{ if (o.isMesh || o.isLine) saved.push([o,o.material,o.visible]); });
+  let extraId = 60000; const extras = {};
+  for (const [o] of saved){
+    if (o.isLine || o===floor || o===seat || o===lmMarker || o===lmRing){ o.visible=false; continue; }
+    if (o.userData.layer) o.material = pickMaterial(o.userData.layer);
+    else if (o.userData.pick){ const id=extraId++; extras[id]=o.userData; o.material = new THREE.MeshBasicMaterial({ color:new THREE.Color(((id+1)%256)/255, Math.floor((id+1)/256)/255, 0) }); }
+  }
+  const cs = renderer.outputColorSpace; renderer.outputColorSpace = THREE.LinearSRGBColorSpace; renderer.shadowMap.enabled=false;
+  renderer.setRenderTarget(pickRT); renderer.setClearColor(0,1); renderer.clear(); renderer.render(scene, cam); renderer.setRenderTarget(null);
+  renderer.outputColorSpace = cs; renderer.shadowMap.enabled = true;
+  for (const [o,m,v] of saved){ if (o.material!==m && !o.userData.layer) o.material.dispose?.(); o.material=m; o.visible=v; }
+  cam.clearViewOffset();
+  const px = new Uint8Array(4); renderer.readRenderTargetPixels(pickRT,0,0,1,1,px);
+  const id = px[0] + px[1]*256 - 1;
+  if (id < 0) return null;
+  if (extras[id]){ const u = extras[id]; const f = forms.find(f=>f.obj.children.some(c=>c.userData===u)); return { name:u.pick, kind:u.region?'Soft tissue':'Construction', region:'', g: u.region || f?.region, side: u.S || f?.side || '' }; }
+  if (id >= 60000) return null;
+  const p = parts[id]; if (!p) return null;
+  return { id, name:p.n, kind: p.b ? 'Bone' : (CONNECTIVE.test(p.id)?'Connective tissue':'Muscle'), region: p.r.replace(/ > /g,' · '), g:p.g, side:p.side };
+}
+
+/* ================================================================ ink (plate) rendering */
+const orthoCams = [0,1,2].map(()=>new THREE.OrthographicCamera(-1,1,1,-1,0.01,20));
+const normalRT = new THREE.WebGLRenderTarget(1,1,{ type:THREE.HalfFloatType }), toneRT = new THREE.WebGLRenderTarget(1,1), idRT = new THREE.WebGLRenderTarget(1,1);
+const normalMats={}, toneMats={};
+const VS_ATTR = `attribute float deep; attribute float mask; attribute float partId; varying float vDeep; varying float vMask; varying float vPid;`;
+function normalMat(ln){ return normalMats[ln] ||= new THREE.ShaderMaterial({ uniforms:{depthMode:depthUniform},
+  vertexShader:`${VS_ATTR} varying vec3 vN; varying float vZ; void main(){ vDeep=deep; vMask=mask; vPid=partId; vN=normalize(normalMatrix*normal); vec4 mv=modelViewMatrix*vec4(position,1.); vZ=-mv.z; gl_Position=projectionMatrix*mv; }`,
+  fragmentShader:`uniform float depthMode; varying float vDeep; varying float vMask; varying float vPid; varying vec3 vN; varying float vZ; const float vIsMuscle=${ln==='muscle'?'1.0':'0.0'}; void main(){ ${DISCARD} gl_FragColor=vec4(normalize(vN)*0.5+0.5, vZ/10.); }` }); }
+function toneMat(ln){ return toneMats[ln] ||= new THREE.ShaderMaterial({ uniforms:{depthMode:depthUniform, L:{value:V3()}, amb:{value:0.3}, str:{value:0.7}, hoverId:hoverUniform},
+  vertexShader:`${VS_ATTR} attribute vec3 color; varying vec3 vN; varying vec3 vC; void main(){ vDeep=deep; vMask=mask; vPid=partId; vC=color; vN=normalize(mat3(modelMatrix)*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader:`uniform float depthMode; uniform vec3 L; uniform float amb; uniform float str; uniform float hoverId; varying float vDeep; varying float vMask; varying float vPid; varying vec3 vN; varying vec3 vC; const float vIsMuscle=${ln==='muscle'?'1.0':'0.0'}; void main(){ ${DISCARD}
+    float d=max(dot(normalize(vN),L),0.); float t = d>0.62?1.:(d>0.22?0.72:0.45); t = mix(1.0, t, str); t = mix(t,1.,amb*0.5);
+    vec3 paper=vec3(0.953,0.945,0.918); float k = ${ln==='muscle'?'0.38':'0.25'}; if (vMask>1.5) k = ${ln==='muscle'?'0.62':'0.45'}; else if (vMask>0.5 && vMask<1.5 && depthMode>2.5) k *= 0.35;
+    vec3 c = mix(paper, vC, k)*t; if (abs(vPid-hoverId)<0.5) c=mix(c,vec3(0.3,0.5,1.),0.45); gl_FragColor=vec4(c,1.); }` }); }
+const extraNormal = new THREE.ShaderMaterial({ vertexShader:`varying vec3 vN; varying float vZ; void main(){ vN=normalize(normalMatrix*normal); vec4 mv=modelViewMatrix*vec4(position,1.); vZ=-mv.z; gl_Position=projectionMatrix*mv; }`, fragmentShader:`varying vec3 vN; varying float vZ; void main(){ gl_FragColor=vec4(normalize(vN)*0.5+0.5, vZ/10.); }` });
+const extraToneVS = `varying vec3 vN; void main(){ vN=normalize(mat3(modelMatrix)*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+const extraToneFS = `uniform vec3 L; uniform vec3 col; varying vec3 vN; void main(){ float d=max(dot(normalize(vN),L),0.); float t=d>0.55?1.:0.82; gl_FragColor=vec4(col*t,1.); }`;
+const idMats = new Map();
+function extraIdMat(o){ if (!idMats.has(o)) { const h=hash(String(o.userData.pick||o.id)+o.id); idMats.set(o,new THREE.MeshBasicMaterial({color:new THREE.Color(h,0.99,0.5)})); } return idMats.get(o); }
+const inkQuad = new THREE.Mesh(new THREE.PlaneGeometry(2,2), new THREE.ShaderMaterial({
+  uniforms:{ tN:{value:null}, tT:{value:null}, tI:{value:null}, px:{value:new THREE.Vector2()}, flipY:{value:0} },
+  vertexShader:`uniform float flipY; varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.x, flipY>0.5 ? -position.y : position.y,0.,1.); }`,
+  fragmentShader:`uniform sampler2D tN; uniform sampler2D tT; uniform sampler2D tI; uniform vec2 px; varying vec2 vUv;
+  vec4 N(vec2 o){ return texture2D(tN, vUv+o*px); } vec2 I(vec2 o){ return texture2D(tI, vUv+o*px).rg; }
+  void main(){ vec4 c=N(vec2(0)); float e=0.; vec2 off[4]; off[0]=vec2(1,0); off[1]=vec2(-1,0); off[2]=vec2(0,1); off[3]=vec2(0,-1); vec2 ic=I(vec2(0));
+    for(int k=0;k<4;k++){ vec4 n=N(off[k]); float dz=abs(n.a-c.a)*10.; float dn=length(n.rgb-c.rgb); e=max(e, smoothstep(0.012,0.03,dz)); e=max(e, smoothstep(0.35,0.6,dn)*0.8); vec2 io=I(off[k]); if (length(io-ic)>0.001) e=max(e,0.55); }
+    vec3 paper=vec3(0.953,0.945,0.918); vec3 col = c.a<=0.0 ? paper : texture2D(tT,vUv).rgb; col = mix(col, vec3(0.16,0.13,0.11), e); gl_FragColor=vec4(col,1.); }` }));
+const inkScene = new THREE.Scene(); inkScene.add(inkQuad); const inkCam = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+// renders the current scene through the ink pipeline; to a viewport of the canvas, or into outRT
+function inkRender(cam, rw, rh, viewport, outRT, formTint){
+  for (const rt of [normalRT, toneRT, idRT]) if (rt.width!==rw || rt.height!==rh) rt.setSize(rw,rh);
+  inkQuad.material.uniforms.px.value.set(1.2/rw,1.2/rh);
+  const Lv = plateLightDir.clone(), str = +$('lIn').value/100, amb = +$('lAm').value/100;
+  const items=[]; scene.traverse(o=>{ if (o.isMesh||o.isLine) items.push([o,o.material,o.visible]); });
+  const tmp=[];
+  for (const [pass, rt] of [['n',normalRT],['t',toneRT],['i',idRT]]){
+    for (const [o,m,v] of items){
+      if (!v) continue;
+      if (o===floor || o===lmMarker || o===lmRing){ o.visible=false; continue; }
+      if (o.isLine){ o.visible = pass==='t'; continue; }
+      if (o.userData.layer) o.material = pass==='n'? normalMat(o.userData.layer) : pass==='t'? toneMat(o.userData.layer) : pickMaterial(o.userData.layer);
+      else if (pass==='n') o.material = extraNormal;
+      else if (pass==='i') o.material = extraIdMat(o);
+      else { const isCon = conGroup.children.includes(o.parent); const hl = o.parent?.userData.hl;
+        const col = isCon ? (formTint && hl ? new THREE.Color(0.86,0.9,0.98) : new THREE.Color(0.96,0.965,0.975)) : new THREE.Color(0.88,0.80,0.68);
+        const mm = new THREE.ShaderMaterial({ uniforms:{L:{value:Lv}, col:{value:col}}, vertexShader:extraToneVS, fragmentShader:extraToneFS }); tmp.push(mm); o.material = mm; }
+    }
+    for (const ln in toneMats){ toneMats[ln].uniforms.L.value.copy(Lv); toneMats[ln].uniforms.amb.value=amb; toneMats[ln].uniforms.str.value=0.35+0.65*str; }
+    renderer.setRenderTarget(rt); renderer.setScissorTest(false);
+    renderer.setClearColor(pass==='t'?0xf3f1ea:0x000000, pass==='n'?0:1); renderer.clear();
+    renderer.render(scene, cam);
+  }
+  for (const [o,m,v] of items){ o.material=m; o.visible=v; }
+  tmp.forEach(m=>m.dispose());
+  const u = inkQuad.material.uniforms; u.tN.value=normalRT.texture; u.tT.value=toneRT.texture; u.tI.value=idRT.texture;
+  if (outRT){ u.flipY.value=0; renderer.setRenderTarget(outRT); renderer.setViewport(0,0,rw,rh); renderer.render(inkScene, inkCam); renderer.setRenderTarget(null); }
+  else { u.flipY.value=0; renderer.setRenderTarget(null); renderer.setScissorTest(true); renderer.setViewport(...viewport); renderer.setScissor(...viewport); renderer.render(inkScene, inkCam); renderer.setScissorTest(false); }
+}
+function renderPlates(W,H){
+  const pw = Math.floor(W/3), dpr = renderer.getPixelRatio();
+  const bb = new THREE.Box3(); for (const L of Object.values(layers)) { L.mesh.geometry.computeBoundingBox(); bb.union(L.mesh.geometry.boundingBox); }
+  const c = bb.getCenter(V3()), sz = bb.getSize(V3());
+  const halfH = Math.max(sz.y*0.56, Math.max(sz.x,sz.z)*0.56*H/pw);
+  const dirs = [V3(0,0,1), V3(-1,0,0), V3(0,0,-1)];
+  for (let i=0;i<3;i++){
+    const cam = orthoCams[i], a = pw/H;
+    cam.left=-halfH*a; cam.right=halfH*a; cam.top=halfH; cam.bottom=-halfH; cam.near=0.01; cam.far=10;
+    cam.position.copy(c).addScaledVector(dirs[i], 4); cam.up.set(0,1,0); cam.lookAt(c); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+    inkRender(cam, Math.floor(pw*dpr), Math.floor(H*dpr), [i*pw, 0, pw, H], null, false);
+  }
+  renderer.setViewport(0,0,W,H);
+}
+
+/* ================================================================ masks & regions */
+function setMasks(fn){
+  for (const L of Object.values(layers)){
+    const arr = L.mesh.geometry.attributes.mask.array;
+    for (const p of L.list){ const v = fn(p); if (arr[p.vo]!==v) arr.fill(v, p.vo, p.vo+p.nv); }
+    L.mesh.geometry.attributes.mask.needsUpdate = true;
+  }
+}
+function studyMask(region, side, forDiagram){
+  const ctx = new Set(CONTEXT[region]);
+  return p => {
+    if (BILATERAL.has(region) && p.side && p.side!==side) return forDiagram ? 0 : 1;
+    if (p.g===region) return 2;
+    if (!forDiagram) return 1;
+    return ctx.has(p.g) ? 1 : 0;
+  };
+}
+function regionBox(region, side, layerNames=['skeleton','muscle']){
+  const bb = new THREE.Box3(), v=V3();
+  for (const ln of layerNames){ const L=layers[ln], pos=L.mesh.geometry.attributes.position.array;
+    for (const p of L.list){ if (p.g!==region) continue; if (BILATERAL.has(region) && p.side && p.side!==side) continue; if (!p.b && p.d) continue;
+      for (let k=0;k<p.nv;k+=2){ const o=(p.vo+k)*3; bb.expandByPoint(v.set(pos[o],pos[o+1],pos[o+2])); } } }
+  return bb;
+}
+
+/* ================================================================ study: lesson panel & stage drawings */
+const stageCache = new Map();
+const STAGES = [['Simple masses','Construction forms'],['Planes & landmarks','Skeleton'],['Developed forms','Muscles']];
+async function renderStudyStages(region, side, angle){
+  const cacheKey = [sexT>0.5?'f':'m', region, side, angle].join('/');
+  if (stageCache.has(cacheKey)) return stageCache.get(cacheKey);
+  // save state
+  const saved = { q:qCur.map(q=>q.clone()), ground:state.ground, depth:depthUniform.value, vis:{ s:layers.skeleton.mesh.visible, m:layers.muscle.mesh.visible, c:conGroup.visible, seat:seat.visible }, hover:hoverUniform.value, fill:conFill.opacity };
+  // neutral pose
+  state.ground = undefined; hoverUniform.value = -1;
+  const neutral = anglesToQuats(presetAng[0]); applyPoseRaw(neutral);
+  seat.visible = false; breastMesh.forEach(m=>m.userData.hide=false);
+  setMasks(studyMask(region, side, true));
+  const ctx = new Set(CONTEXT[region]);
+  const formVis = forms.map(f=>f.obj.visible);
+  forms.forEach(f=>{ const inCtx = ctx.has(f.region) && !(BILATERAL.has(region) && f.side && f.side!==side); f.obj.visible = f.obj.visible && inCtx; f.obj.userData.hl = f.region===region;
+    f.obj.children.forEach(c=>{ if (c.isLine) c.material = f.region===region ? conLine : conLineFaint; }); });
+  // camera
+  let bb = regionBox(region, side); if (bb.isEmpty()) bb = regionBox(region, side, ['skeleton']);
+  const c = bb.getCenter(V3()), sz = bb.getSize(V3());
+  let az = {front:0, quarter:45, side:90, back:180}[angle]; if (region==='back') az += 180;
+  const mirror = side==='R' ? -1 : 1; if (angle==='quarter' || angle==='side') az *= mirror;
+  const a = az*D2R, dir = V3(Math.sin(a), 0.12, Math.cos(a)).normalize();
+  const W=760, H=560, span = Math.max(sz.x, sz.y, sz.z)*0.62 + 0.03;
+  const cam = new THREE.OrthographicCamera(-span*W/H, span*W/H, span, -span, 0.01, 10);
+  cam.position.copy(c).addScaledVector(dir, 3); cam.lookAt(c); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+  const outRT = new THREE.WebGLRenderTarget(W, H), buf = new Uint8Array(W*H*4), urls = [];
+  const cv = document.createElement('canvas'); cv.width=W; cv.height=H; const ctx2 = cv.getContext('2d');
+  conFill.opacity = 1;
+  for (let s=0;s<3;s++){
+    layers.skeleton.mesh.visible = s===1; layers.muscle.mesh.visible = s===2; conGroup.visible = s===0;
+    breastGroup.visible = s===2 && sexT>0.5 && ctx.has('chest'); depthUniform.value = 0;
+    inkRender(cam, W, H, null, outRT, true);
+    renderer.readRenderTargetPixels(outRT, 0, 0, W, H, buf);
+    const img = ctx2.createImageData(W, H);
+    for (let y=0;y<H;y++) img.data.set(buf.subarray((H-1-y)*W*4, (H-y)*W*4), y*W*4);
+    ctx2.putImageData(img, 0, 0); urls.push(cv.toDataURL('image/png'));
+  }
+  outRT.dispose();
+  // restore
+  forms.forEach((f,i)=>{ f.obj.visible = formVis[i]; f.obj.userData.hl=false; f.obj.children.forEach(c=>{ if (c.isLine) c.material = conLine; }); });
+  conFill.opacity = saved.fill;
+  layers.skeleton.mesh.visible = saved.vis.s; layers.muscle.mesh.visible = saved.vis.m; conGroup.visible = saved.vis.c; breastGroup.visible = true;
+  depthUniform.value = saved.depth; hoverUniform.value = saved.hover; state.ground = saved.ground;
+  applyMasks(); applyPoseRaw(saved.q); seat.visible = saved.vis.seat;
+  stageCache.set(cacheKey, urls);
+  return urls;
+}
+function applyPoseRaw(qs){ const g = groundLift(qs, state.ground); computeBones(qs, g.lift); for (const L of Object.values(layers)) skinLayer(L); updateConstruction(); updateBreasts(); }
+function applyMasks(){ if (state.region && !$('lesson').hidden) setMasks(studyMask(state.region, state.side, false)); else setMasks(()=>1); requestRender(); }
+let lessonTicket = 0;
+function openLesson(region, side){
+  state.region = region; state.side = side || state.side || 'L';
+  $('regionSel').value = region;
+  const [intro, s1, s2, s3, ex] = LESSONS[region];
+  $('lTitle').textContent = REGIONS[region] + (BILATERAL.has(region) ? (state.side==='R'?' · right':' · left') : '');
+  $('lIntro').textContent = intro; $('lExercise').textContent = ex;
+  const texts = [s1, s2, s3];
+  $('lStages').replaceChildren(...STAGES.map(([t, sub], i)=>{
+    const card = document.createElement('article'); card.className='stagecard';
+    card.innerHTML = `<div class="sh"><span class="num">0${i+1}</span><h3>${t}</h3><span class="eyebrow" style="margin-left:auto">${sub}</span></div><div class="img"><em>Drawing…</em></div><p></p>`;
+    card.querySelector('p').textContent = texts[i]; return card; }));
+  renderSheets(region); renderStudy();
+  $('lesson').hidden = false; applyMasks(); drawStages();
+}
+function drawStages(){
+  const t = ++lessonTicket;
+  requestAnimationFrame(()=>setTimeout(async ()=>{
+    if (t!==lessonTicket || $('lesson').hidden) return;
+    try {
+      const urls = await renderStudyStages(state.region, state.side, state.angle);
+      if (t!==lessonTicket) return;
+      [...$('lStages').children].forEach((card,i)=>{ const box = card.querySelector('.img'); const img = new Image(); img.src = urls[i];
+        img.alt = `${REGIONS[state.region]}, ${STAGES[i][0].toLowerCase()} (${STAGES[i][1].toLowerCase()}), ${state.angle} view, neutral stance`; box.replaceChildren(img); });
+    } catch(e){ console.error(e); [...$('lStages').querySelectorAll('.img')].forEach(b=>b.innerHTML='<em>This drawing could not render. Close and reopen the panel to retry.</em>'); }
+    requestRender();
+  }, 30));
+}
+function closeLesson(){ lmActive=null; lmMarker.visible=lmRing.visible=false; $('lesson').hidden = true; $('regionSel').value=''; applyMasks(); }
+function focusRegion(){
+  if (!state.region) return; const bb = regionBox(state.region, state.side); if (bb.isEmpty()) return;
+  const c = bb.getCenter(V3()), r = Math.max(0.3, bb.getSize(V3()).length()*2.2);
+  tweenCamera(c, c.clone().add(camera.position.clone().sub(controls.target).normalize().multiplyScalar(r)));
+}
+// schema sheets (filled in when the sheet collection is available)
+let LESSONDATA = null;
+fetch('lessons.json').then(r=>r.ok?r.json():null).then(d=>{ LESSONDATA=d; if (d && !$('lesson').hidden) { renderSheets(state.region); renderStudy(); } }).catch(()=>{});
+const MAPPED_TEXT = {
+  chest:['Establish the sternum direction, clavicle span and selected rib arches. Place the iliac crests below them using the actual spacing shown; do not substitute a symmetrical egg.','Map each rib’s turn into depth, the costal cartilage, and the pelvic opening. Follow the numbered locations across all three stages.','Follow the pectoral masses toward the humerus, then distinguish serratus slips from the external oblique. Keep the sternum and iliac crest locations fixed beneath these forms.'],
+  back:['Place the scapulae relative to the rib arches and iliac crests. Check the inferior angles before constructing the waist.','Study scapular borders, vertebral spacing and the posterior rib arcs. The openings and overlaps are taken from the anatomical mesh.','Relate the trapezius and latissimus volumes to the scapula and pelvis. These are muscle forms, not the final skin surface.'],
+  pelvis:['Construct the two hip bones around the sacrum. Preserve the pelvic opening, pubic connection and the lower ischial contours.','Compare the iliac wings, sacrum, pubic rami and obturator openings. The selected source vertices mark the same locations in every stage.','Place the gluteal volumes around the actual pelvic skeleton. Distinguish the bony rim from the overlying muscle and preserve the hip-bone orientation.'],
+  pelvisF:['Construct the two hip bones around the sacrum. Preserve the pelvic opening, pubic connection and the lower ischial contours.','Compare the iliac wings, sacrum, pubic rami and obturator openings. The selected source vertices mark the same locations in every stage.','Use restrained tone to describe the iliac fossae, sacral relief and the turn into the acetabular region. This is the female-source bony pelvis; female muscles are not inferred.'],
+  hand:['Place the carpal cluster, five metacarpals and the finger chains. Copy their relative lengths and spacing; notice the thumb’s separate direction.','Identify the phalangeal bases and their joint intervals. Follow one finger from metacarpal to distal phalanx before moving to the next.','Relate the thenar, hypothenar and interosseous forms to the bones. This selection shows intrinsic hand muscles; it is not a complete tendon or skin study.'] };
+function currentStudy(){
+  if (!LESSONDATA || !state.region) return null; const st = LESSONDATA.studies;
+  if (sex===1 && st['female-'+state.region]) return st['female-'+state.region];
+  return st['male-'+state.region] || null;
+}
+function renderStudy(){
+  const box = $('lStudy'), study = currentStudy();
+  if (!study){ box.hidden = true; return; }
+  box.hidden = false;
+  const view = study.views[{front:'0',quarter:'45',side:'90',back:'180'}[state.angle]];
+  const female = study.sex==='female';
+  $('lStudyNote').textContent = (female ? 'Real female pelvis (Human Reference Atlas, Visible Human Female). ' : 'Mapped from this same Z-Anatomy source. ') + (state.region==='hand' ? 'This fixed reference shows the left hand. ' : '') + 'The numbered points stay fixed as each stage adds anatomy.';
+  const titles = ['Anatomical scaffold','Bone contours & landmarks', female ? 'Developed bone form' : 'Muscle forms over the same skeleton'];
+  const text = MAPPED_TEXT[female ? 'pelvisF' : state.region];
+  $('lStudyCards').replaceChildren(...titles.map((t,i)=>{ const c=document.createElement('article'); c.className='stagecard';
+    c.innerHTML = `<div class="sh"><span class="num">0${i+1}</span><h3></h3></div><button class="img zoomable" aria-label="Enlarge"><img alt=""></button><p></p>`;
+    c.querySelector('h3').textContent=t; c.querySelector('p').textContent=text[i];
+    const img=c.querySelector('img'); img.src=view.images[i]; img.alt=`${study.sex} ${study.region}: ${t}. Numbered points match the list below.`;
+    c.querySelector('button').onclick=()=>openViewer([{title:t, src:view.images[i]}],0); return c; }));
+  $('lStudyLegend').replaceChildren(...study.anchors.map((a,i)=>{ const b=document.createElement('button'); b.className='lm';
+    b.innerHTML=`<span>${i+1}</span>`; b.append(a.label + (view.markers[i]?.hidden?' · behind surface':'') + (a.approx?' · approximate on this figure':''));
+    b.onclick=()=>locateLandmark(a); return b; }));
+}
+function renderSheets(region){
+  const grid = $('lSheetGrid'), ids = SHEET_GROUPS[region] || [];
+  if (!LESSONDATA || !ids.length){ $('lSheets').hidden = true; return; }
+  const list = ids.map(id=>LESSONDATA.sheets.find(s=>s.id===id)).filter(Boolean);
+  grid.replaceChildren(...list.map((s,i)=>{ const b=document.createElement('button'); b.className='sheet'; b.setAttribute('aria-label','Enlarge '+s.title);
+    b.innerHTML=`<img alt="" loading="lazy" width="480" height="320"><span></span>`; b.querySelector('img').src=s.thumb; b.querySelector('img').alt=s.title+' drawing sheet'; b.querySelector('span').textContent=s.title;
+    b.onclick=()=>openViewer(LESSONDATA.sheets.map(x=>({title:x.title, src:x.src, id:x.id})), LESSONDATA.sheets.indexOf(s)); return b; }));
+  $('lSheets').hidden = false;
+}
+/* full-size viewer */
+let viewerList=[], viewerIdx=0;
+function openViewer(list, i){ viewerList=list; viewerIdx=i; const sel=$('vSel'); sel.replaceChildren(...list.map((x,k)=>new Option(x.title,k))); sel.hidden = list.length<2; showViewer(); $('viewer').hidden=false; $('vClose').focus(); }
+function showViewer(){ const x=viewerList[viewerIdx]; $('vSel').value=viewerIdx; $('vImg').src=x.src; $('vImg').alt=x.title; $('vTitle').textContent=x.title; $('vScroll').classList.remove('actual'); $('vZoom').textContent='Actual size'; $('vScroll').scrollTo(0,0); }
+$('vSel').onchange=e=>{ viewerIdx=+e.target.value; showViewer(); };
+$('vZoom').onclick=()=>{ const on=$('vScroll').classList.toggle('actual'); $('vZoom').textContent=on?'Fit to screen':'Actual size'; };
+$('vClose').onclick=()=>{ $('viewer').hidden=true; };
+$('viewer').addEventListener('keydown',e=>{ if(e.key==='Escape') $('viewer').hidden=true; if(e.key==='ArrowRight'&&viewerList.length>1){viewerIdx=(viewerIdx+1)%viewerList.length;showViewer();} if(e.key==='ArrowLeft'&&viewerList.length>1){viewerIdx=(viewerIdx+viewerList.length-1)%viewerList.length;showViewer();} });
+$('viewer').addEventListener('click',e=>{ if(e.target.id==='viewer') $('viewer').hidden=true; });
+/* landmark locator */
+const lmMarker = new THREE.Mesh(new THREE.SphereGeometry(0.008,16,12), new THREE.MeshBasicMaterial({ color:0xE8552E, depthTest:false }));
+const lmRing = new THREE.Mesh(new THREE.RingGeometry(0.013,0.017,32), new THREE.MeshBasicMaterial({ color:0xE8552E, depthTest:false, side:THREE.DoubleSide }));
+lmMarker.renderOrder = lmRing.renderOrder = 10; lmMarker.visible = lmRing.visible = false; scene.add(lmMarker, lmRing);
+let lmActive = null;
+function landmarkPos(a){ const p = parts.find(x=>x.id===a.part); if (!p) return null; const L = layers[p.layer], arr = L.mesh.geometry.attributes.position.array, o = (p.vo+a.v)*3; return V3(arr[o],arr[o+1],arr[o+2]); }
+function updateLandmark(){ if (!lmActive) return; const v = landmarkPos(lmActive); if (!v) return; lmMarker.position.copy(v); lmRing.position.copy(v); lmRing.lookAt(camera.position); }
+function locateLandmark(a){
+  if (!layerOn.skeleton){ layerOn.skeleton=true; $('lySkel').setAttribute('aria-pressed','true'); }
+  if (layerOn.muscle){ layerOn.muscle=false; $('lyMus').setAttribute('aria-pressed','false'); }
+  applyLayers(); if (state.view!=='3d') setView('3d');
+  lmActive = a; lmMarker.visible = lmRing.visible = true; updateLandmark();
+  const p = parts.find(x=>x.id===a.part); hoverUniform.value = p ? p.gid : -1;
+  const v = landmarkPos(a), az = {front:0,quarter:45,side:90,back:180}[state.angle]*D2R + (state.region==='back'?Math.PI:0);
+  const r = state.region==='hand' ? 0.45 : 0.9;
+  tweenCamera(v, v.clone().add(V3(Math.sin(az)*r, 0.08*r, Math.cos(az)*r)));
+  $('hudS').textContent = (a.label) + ' · ' + (p ? p.n : '');
+}
+const SHEET_GROUPS={head:['head'],eye:['eye'],nose:['nose'],mouth:['mouth'],ear:['ear'],neck:['head','chest','back'],chest:['chest','torso'],back:['back','torso'],pelvis:['torso','chest','back'],shoulder:['arm','chest','back'],upperarm:['arm'],elbow:['arm'],forearm:['arm'],hand:['hand-structure','hand-form','fingers'],thigh:['leg'],calf:['leg'],knee:['knee-structure','knee-form'],foot:['foot-structure','foot-form']};
+
+/* ================================================================ camera tween */
+let tween = null;
+function tweenCamera(target, pos){ tween = { t:0, t0:controls.target.clone(), p0:camera.position.clone(), t1:target, p1:pos }; requestRender(); }
+function stepTween(){ if (!tween) return false; tween.t = Math.min(1, tween.t+0.06); const e = 1-Math.pow(1-tween.t,3);
+  controls.target.lerpVectors(tween.t0, tween.t1, e); camera.position.lerpVectors(tween.p0, tween.p1, e); if (tween.t>=1) tween=null; return true; }
+
+/* ================================================================ pose mode: markers & panel */
+const markerEls = new Map();
+function markerPivot(id){ const J=JOINTS[id]; const b = boneIndex(id==='waist' ? 'spine2' : J.bones[0]); return pivot(b).applyMatrix4(_w[b]); }
+function buildMarkers(){
+  for (const [id,J] of Object.entries(JOINTS)){
+    const b = document.createElement('button'); b.className = 'jm' + (HAND_KIND.has(J.kind)?' small':''); b.setAttribute('aria-label','Pose '+J.name.toLowerCase());
+    const sp = document.createElement('span'); sp.textContent = J.name; b.append(sp);
+    b.onclick = e => { e.stopPropagation(); selectJoint(id); };
+    $('markers').append(b); markerEls.set(id, b);
+  }
+}
+function positionMarkers(W,H){
+  if (state.mode!=='pose' || state.view!=='3d') return;
+  const handSide = state.joint && (HAND_KIND.has(JOINTS[state.joint].kind) || JOINTS[state.joint].kind==='wrist') ? JOINTS[state.joint].side : null;
+  const close = camera.position.distanceTo(controls.target) < 1.3;
+  let sel = null;
+  for (const [id, el] of markerEls){
+    const J = JOINTS[id], p = markerPivot(id).project(camera);
+    const x = (p.x+1)*W/2, y = (1-p.y)*H/2;
+    const detail = HAND_KIND.has(J.kind) || J.kind==='toes';
+    const show = (!detail || (J.kind==='toes' ? close : (handSide===J.side && close))) && p.z<1 && x>6 && x<W-6 && y>6 && y<H-6;
+    el.hidden = !show; el.style.left = x+'px'; el.style.top = y+'px';
+    el.setAttribute('aria-pressed', String(state.joint===id)); el.style.zIndex = state.joint===id ? 3 : 1;
+    if (id===state.joint) sel = {x,y};
+  }
+  const panel = $('jpanel');
+  if (!panel.hidden && sel && innerWidth>820){
+    const pw = panel.offsetWidth, ph = panel.offsetHeight;
+    let x = sel.x+24; if (x+pw > W-12) x = sel.x-pw-24; x = Math.max(12, Math.min(W-pw-12, x));
+    panel.style.left = x+'px'; panel.style.top = Math.max(70, Math.min(H-ph-12, sel.y-ph/2))+'px';
+  }
+}
+function selectJoint(id){ state.joint = id; $('jpanel').hidden = false; updatePanel(); requestRender();
+  if (HAND_KIND.has(JOINTS[id].kind) && camera.position.distanceTo(controls.target)>1.3) zoomHand(); }
+function jointValues(id){ const J=JOINTS[id]; const a = state.angles[id] || []; return J.axes.map((_,i)=>a[i]??0); }
+let dragging = false;
+function updatePanel(){
+  const id = state.joint; if (!id || $('jpanel').hidden) return;
+  const J = JOINTS[id]; $('jName').textContent = J.name;
+  $('jNote').textContent = NOTES[J.kind] || (HAND_KIND.has(J.kind) ? 'Bend each finger joint separately. Zoom out to see the other joints again.' : '');
+  $('jHand').hidden = !(HAND_KIND.has(J.kind) || J.kind==='wrist');
+  const vals = jointValues(id), L = limits(id, vals);
+  const box = $('jSliders');
+  if (box.dataset.joint !== id){
+    box.dataset.joint = id; box.replaceChildren();
+    J.axes.forEach(([label], i)=>{
+      const wrap = document.createElement('label'); wrap.className='slider';
+      const t = document.createElement('span'); t.textContent = label; const out = document.createElement('output');
+      const inp = document.createElement('input'); inp.type='range'; inp.step=1; inp.id = `j-${id}-${i}`; inp.setAttribute('aria-label', `${J.name}: ${label}`);
+      inp.addEventListener('pointerdown', ()=>{ if (!dragging){ pushHistory(); dragging=true; } });
+      inp.addEventListener('keydown', ()=>{ if (!dragging){ pushHistory(); dragging=true; } });
+      inp.addEventListener('change', ()=>{ dragging=false; });
+      inp.addEventListener('input', ()=>{ const v = jointValues(id); v[i] = +inp.value; editJoint(id, v); syncSliders(); });
+      wrap.append(t, out, inp); box.append(wrap);
+    });
+  }
+  syncSliders();
+}
+function syncSliders(){
+  const id = state.joint; if (!id) return; const vals = jointValues(id), L = limits(id, vals);
+  [...$('jSliders').children].forEach((wrap,i)=>{ const inp = wrap.querySelector('input'); inp.min = L[i][1]; inp.max = L[i][2]; inp.value = vals[i]; wrap.querySelector('output').textContent = Math.round(vals[i])+'°'; });
+}
+function zoomHand(){
+  const S = JOINTS[state.joint]?.side || 'L'; const p = markerPivot('middleMcp'+S);
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  tweenCamera(p, p.clone().add(dir.multiplyScalar(0.55)));
+}
+function setHand(S, open){
+  pushHistory();
+  FINGERS.forEach((f,i)=>{ state.angles[f+'Mcp'+S] = open?[0,0]:[80+i*2,0]; state.angles[f+'Pip'+S] = open?[0]:[100]; state.angles[f+'Dip'+S] = open?[0]:[60]; });
+  state.angles['thumbCmc'+S] = open?[0,0,0]:[35,45,8]; state.angles['thumbMcp'+S] = open?[0]:[40]; state.angles['thumbIp'+S] = open?[0]:[45];
+  state.edited = true; setTarget(true); refreshPoseList(); updatePanel();
+}
+
+/* ================================================================ UI */
+const layerOn = { skeleton:false, muscle:true, construction:false };
+function applyLayers(){
+  layers.skeleton.mesh.visible = layerOn.skeleton; layers.muscle.mesh.visible = layerOn.muscle; conGroup.visible = layerOn.construction;
+  const combo = layerOn.construction && (layerOn.skeleton || layerOn.muscle);
+  conFill.opacity = combo ? 0.28 : 0.92; conFill.depthWrite = !combo;
+  conGroup.traverse(o=>{ if (o.isMesh) o.castShadow = !combo; });
+  updateBreasts(); $('depthSeg').style.opacity = layerOn.muscle ? 1 : 0.45;
+  updateHud(); requestRender();
+}
+function updateHud(){
+  const P = POSES[state.preset];
+  $('hudT').textContent = P.name + (state.edited ? ' · adjusted' : '');
+  const on = Object.entries(layerOn).filter(([,v])=>v).map(([k])=>({skeleton:'Skeleton',muscle:'Muscles',construction:'Construction'})[k]);
+  $('hudS').textContent = [(sex? 'Female (re-proportioned)' : 'Male'), on.join(' + ') || 'No layers', state.view==='2d'?'2D plates':'3D', state.mode==='pose'?'Pose mode':'Study mode'].join(' · ');
+}
+function refreshPoseList(){ [...$('poses').children].forEach((b,k)=>{ b.setAttribute('aria-pressed', String(k===state.preset)); b.querySelector('.edited')?.remove(); if (k===state.preset && state.edited){ const t=document.createElement('span'); t.className='edited'; t.textContent='adjusted'; b.querySelector('b').append(t); } }); updateHud(); }
+function setMode(m){
+  state.mode = m; [...$('modeSeg').children].forEach(x=>x.setAttribute('aria-pressed', String(x.dataset.mode===m)));
+  $('markers').hidden = m!=='pose' || state.view!=='3d'; if (m!=='pose') $('jpanel').hidden = true;
+  $('hint').textContent = m==='pose' ? 'Click a joint marker to bend or rotate it · drag empty space to orbit' : (state.view==='2d' ? 'Hover a plate to name structures · click to study a region' : 'Click a body part to study it · drag to orbit · scroll to zoom');
+  updateHud(); requestRender();
+}
+function setView(v){
+  state.view = v; [...$('viewSeg').children].forEach(x=>x.setAttribute('aria-pressed', String(x.dataset.view===v)));
+  $('plates').hidden = v!=='2d'; controls.enabled = v==='3d'; setMode(state.mode);
+}
+POSES.forEach((P,i)=>{ const b=document.createElement('button'); b.className='pose'; b.id='pose-'+P.id; b.setAttribute('aria-pressed', String(i===0));
+  b.innerHTML=`<span class="num">${String(i+1).padStart(2,'0')}</span><span><b>${P.name}</b><small>${P.sub}</small></span>`; b.onclick=()=>setPreset(i); $('poses').appendChild(b); });
+for (const [id,name] of Object.entries(REGIONS)) $('regionSel').add(new Option(name, id));
+$('regionSel').onchange = e => openLesson(e.target.value, state.side);
+$('sexSeg').onclick = e=>{ const b=e.target.closest('button'); if(!b) return; sex=+b.dataset.sex; [...$('sexSeg').children].forEach(x=>x.setAttribute('aria-pressed', String(x===b))); updateHud(); requestRender(); };
+$('modeSeg').onclick = e=>{ const b=e.target.closest('button'); if (b) setMode(b.dataset.mode); };
+$('viewSeg').onclick = e=>{ const b=e.target.closest('button'); if (b) setView(b.dataset.view); };
+$('layers').onclick = e=>{ const b=e.target.closest('button'); if(!b) return; const k=b.dataset.layer; layerOn[k]=!layerOn[k]; b.setAttribute('aria-pressed', String(layerOn[k])); applyLayers(); };
+$('depthSeg').onclick = e=>{ const b=e.target.closest('button'); if(!b) return; depthUniform.value=+b.dataset.depth; [...$('depthSeg').children].forEach(x=>x.setAttribute('aria-pressed', String(x===b))); if(!layerOn.muscle){ layerOn.muscle=true; $('lyMus').setAttribute('aria-pressed','true'); } applyLayers(); };
+$('angleSeg').onclick = e=>{ const b=e.target.closest('button'); if(!b) return; state.angle=b.dataset.angle; [...$('angleSeg').children].forEach(x=>x.setAttribute('aria-pressed', String(x===b))); drawStages(); renderStudy(); };
+for (const id of ['lAz','lEl','lIn','lAm']) $(id).oninput = setLight;
+$('presets').onclick = e=>{ const b=e.target.closest('button'); if(!b) return; const [a,el,i,m]=b.dataset.p.split(','); $('lAz').value=a; $('lEl').value=el; $('lIn').value=i; $('lAm').value=m; setLight(); };
+$('undoPose').onclick = undo; $('jUndo').onclick = undo;
+$('resetPose').onclick = ()=>setPreset(state.preset);
+$('jClose').onclick = ()=>{ $('jpanel').hidden = true; markerEls.get(state.joint)?.focus(); state.joint=null; requestRender(); };
+$('jReset').onclick = ()=>{ const id=state.joint; if (!id) return; pushHistory(); const base = presetAng[state.preset][id]; if (base) state.angles[id]=[...base]; else delete state.angles[id]; state.edited=true; setTarget(true); refreshPoseList(); updatePanel(); };
+$('jZoomHand').onclick = zoomHand;
+$('jOpenHand').onclick = ()=>setHand(JOINTS[state.joint].side, true);
+$('jFist').onclick = ()=>setHand(JOINTS[state.joint].side, false);
+$('jpanel').addEventListener('keydown', e=>{ if (e.key==='Escape'){ $('jClose').click(); e.stopPropagation(); } });
+$('lClose').onclick = closeLesson; $('lFocus').onclick = focusRegion;
+$('lesson').addEventListener('keydown', e=>{ if (e.key==='Escape') closeLesson(); });
+
+/* hover & click */
+let mouse=null, pickPending=false, down=null;
+canvas.addEventListener('pointermove', e=>{ mouse={x:e.offsetX,y:e.offsetY}; if (!e.buttons){ pickPending=true; requestRender(); } });
+canvas.addEventListener('pointerleave', ()=>{ mouse=null; hoverUniform.value=-1; $('tip').hidden=true; requestRender(); });
+canvas.addEventListener('pointerdown', e=>{ down={x:e.offsetX,y:e.offsetY}; });
+canvas.addEventListener('pointerup', e=>{
+  if (!down || Math.hypot(e.offsetX-down.x, e.offsetY-down.y)>5){ down=null; return; } down=null;
+  const [W,H] = size(); const r = pickScreen(e.offsetX, e.offsetY, W, H);
+  if (e.pointerType!=='mouse'){ mouse={x:e.offsetX,y:e.offsetY}; showTip(r, W, H); }
+  if (state.mode==='study' && r && r.g) openLesson(r.g, r.side || (r.g && BILATERAL.has(r.g) ? state.side : ''));
+});
+function pickScreen(x, y, W, H){
+  let cam=camera, w=W;
+  if (state.view==='2d'){ const pw=Math.floor(W/3), i=Math.min(2,Math.floor(x/pw)); cam=orthoCams[i]; x-=i*pw; w=pw; }
+  return pickAt(cam, x, y, w, H);
+}
+function showTip(r, W, H){
+  const tip=$('tip');
+  if (r){ hoverUniform.value = r.id ?? -1; tip.innerHTML=`<em>${r.kind}${r.g && state.mode==='study' ? ' · click to study '+REGIONS[r.g].toLowerCase() : ''}</em><b></b>${r.region?`<span></span>`:''}`;
+    tip.querySelector('b').textContent = r.name; if (r.region) tip.querySelector('span').textContent = r.region;
+    tip.hidden=false; tip.style.left=Math.min(mouse.x, W-280)+'px'; tip.style.top=Math.min(mouse.y,H-90)+'px'; }
+  else { hoverUniform.value=-1; tip.hidden=true; }
+}
+
+/* render loop */
+let needs=true; function requestRender(){ needs=true; }
+controls.addEventListener('change', requestRender);
+function size(){ const r=$('stage').getBoundingClientRect(); return [Math.max(1,r.width|0), Math.max(1,r.height|0)]; }
+function resize(){ const [W,H]=size(); const pr=renderer.getPixelRatio();
+  if (canvas.width!==Math.floor(W*pr) || canvas.height!==Math.floor(H*pr)){ renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); needs=true; } return [W,H]; }
+function tick(){
+  let dirty=false;
+  if (poseT<1){ poseT=Math.min(1,poseT+0.06); dirty=true; }
+  if (Math.abs(sexT-sex)>1e-4){ sexT += Math.sign(sex-sexT)*Math.min(0.08,Math.abs(sex-sexT)); dirty=true; if (Math.abs(sexT-sex)<1e-4 && !$('lesson').hidden){ drawStages(); renderStudy(); } }
+  if (dirty || poseDirty){ poseDirty=false; needs=true;
+    if (Math.abs(sexT-sex)>1e-4 || sexT===sex) qTo = anglesToQuats(state.angles);
+    const e = poseT<0.5? 2*poseT*poseT : 1-Math.pow(-2*poseT+2,2)/2;
+    qCur = qTo.map((q,b)=>qFrom[b].clone().slerp(q,e)); applyPose(qCur);
+  }
+}
+function frame(){
+  requestAnimationFrame(frame);
+  if (!layers.muscle) return;
+  tick(); if (stepTween()) needs=true; controls.update();
+  const [W,H]=resize();
+  if (!needs) return; needs=false;
+  if (pickPending && mouse){ pickPending=false; showTip(pickScreen(mouse.x, mouse.y, W, H), W, H); }
+  positionMarkers(W,H); if (lmActive) lmRing.lookAt(camera.position);
+  if (state.view==='2d') renderPlates(W,H); else { renderer.setClearColor(0,0); renderer.setViewport(0,0,W,H); renderer.render(scene,camera); }
+}
+renderer.setClearColor(0,0);
+setLight();
+loadData().then(({meta, bin})=>{
+  buildLayers(meta, bin); buildChildMap(); buildBreasts(); buildConstruction(); buildMarkers();
+  presetAng = POSES.map(presetAngles);
+  state.angles = structuredClone(presetAng[0]); qTo = anglesToQuats(state.angles); qFrom = qTo; qCur = qTo;
+  $('loading').hidden=true; applyLayers(); setMode('study'); poseDirty = true; frame();
+  window.__ready = true;
+}).catch(err=>{ $('loading').textContent='The anatomy data could not load. Reload the page to try again.'; console.error(err); });
+window.__api = { get state(){return state}, setPreset, JOINTS, openLesson, closeLesson, selectJoint, setMode, setView, camera, controls, requestRender, presetAng: ()=>presetAng, editJoint, setHand };
+</script>
