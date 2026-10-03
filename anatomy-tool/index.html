@@ -270,7 +270,7 @@ select.region:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div class="vscroll" id="vScroll"><img id="vImg" alt=""></div>
     </div>
     <div class="loading" id="loading">Preparing the figure…</div>
-    <div class="hint" id="hint">Click a body part to study it • drag to orbit • scroll to zoom</div>
+    <div class="hint" id="hint">Click a body part to study it · drag to orbit · scroll to zoom</div>
   </main>
 </div>
 
@@ -329,13 +329,13 @@ for (const S of ['R','L']){
   defJ('elbow'+S, side+' elbow','elbow',['forearm'+S],[['Bend',-12,150],['Forearm turn',-80,85]],S);
   defJ('wrist'+S, side+' wrist','wrist',['hand'+S],[['Flex',-70,80],['Side bend',-25,35]],S);
   for (const f of FINGERS){
-    defJ(f+'Mcp'+S, `${side} ${f} • base`,'mcp',[f+'Mcp'+S],[['Bend',-15,90],['Spread',-20,20]],S);
-    defJ(f+'Pip'+S, `${side} ${f} • middle`,'pip',[f+'Pip'+S],[['Bend',0,110]],S);
-    defJ(f+'Dip'+S, `${side} ${f} • tip`,'dip',[f+'Dip'+S],[['Bend',0,80]],S);
+    defJ(f+'Mcp'+S, `${side} ${f} · base`,'mcp',[f+'Mcp'+S],[['Bend',-15,90],['Spread',-20,20]],S);
+    defJ(f+'Pip'+S, `${side} ${f} · middle`,'pip',[f+'Pip'+S],[['Bend',0,110]],S);
+    defJ(f+'Dip'+S, `${side} ${f} · tip`,'dip',[f+'Dip'+S],[['Bend',0,80]],S);
   }
-  defJ('thumbCmc'+S, side+' thumb • base','tcmc',['thumbCmc'+S],[['Across palm',-10,55],['Opposition',0,60],['Open',-10,45]],S);
-  defJ('thumbMcp'+S, side+' thumb • knuckle','tbend',['thumbMcp'+S],[['Bend',0,60]],S);
-  defJ('thumbIp'+S, side+' thumb • tip','tbend',['thumbIp'+S],[['Bend',-10,80]],S);
+  defJ('thumbCmc'+S, side+' thumb · base','tcmc',['thumbCmc'+S],[['Across palm',-10,55],['Opposition',0,60],['Open',-10,45]],S);
+  defJ('thumbMcp'+S, side+' thumb · knuckle','tbend',['thumbMcp'+S],[['Bend',0,60]],S);
+  defJ('thumbIp'+S, side+' thumb · tip','tbend',['thumbIp'+S],[['Bend',-10,80]],S);
   defJ('hip'+S, side+' hip','hip',['thigh'+S],[['Forward',-30,125],['Out',-30,50],['Rotate',-40,45]],S);
   defJ('knee'+S, side+' knee','knee',['shin'+S],[['Bend',-6,150]],S);
   defJ('ankle'+S, side+' ankle','ankle',['foot'+S],[['Point toes',-30,50],['Roll in',-20,30],['Turn in',-15,20]],S);
@@ -353,7 +353,7 @@ function limits(id, a){
   return ax;
 }
 function clampJoint(id, a){ let v=[...a]; for (let n=0;n<2;n++){ const L=limits(id,v); v=v.map((x,i)=>Math.min(L[i][2],Math.max(L[i][1],x))); } return v; }
-const NOTES = { shoulder:'Elevation lifts the arm from the side. Reach direction: −90° back • 0° out to the side • 90° forward • 135° across. Rotation: negative inward, positive outward. The reach envelope is approximate.',
+const NOTES = { shoulder:'Elevation lifts the arm from the side. Reach direction: −90° back · 0° out to the side · 90° forward · 135° across. Rotation: negative inward, positive outward. The reach envelope is approximate.',
   elbow:'Forearm turn: positive turns the palm down (pronation), negative turns it up.', wrist:'Flex bends toward the palm. Side bend: positive toward the thumb.',
   mcp:'Spread narrows as the finger bends, as it does at a real knuckle.', tcmc:'The thumb base combines across-palm movement, opposition and opening.',
   hip:'Forward flexes the thigh; negative extends it behind the body.', ankle:'Point toes: positive points the foot down.', trunk:'Bend: positive curls forward. Turn/twist: positive turns toward the figure’s left.' };
@@ -364,31 +364,31 @@ const POSES = [
   { id:'stance', name:'Anatomical stance', sub:'Neutral reference, palms forward', bones:{
       upperarmR:A(-0.13,-1,0.02), upperarmL:A(0.13,-1,0.02), forearmR:A(-0.2,-1,0.08), forearmL:A(0.2,-1,0.08),
       thighR:A(-0.03,-1,0), thighL:A(0.03,-1,0), footR:KEEP, footL:KEEP } },
-  { id:'houdon', name:'Houdon’s Ecorche', sub:'After J.-A. Houdon, 1767 • arm raised, head turned', bones:{
+  { id:'houdon', name:'Houdon’s Ecorche', sub:'After J.-A. Houdon, 1767 · arm raised, head turned', bones:{
       root:[0,-6,3], spine1:[0,-2,-1], spine2:[-2,-3,-1], chest:[-3,-4,-2], neck:[-4,-10,0], head:[-6,-26,0],
       clavR:[0,0,-12], upperarmR:A(-0.45,0.16,0.88,-60), forearmR:A(-0.46,0.2,0.86,-30), handR:[0,0,-6], fingersR:10, fingers2R:10,
       upperarmL:A(0.2,-0.95,0.18), forearmL:A(0.12,-0.8,0.58,20), handL:[0,0,8], fingersL:25, fingers2L:30,
       thighL:A(0.03,-1,0.02), shinL:A(0.03,-1,-0.01), footL:KEEP,
       thighR:A(-0.1,-0.97,-0.14), shinR:A(-0.08,-0.9,-0.42), footR:[34,0,0], toesR:[-34,0,0] } },
-  { id:'gladiator', name:'Borghese Gladiator', sub:'After Agasias, c. 100 BC • lunge, arm thrust up', bones:{
+  { id:'gladiator', name:'Borghese Gladiator', sub:'After Agasias, c. 100 BC · lunge, arm thrust up', bones:{
       root:[6,12,0], spine1:[10,2,-2], spine2:[12,4,-2], chest:[10,6,-3], neck:[-22,8,0], head:[-24,14,0],
       clavL:[0,0,14], upperarmL:A(0.35,0.72,0.6,0), forearmL:A(0.12,0.3,0.95,40), fingersL:45, fingers2L:55,
       upperarmR:A(-0.3,-0.7,-0.65), forearmR:A(-0.22,-0.86,-0.46), fingersR:70, fingers2R:80, fistR:true,
       thighL:A(0.14,-0.46,0.88), shinL:A(0.05,-0.99,-0.08), footL:KEEP,
       thighR:A(-0.1,-0.72,-0.69), shinR:A(-0.1,-0.7,-0.71), footR:[40,0,0], toesR:[-50,0,0] } },
-  { id:'doryphoros', name:'Doryphoros', sub:'After Polykleitos, c. 440 BC • contrapposto', bones:{
+  { id:'doryphoros', name:'Doryphoros', sub:'After Polykleitos, c. 440 BC · contrapposto', bones:{
       root:[0,4,-5], spine1:[0,-1,3], spine2:[0,-1,3], chest:[0,-4,3], neck:[4,-6,-2], head:[6,-14,-3],
       upperarmR:A(-0.12,-1,0.02), forearmR:A(-0.15,-1,0.1), fingersR:20, fingers2R:25,
       upperarmL:A(0.14,-0.97,0.1), forearmL:A(0.12,-0.08,0.99,60), fingersL:70, fingers2L:80, fistL:true,
       thighR:A(-0.05,-1,0.02), shinR:A(-0.03,-1,0), footR:KEEP,
       thighL:A(0.1,-0.97,-0.14), shinL:A(0.08,-0.85,-0.52), footL:[30,0,0], toesL:[-30,0,0] } },
-  { id:'thinker', name:'The Thinker', sub:'After Rodin, 1904 • seated, torso twisted', ground:'seat', bones:{
+  { id:'thinker', name:'The Thinker', sub:'After Rodin, 1904 · seated, torso twisted', ground:'seat', bones:{
       root:[-4,0,0], spine1:[16,8,0], spine2:[18,10,0], chest:[14,12,0], neck:[20,0,0], head:[2,-6,0],
       thighR:A(-0.14,0.06,0.99), shinR:A(-0.08,-0.94,0.3), footR:KEEP,
       thighL:A(0.1,0.1,0.99), shinL:A(0.08,-0.9,0.42), footL:KEEP,
       upperarmR:A(0.55,-0.6,0.58), forearmR:A(0.02,0.86,0.5,-50), handR:[-45,0,0], fingersR:60, fingers2R:60,
       upperarmL:A(0.12,-0.62,0.78), forearmL:A(0.05,-0.55,0.83), handL:[40,0,0], fingersL:30, fingers2L:30 } },
-  { id:'crouch', name:'Crouching Youth', sub:'After Michelangelo, c. 1530 • one knee down', ground:'all', bones:{
+  { id:'crouch', name:'Crouching Youth', sub:'After Michelangelo, c. 1530 · one knee down', ground:'all', bones:{
       root:[14,0,0], spine1:[18,0,0], spine2:[18,4,0], chest:[14,4,0], neck:[14,0,0], head:[18,-8,0],
       thighR:A(-0.05,-0.97,0.22), shinR:A(0,-0.1,-0.99), footR:A(0,-0.93,-0.37), toesR:[-70,0,0],
       thighL:A(0.14,0.2,0.97), shinL:A(0.05,-0.99,0.08), footL:KEEP,
@@ -779,7 +779,7 @@ function pickAt(cam, x, y, w, h){
   if (extras[id]){ const u = extras[id]; const f = forms.find(f=>f.obj.children.some(c=>c.userData===u)); return { name:u.pick, kind:u.region?'Soft tissue':'Construction', region:'', g: u.region || f?.region, side: u.S || f?.side || '' }; }
   if (id >= 60000) return null;
   const p = parts[id]; if (!p) return null;
-  return { id, name:p.n, kind: p.b ? 'Bone' : (CONNECTIVE.test(p.id)?'Connective tissue':'Muscle'), region: p.r.replace(/ > /g,' • '), g:p.g, side:p.side };
+  return { id, name:p.n, kind: p.b ? 'Bone' : (CONNECTIVE.test(p.id)?'Connective tissue':'Muscle'), region: p.r.replace(/ > /g,' · '), g:p.g, side:p.side };
 }
 
 /* ================================================================ ink (plate) rendering */
@@ -935,7 +935,7 @@ function openLesson(region, side){
   state.region = region; state.side = side || state.side || 'L';
   $('regionSel').value = region;
   const [intro, s1, s2, s3, ex] = LESSONS[region];
-  $('lTitle').textContent = REGIONS[region] + (BILATERAL.has(region) ? (state.side==='R'?' • right':' • left') : '');
+  $('lTitle').textContent = REGIONS[region] + (BILATERAL.has(region) ? (state.side==='R'?' · right':' · left') : '');
   $('lIntro').textContent = intro; $('lExercise').textContent = ex;
   const texts = [s1, s2, s3];
   $('lStages').replaceChildren(...STAGES.map(([t, sub], i)=>{
@@ -993,7 +993,7 @@ function renderStudy(){
     const img=c.querySelector('img'); img.src=view.images[i]; img.alt=`${study.sex} ${study.region}: ${t}. Numbered points match the list below.`;
     c.querySelector('button').onclick=()=>openViewer([{title:t, src:view.images[i]}],0); return c; }));
   $('lStudyLegend').replaceChildren(...study.anchors.map((a,i)=>{ const b=document.createElement('button'); b.className='lm';
-    b.innerHTML=`<span>${i+1}</span>`; b.append(a.label + (view.markers[i]?.hidden?' • behind surface':'') + (a.approx?' • approximate on this figure':''));
+    b.innerHTML=`<span>${i+1}</span>`; b.append(a.label + (view.markers[i]?.hidden?' · behind surface':'') + (a.approx?' · approximate on this figure':''));
     b.onclick=()=>locateLandmark(a); return b; }));
 }
 function renderSheets(region){
@@ -1030,7 +1030,7 @@ function locateLandmark(a){
   const v = landmarkPos(a), az = {front:0,quarter:45,side:90,back:180}[state.angle]*D2R + (state.region==='back'?Math.PI:0);
   const r = state.region==='hand' ? 0.45 : 0.9;
   tweenCamera(v, v.clone().add(V3(Math.sin(az)*r, 0.08*r, Math.cos(az)*r)));
-  $('hudS').textContent = (a.label) + ' • ' + (p ? p.n : '');
+  $('hudS').textContent = (a.label) + ' · ' + (p ? p.n : '');
 }
 const SHEET_GROUPS={head:['head'],eye:['eye'],nose:['nose'],mouth:['mouth'],ear:['ear'],neck:['head','chest','back'],chest:['chest','torso'],back:['back','torso'],pelvis:['torso','chest','back'],shoulder:['arm','chest','back'],upperarm:['arm'],elbow:['arm'],forearm:['arm'],hand:['hand-structure','hand-form','fingers'],thigh:['leg'],calf:['leg'],knee:['knee-structure','knee-form'],foot:['foot-structure','foot-form']};
 
@@ -1126,15 +1126,15 @@ function applyLayers(){
 }
 function updateHud(){
   const P = POSES[state.preset];
-  $('hudT').textContent = P.name + (state.edited ? ' • adjusted' : '');
+  $('hudT').textContent = P.name + (state.edited ? ' · adjusted' : '');
   const on = Object.entries(layerOn).filter(([,v])=>v).map(([k])=>({skeleton:'Skeleton',muscle:'Muscles',construction:'Construction'})[k]);
-  $('hudS').textContent = [(sex? 'Female (re-proportioned)' : 'Male'), on.join(' + ') || 'No layers', state.view==='2d'?'2D plates':'3D', state.mode==='pose'?'Pose mode':'Study mode'].join(' • ');
+  $('hudS').textContent = [(sex? 'Female (re-proportioned)' : 'Male'), on.join(' + ') || 'No layers', state.view==='2d'?'2D plates':'3D', state.mode==='pose'?'Pose mode':'Study mode'].join(' · ');
 }
 function refreshPoseList(){ [...$('poses').children].forEach((b,k)=>{ b.setAttribute('aria-pressed', String(k===state.preset)); b.querySelector('.edited')?.remove(); if (k===state.preset && state.edited){ const t=document.createElement('span'); t.className='edited'; t.textContent='adjusted'; b.querySelector('b').append(t); } }); updateHud(); }
 function setMode(m){
   state.mode = m; [...$('modeSeg').children].forEach(x=>x.setAttribute('aria-pressed', String(x.dataset.mode===m)));
   $('markers').hidden = m!=='pose' || state.view!=='3d'; if (m!=='pose') $('jpanel').hidden = true;
-  $('hint').textContent = m==='pose' ? 'Click a joint marker to bend or rotate it • drag empty space to orbit' : (state.view==='2d' ? 'Hover a plate to name structures • click to study a region' : 'Click a body part to study it • drag to orbit • scroll to zoom');
+  $('hint').textContent = m==='pose' ? 'Click a joint marker to bend or rotate it · drag empty space to orbit' : (state.view==='2d' ? 'Hover a plate to name structures · click to study a region' : 'Click a body part to study it · drag to orbit · scroll to zoom');
   updateHud(); requestRender();
 }
 function setView(v){
@@ -1182,7 +1182,7 @@ function pickScreen(x, y, W, H){
 }
 function showTip(r, W, H){
   const tip=$('tip');
-  if (r){ hoverUniform.value = r.id ?? -1; tip.innerHTML=`<em>${r.kind}${r.g && state.mode==='study' ? ' • click to study '+REGIONS[r.g].toLowerCase() : ''}</em><b></b>${r.region?`<span></span>`:''}`;
+  if (r){ hoverUniform.value = r.id ?? -1; tip.innerHTML=`<em>${r.kind}${r.g && state.mode==='study' ? ' · click to study '+REGIONS[r.g].toLowerCase() : ''}</em><b></b>${r.region?`<span></span>`:''}`;
     tip.querySelector('b').textContent = r.name; if (r.region) tip.querySelector('span').textContent = r.region;
     tip.hidden=false; tip.style.left=Math.min(mouse.x, W-280)+'px'; tip.style.top=Math.min(mouse.y,H-90)+'px'; }
   else { hoverUniform.value=-1; tip.hidden=true; }
